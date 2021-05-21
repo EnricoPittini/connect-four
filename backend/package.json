@@ -1,0 +1,37 @@
+{
+  "name": "connect-four-backend",
+  "version": "0.0.1",
+  "description": "Connect Four game",
+  "main": "server.js",
+  "scripts": {
+    "start": "node ./dist/server.js",
+    "compile": "npx tsc",
+    "dev": "npx tsc-watch --noClear --onSuccess 'node ./dist/server.js'",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Enrico Pittini \u001e& Giacomo Rosin",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/cors": "^2.8.10",
+    "@types/express": "^4.17.11",
+    "@types/express-jwt": "^6.0.1",
+    "@types/jsonwebtoken": "^8.5.1",
+    "@types/mongoose": "^5.10.5",
+    "@types/passport": "^1.0.6",
+    "@types/passport-http": "^0.3.8",
+    "tsc-watch": "^4.2.9",
+    "typescript": "^4.2.4"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^9.0.2",
+    "express": "^4.17.1",
+    "express-jwt": "^6.0.0",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^5.12.10",
+    "passport": "^0.4.1",
+    "passport-http": "^0.3.0",
+    "socket.io": "^4.1.2"
+  },
+  "private": true
+}

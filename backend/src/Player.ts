@@ -1,6 +1,9 @@
 import mongoose = require('mongoose');
 import crypto = require('crypto');
 
+import stats = require("./Stats");
+import {StatsDocument} from "./Stats";
+
 
 function hashPassword(pwd: string): { digest: string, salt: string } {
 
@@ -41,6 +44,7 @@ export interface Player {
   friends: string[],
   digest: string,     // this is the hashed password (digest of the password)
   salt: string,       // salt is a random string that will be mixed with the actual password before hashing
+  stats: StatsDocument['_id'],
 }
 
 export interface PlayerDocument extends Player, mongoose.Document {
@@ -51,6 +55,7 @@ export interface PlayerDocument extends Player, mongoose.Document {
   addFriend: (friendUsername: string) => boolean,
   removeFriend: (friendUsername: string) => boolean,
   hasFriend: (friendUsername: string) => boolean,
+  getStats: () => StatsDocument,
 }
 
 export interface PlayerModel extends mongoose.Model<PlayerDocument> {
@@ -90,6 +95,10 @@ const playerSchema = new mongoose.Schema<PlayerDocument, PlayerModel>({
   },
   salt: {
     type: mongoose.SchemaTypes.String,
+    required: true,
+  },
+  stats: {
+    type: mongoose.SchemaTypes.ObjectId,
     required: true,
   },
 });
@@ -160,6 +169,11 @@ playerSchema.methods.hasFriend = function(friendUsername: string): boolean {
   return !!this.friends.find(item => item === friendUsername);
 }
 
+playerSchema.methods.getStats = function(): Promise<StatsDocument> {
+  // Cast to Promise<StatsDocument> because we are sure that the StatsDocument exists
+  return stats.getModel().findOne( { "_id" : this.stats} ).exec() as Promise<StatsDocument>;
+}
+
 
 
 export function getSchema() {
@@ -180,44 +194,52 @@ export interface NewStandardPlayerParams extends Pick<Player, 'username' | 'name
   password: string,
 }
 
-export function newStandardPlayer(data: NewStandardPlayerParams): Player {
+export function newStandardPlayer(data: NewStandardPlayerParams): Promise<PlayerDocument> {
   const _playerModel = getModel();
 
   const { digest, salt } = hashPassword(data.password);
 
-  const player: Player = {
-    username: data.username,
-    name: data.name,
-    surname: data.surname,
-    avatar: data.avatar,
-    type: PlayerType.STANDARD_PLAYER,
-    friends: [],
-    digest: digest,
-    salt: salt,
-  };
+  const statsDocument : StatsDocument = stats.newStats();
 
-  return new _playerModel(player);
+  return statsDocument.save().then(()=>{
+    const player: Player = {
+      username: data.username,
+      name: data.name,
+      surname: data.surname,
+      avatar: data.avatar,
+      type: PlayerType.STANDARD_PLAYER,
+      friends: [],
+      digest: digest,
+      salt: salt,
+      stats: statsDocument['_id'],
+    };
+    return new _playerModel(player);
+  });
 }
 
 export interface NewModeratorParams extends Pick<Player, 'username'> {
   password: string,
 }
 
-export function newModerator(data: NewModeratorParams): Player {
+export function newModerator(data: NewModeratorParams): Promise<PlayerDocument> {
   const _playerModel = getModel();
 
   const { digest, salt } = hashPassword(data.password);
 
-  const player: Player = {
-    username: data.username,
-    name: '',
-    surname: '',
-    avatar: '',
-    type: PlayerType.MODERATOR_FIRST_ACCESS,
-    friends: [],
-    digest: digest,
-    salt: salt,
-  };
+  const statsDocument : StatsDocument = stats.newStats();
 
-  return new _playerModel(player);
+  return statsDocument.save().then(()=>{
+    const player: Player = {
+      username: data.username,
+      name: '',
+      surname: '',
+      avatar: '',
+      type: PlayerType.MODERATOR_FIRST_ACCESS,
+      friends: [],
+      digest: digest,
+      salt: salt,
+      stats: statsDocument['_id'],
+    };
+    return new _playerModel(player);
+  });
 }

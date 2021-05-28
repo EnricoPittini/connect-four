@@ -3,21 +3,36 @@ import crypto = require('crypto');
 
 
 function hashPassword(pwd: string): { digest: string, salt: string } {
-  // TODO da implementare
+
+  const salt = crypto.randomBytes(16).toString('hex'); // We use a random 16-bytes hex string for salt
+
+  // We use the hash function sha512 to hash both the password and salt to
+  // obtain a password digest
+  //
+  // From wikipedia: (https://en.wikipedia.org/wiki/HMAC)
+  // In cryptography, an HMAC (sometimes disabbreviated as either keyed-hash message
+  // authentication code or hash-based message authentication code) is a specific type
+  // of message authentication code (MAC) involving a cryptographic hash function and
+  // a secret cryptographic key.
+
+  const hmac = crypto.createHmac('sha512', salt);
+  hmac.update(pwd);
+  const digest = hmac.digest('hex'); // The final digest depends both by the password and the salt
+
   return {
-    digest: '',
-    salt: '',
+    digest: digest,
+    salt: salt,
   };
 }
 
 
 export enum PlayerType {
-  PLAYER = 'PLAYER',
+  STANDARD_PLAYER = 'STANDARD_PLAYER',
   MODERATOR = 'MODERATOR',
   MODERATOR_FIRST_ACCESS = 'MODERATOR_FIRST_ACCESS',
 }
 
-export interface Player extends mongoose.Document {
+export interface Player {
   username: string,
   name: string,
   surname: string,
@@ -26,7 +41,9 @@ export interface Player extends mongoose.Document {
   friends: string[],
   digest: string,     // this is the hashed password (digest of the password)
   salt: string,       // salt is a random string that will be mixed with the actual password before hashing
+}
 
+export interface PlayerDocument extends Player, mongoose.Document {
   validatePassword: (pwd: string) => boolean,
   confirmModerator: (name: string, surname: string, avatar: string, pwd: string) => void,
 
@@ -36,8 +53,11 @@ export interface Player extends mongoose.Document {
   hasFriend: (friendUsername: string) => boolean,
 }
 
+export interface PlayerModel extends mongoose.Model<PlayerDocument> {
+}
 
-const playerSchema = new mongoose.Schema({
+
+const playerSchema = new mongoose.Schema<PlayerDocument, PlayerModel>({
   _id: false,         // TODO testare
   username: {
     type: mongoose.SchemaTypes.String,
@@ -75,9 +95,7 @@ const playerSchema = new mongoose.Schema({
 });
 
 
-playerSchema.methods.validatePassword = function(this: any /* TODO togliere */, pwd: string): boolean {
-  // TODO mettere apposto i tipi
-
+playerSchema.methods.validatePassword = function(pwd: string): boolean {
   // To validate the password, we compute the digest with the
   // same HMAC to check if it matches with the digest we stored
   // in the database.
@@ -88,8 +106,7 @@ playerSchema.methods.validatePassword = function(this: any /* TODO togliere */, 
   return (this.digest === digest);
 }
 
-playerSchema.methods.confirmModerator = function(this: any /* TODO togliere */,
-                                                 name: string,
+playerSchema.methods.confirmModerator = function(name: string,
                                                  surname: string,
                                                  avatar: string,
                                                  pwd: string): void {
@@ -108,14 +125,13 @@ playerSchema.methods.confirmModerator = function(this: any /* TODO togliere */,
  * @param friendUsername - the username of the friend to add, must be an existing username
  * @returns
  */
-playerSchema.methods.addFriend = function(this: any /* TODO togliere */, friendUsername: string): boolean {
-  // TODO sistemare tipi
+playerSchema.methods.addFriend = function(friendUsername: string): boolean {
   if (this.username === friendUsername || this.hasFriend(friendUsername)) {
     // friendUsername is your username or already in the friend list
     return false;
   }
 
-  (this.friends as string[]).push(friendUsername);
+  this.friends.push(friendUsername);
   return true;
 }
 
@@ -125,14 +141,13 @@ playerSchema.methods.addFriend = function(this: any /* TODO togliere */, friendU
  * @param friendUsername - the username of the friend to remove
  * @returns
  */
-playerSchema.methods.removeFriend = function(this: any /* TODO togliere */, friendUsername: string): boolean {
-  // TODO sistemare tipi
+playerSchema.methods.removeFriend = function(friendUsername: string): boolean {
   if (!this.hasFriend(friendUsername)) {
     // not in the friend list
     return false;
   }
 
-  this.friends = (this.friends as string[]).filter(item => item !== friendUsername);
+  this.friends = this.friends.filter(item => item !== friendUsername);
   return true;
 }
 
@@ -141,9 +156,8 @@ playerSchema.methods.removeFriend = function(this: any /* TODO togliere */, frie
  * @param friendUsername - the username of the friend
  * @returns
  */
-playerSchema.methods.hasFriend = function(this: any /* TODO togliere */, friendUsername: string): boolean {
-  // TODO sistemare tipi
-  return !!(this.friends as string[]).find(item => item === friendUsername);
+playerSchema.methods.hasFriend = function(friendUsername: string): boolean {
+  return !!this.friends.find(item => item === friendUsername);
 }
 
 
@@ -153,17 +167,57 @@ export function getSchema() {
 }
 
 // Mongoose Model
-let playerModel: mongoose.Model<Player>;  // This is not exposed outside the model
-export function getModel(): mongoose.Model<Player> { // Return Model as singleton
+let playerModel: PlayerModel;  // This is not exposed outside the model
+export function getModel(): PlayerModel { // Return Model as singleton
   if(!playerModel) {
-    playerModel = mongoose.model('Player', getSchema())
+    playerModel = mongoose.model<PlayerDocument, PlayerModel>('Player', getSchema())
   }
   return playerModel;
 }
 
-export function newPlayer(data: any): Player {
-  var _playerModel = getModel();
-  var player = new _playerModel( data );
 
-  return player;
+export interface NewStandardPlayerParams extends Pick<Player, 'username' | 'name' | 'surname' | 'avatar'> {
+  password: string,
+}
+
+export function newStandardPlayer(data: NewStandardPlayerParams): Player {
+  const _playerModel = getModel();
+
+  const { digest, salt } = hashPassword(data.password);
+
+  const player: Player = {
+    username: data.username,
+    name: data.name,
+    surname: data.surname,
+    avatar: data.avatar,
+    type: PlayerType.STANDARD_PLAYER,
+    friends: [],
+    digest: digest,
+    salt: salt,
+  };
+
+  return new _playerModel(player);
+}
+
+export interface NewModeratorParams extends Pick<Player, 'username'> {
+  password: string,
+}
+
+export function newModerator(data: NewModeratorParams): Player {
+  const _playerModel = getModel();
+
+  const { digest, salt } = hashPassword(data.password);
+
+  const player: Player = {
+    username: data.username,
+    name: '',
+    surname: '',
+    avatar: '',
+    type: PlayerType.MODERATOR_FIRST_ACCESS,
+    friends: [],
+    digest: digest,
+    salt: salt,
+  };
+
+  return new _playerModel(player);
 }

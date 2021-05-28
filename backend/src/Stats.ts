@@ -8,6 +8,7 @@ export interface Stats{
   forfaitLossCount : number,
   secondsPlayed : number,
   moveCount : number,
+  // TODO campo matches che è la lista di id di partite che sono state già analizzate in queste statistiche
 }
 
 export interface StatsDocument extends Stats, mongoose.Document {
@@ -50,6 +51,7 @@ const statsSchema = new mongoose.Schema<StatsDocument, StatsModel>({
 
 statsSchema.methods.refresh = function(match: any /*TODO sistemare tipo Match */): void {
   //TODO da implementare
+  // TODO controllare che la partita non sia già stata analizzata
 }
 
 

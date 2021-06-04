@@ -1,9 +1,9 @@
 import mongoose = require('mongoose');
 
-export interface FriendRequest{
-    from : string,
-    to : string,
-    datetime : Date,
+export interface FriendRequest {
+  from: string,
+  to: string,
+  datetime: Date,
 }
 
 export interface FriendRequestDocument extends FriendRequest, mongoose.Document {
@@ -18,12 +18,12 @@ const friendRequestSchema = new mongoose.Schema<FriendRequestDocument, FriendReq
     required: true,
   },
   to: {
-      type: mongoose.SchemaTypes.String,
-      required: true,
+    type: mongoose.SchemaTypes.String,
+    required: true,
   },
   datetime: {
-      type: mongoose.SchemaTypes.Date,
-      required: true,
+    type: mongoose.SchemaTypes.Date,
+    required: true,
   },
 });
 
@@ -35,13 +35,13 @@ export function getSchema() {
 // Mongoose Model
 let friendRequestModel: FriendRequestModel;  // This is not exposed outside the model
 export function getModel(): FriendRequestModel { // Return Model as singleton
-  if(!friendRequestModel) {
+  if (!friendRequestModel) {
     friendRequestModel = mongoose.model<FriendRequestDocument, FriendRequestModel>('FriendRequest', getSchema())
   }
   return friendRequestModel;
 }
 
-interface NewFriendRequestParams extends Pick< FriendRequest, 'from' | 'to'>{
+interface NewFriendRequestParams extends Pick<FriendRequest, 'from' | 'to'> {
 }
 
 export function newFriendRequest(data: NewFriendRequestParams): FriendRequestDocument {

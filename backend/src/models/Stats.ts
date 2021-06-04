@@ -1,16 +1,16 @@
 import mongoose = require('mongoose');
 
-import { MatchDocument, WhichPlayer, MatchStatus } from "./Match";
+import { MatchDocument, WhichPlayer, MatchStatus } from './Match';
 
 
 export interface Stats {
-  rating : number,
-  matchCount : number,
-  winCount : number,
-  forfaitWinCount : number,
-  forfaitLossCount : number,
-  secondsPlayed : number,
-  moveCount : number,
+  rating: number,
+  matchCount: number,
+  winCount: number,
+  forfaitWinCount: number,
+  forfaitLossCount: number,
+  secondsPlayed: number,
+  moveCount: number,
   player: string,
   // TODO campo matches che è la lista di id di partite che sono state già analizzate in queste statistiche
 }
@@ -28,24 +28,24 @@ const statsSchema = new mongoose.Schema<StatsDocument, StatsModel>({
     required: true,
   },
   matchCount: {
-      type: mongoose.SchemaTypes.Number,
-      required: true,
+    type: mongoose.SchemaTypes.Number,
+    required: true,
   },
   winCount: {
-      type: mongoose.SchemaTypes.Number,
-      required: true,
+    type: mongoose.SchemaTypes.Number,
+    required: true,
   },
   forfaitWinCount: {
     type: mongoose.SchemaTypes.Number,
     required: true,
   },
   forfaitLossCount: {
-      type: mongoose.SchemaTypes.Number,
-      required: true,
+    type: mongoose.SchemaTypes.Number,
+    required: true,
   },
   secondsPlayed: {
-      type: mongoose.SchemaTypes.Number,
-      required: true,
+    type: mongoose.SchemaTypes.Number,
+    required: true,
   },
   moveCount: {
     type: mongoose.SchemaTypes.Number,
@@ -58,7 +58,7 @@ const statsSchema = new mongoose.Schema<StatsDocument, StatsModel>({
   },
 });
 
-statsSchema.methods.refresh = function(match: MatchDocument): Promise<void> {
+statsSchema.methods.refresh = function (match: MatchDocument): Promise<void> {
   // TODO controllare che la partita non sia già stata analizzata
 
   if (match.status === MatchStatus.IN_PROGRESS) {
@@ -118,7 +118,7 @@ export function getSchema() {
 // Mongoose Model
 let statsModel: StatsModel;  // This is not exposed outside the model
 export function getModel(): StatsModel { // Return Model as singleton
-  if(!statsModel) {
+  if (!statsModel) {
     statsModel = mongoose.model<StatsDocument, StatsModel>('Stats', getSchema())
   }
   return statsModel;
@@ -131,13 +131,13 @@ export function newStats(data: NewStatsParams): StatsDocument {
   const _statsModel = getModel();
 
   const stats: Stats = {
-    rating : 0,
-    matchCount : 0,
-    winCount : 0,
-    forfaitWinCount : 0,
-    forfaitLossCount : 0,
-    secondsPlayed : 0,
-    moveCount : 0,
+    rating: 0,
+    matchCount: 0,
+    winCount: 0,
+    forfaitWinCount: 0,
+    forfaitLossCount: 0,
+    secondsPlayed: 0,
+    moveCount: 0,
     player: data.player,
   };
 

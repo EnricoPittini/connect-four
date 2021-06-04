@@ -14,11 +14,11 @@ import player = require('./models/Player');
 
 console.info('Server starting...');
 
-const result = dotenv.config()                // The dotenv module will load a file named ".env"
+const result = dotenv.config()                // The dotenv module will load a file named '.env'
                                               // file and load all the key-value pairs into
                                               // process.env (environment variable)
 if (result.error) {
-  console.error("Unable to load \".env\" file. Please provide one to store the JWT secret key");
+  console.error('Unable to load \'.env\' file. Please provide one to store the JWT secret key');
   process.exit(-1);
 }
 if (!process.env.JWT_SECRET
@@ -28,7 +28,7 @@ if (!process.env.JWT_SECRET
     || !process.env.MAIN_MODERATOR_USERNAME
     || !process.env.MAIN_MODERATOR_PASSWORD
     || !process.env.SERVER_PORT) {
-  console.error("\".env\" file loaded but doesn't contain some required key-value pairs");
+  console.error("'.env' file loaded but doesn't contain some required key-value pairs");
   process.exit(-1);
 }
 
@@ -68,21 +68,21 @@ app.use(express.json());
 
 
 app.use((req, res, next) => {
-  console.info("------------------------------------------------")
-  console.info("New request for: " + req.url);
-  console.info("Method: " + req.method);
+  console.info('------------------------------------------------')
+  console.info(`New request for: ${req.url}`);
+  console.info(`Method: ${req.method}`);
   next();
-})
+});
 
 // Add API routes to express application
 
-app.get("/", (_, res) => {
+app.get('/', (_, res) => {
   res.status(200).json({
-    api_version: "0.0.1",
+    api_version: '0.0.1',   // TODO process.env.npm_package_version
     endpoints: [
       // TODO
-      "/messages",
-      "/tags",
+      '/messages',
+      '/tags',
     ]
   });
 });
@@ -96,7 +96,7 @@ app.get("/", (_, res) => {
 
 // Add error handling middleware
 app.use((err: any /* TODO aggiustare tipo */, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error("Request error: " + JSON.stringify(err));
+  console.error('Request error: ' + JSON.stringify(err));
   res.status(err.statusCode || 500).json(err);
 });
 
@@ -110,9 +110,9 @@ app.use((req, res, next) => {
   res.status(404).json({
     statusCode: 404,
     error: true,
-    errorMessage: "Invalid endpoint"
+    errorMessage: 'Invalid endpoint'
   });
-})
+});
 
 
 // Connect to mongodb and launch the HTTP server trough Express
@@ -133,13 +133,13 @@ mongoose.connect(`mongodb://${DB_HOST}:${DB_PORT}/${DB_NAME}`, {
   useFindAndModify: true,
 })
 .then(() => {
-  console.info("Connected to MongoDB");
+  console.info('Connected to MongoDB');
 
   return player.getModel().findOne({ username: MAIN_MODERATOR_USERNAME });
 })
 .then((playerDocument) => {
   if (!playerDocument) {
-    console.info("Creating main moderator");
+    console.info('Creating main moderator');
 
     return player.newModerator({
       username: MAIN_MODERATOR_USERNAME,
@@ -147,7 +147,7 @@ mongoose.connect(`mongodb://${DB_HOST}:${DB_PORT}/${DB_NAME}`, {
     });
   }
   else {
-    console.info("Main moderator already exists");
+    console.info('Main moderator already exists');
   }
 })
 .then((moderatorDocument) => {
@@ -161,12 +161,12 @@ mongoose.connect(`mongodb://${DB_HOST}:${DB_PORT}/${DB_NAME}`, {
 
   io = new Server(server);
   io.on('connection', (socket) => {
-    console.info("Socket.io client connected");
+    console.info('Socket.io client connected');
   });
 
   server.listen(SERVER_PORT, () => console.info(`HTTP Server started on port ${SERVER_PORT}`));
 })
 .catch((err) => {
-  console.error("Error Occurred during initialization");
+  console.error('Error Occurred during initialization');
   console.error(err);
 });

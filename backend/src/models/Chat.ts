@@ -1,39 +1,39 @@
 import mongoose = require('mongoose');
 
-enum SenderPlayer{
-  PLAYER_A = "PLAYER_A",
-  PLAYER_B = "PLAYER_B",
+enum SenderPlayer {
+  PLAYER_A = 'PLAYER_A',
+  PLAYER_B = 'PLAYER_B',
 }
 
-export interface Message{
-    sender: SenderPlayer,
-    text: string,
-    datetime: Date,
+export interface Message {
+  sender: SenderPlayer,
+  text: string,
+  datetime: Date,
 }
 
 // TODO ricontrollare tipi per sub documents
 const messageSchema = new mongoose.Schema({
-    sender: {
-        type: mongoose.SchemaTypes.String,
-        required: true,
-    },
-    text: {
-        type: mongoose.SchemaTypes.String,
-        required: true,
-    },
-    datetime: {
-        type: mongoose.SchemaTypes.Date,
-        required: true,
-    },
+  sender: {
+    type: mongoose.SchemaTypes.String,
+    required: true,
+  },
+  text: {
+    type: mongoose.SchemaTypes.String,
+    required: true,
+  },
+  datetime: {
+    type: mongoose.SchemaTypes.Date,
+    required: true,
+  },
 });
 
 
-export interface Chat{
-    playerA : string,
-    playerB : string,
-    messages : Message[],
-    playerAHasNewMessages : boolean,
-    playerBHasNewMessages : boolean,
+export interface Chat {
+  playerA: string,
+  playerB: string,
+  messages: Message[],
+  playerAHasNewMessages: boolean,
+  playerBHasNewMessages: boolean,
 }
 
 export interface ChatDocument extends Chat, mongoose.Document {
@@ -49,12 +49,12 @@ const chatSchema = new mongoose.Schema<ChatDocument, ChatModel>({
     required: true,
   },
   playerB: {
-      type: mongoose.SchemaTypes.String,
-      required: true,
+    type: mongoose.SchemaTypes.String,
+    required: true,
   },
   messages: {
-      type: [messageSchema],
-      required: true,
+    type: [messageSchema],
+    required: true,
   },
   playerAHasNewMessages: {
     type: mongoose.SchemaTypes.Boolean,
@@ -66,20 +66,20 @@ const chatSchema = new mongoose.Schema<ChatDocument, ChatModel>({
   },
 });
 
-chatSchema.methods.addMessage = function(senderUsername: string, text: string): boolean {
-  let sender : SenderPlayer;
+chatSchema.methods.addMessage = function (senderUsername: string, text: string): boolean {
+  let sender: SenderPlayer;
 
-  if(senderUsername===this.playerA){
+  if (senderUsername === this.playerA) {
     sender = SenderPlayer.PLAYER_A;
   }
-  else if(senderUsername===this.playerB){
+  else if (senderUsername === this.playerB) {
     sender = SenderPlayer.PLAYER_B;
   }
-  else{
+  else {
     return false;
   }
 
-  const message : Message = {
+  const message: Message = {
     sender: sender,
     text: text,
     datetime: new Date(),
@@ -88,10 +88,10 @@ chatSchema.methods.addMessage = function(senderUsername: string, text: string): 
   this.messages.push(message);
 
   // TODO attenzione al fatto che ogni volta che è aggiunto un messaggio è messo che il destinatario ha nuovi messaggi
-  if(sender===SenderPlayer.PLAYER_A){
+  if (sender === SenderPlayer.PLAYER_A) {
     this.playerBHasNewMessages = true;
   }
-  else{
+  else {
     this.playerAHasNewMessages = true;
   }
 
@@ -105,13 +105,13 @@ export function getSchema() {
 // Mongoose Model
 let chatModel: ChatModel;  // This is not exposed outside the model
 export function getModel(): ChatModel { // Return Model as singleton
-  if(!chatModel) {
+  if (!chatModel) {
     chatModel = mongoose.model<ChatDocument, ChatModel>('Chat', getSchema())
   }
   return chatModel;
 }
 
-interface NewChatParams extends Pick< Chat, 'playerA' | 'playerB'>{
+interface NewChatParams extends Pick<Chat, 'playerA' | 'playerB'> {
 }
 
 export function newChat(data: NewChatParams): ChatDocument {

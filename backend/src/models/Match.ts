@@ -1,26 +1,26 @@
 import mongoose = require('mongoose');
 
 export enum WhichPlayer {
-  PLAYER_1 = "PLAYER_1",
-  PLAYER_2 = "PLAYER_2",
-  EMPTY = "EMPTY",
+  PLAYER_1 = 'PLAYER_1',
+  PLAYER_2 = 'PLAYER_2',
+  EMPTY = 'EMPTY',
 }
 
 export enum MatchStatus {
-  IN_PROGRESS = "IN_PROGRESS",
-  NORMALLY_TERMINATED = "NORMALLY_TERMINATED",
-  FORFAIT = "FORFAIT",
+  IN_PROGRESS = 'IN_PROGRESS',
+  NORMALLY_TERMINATED = 'NORMALLY_TERMINATED',
+  FORFAIT = 'FORFAIT',
 }
 
-export interface Match{
-  player1 : string,
-  player2 : string,
-  datetimeBegin : Date,
-  datetimeEnd : Date | null,
-  board : WhichPlayer[][],
-  status : MatchStatus,
-  winner : WhichPlayer,
-  playerTurn : WhichPlayer,
+export interface Match {
+  player1: string,
+  player2: string,
+  datetimeBegin: Date,
+  datetimeEnd: Date | null,
+  board: WhichPlayer[][],
+  status: MatchStatus,
+  winner: WhichPlayer,
+  playerTurn: WhichPlayer,
 }
 
 export interface MatchDocument extends Match, mongoose.Document {
@@ -38,12 +38,12 @@ const matchSchema = new mongoose.Schema<MatchDocument, MatchModel>({
     required: true,
   },
   player2: {
-      type: mongoose.SchemaTypes.String,
-      required: true,
+    type: mongoose.SchemaTypes.String,
+    required: true,
   },
   datetimeBegin: {
-      type: mongoose.SchemaTypes.Date,
-      required: true,
+    type: mongoose.SchemaTypes.Date,
+    required: true,
   },
   datetimeEnd: {
     type: mongoose.SchemaTypes.Date,
@@ -69,13 +69,13 @@ const matchSchema = new mongoose.Schema<MatchDocument, MatchModel>({
 
 // TODO eventualmente trasformarla in metodo o esportarla
 function getPlayerRole(match: Match, playerUsername: string): WhichPlayer {
-  if(playerUsername===match.player1){
+  if (playerUsername === match.player1) {
     return WhichPlayer.PLAYER_1;
   }
-  else if(playerUsername===match.player2){
+  else if (playerUsername === match.player2) {
     return WhichPlayer.PLAYER_2;
   }
-  else{
+  else {
     return WhichPlayer.EMPTY;
   }
 }
@@ -122,7 +122,7 @@ const RIGHT_COLUMN = 6;
  * @returns
  */
 function getCellValue(board: WhichPlayer[][], row: number, col: number): WhichPlayer | null {
-  if(row<BOTTOM_ROW || row>TOP_ROW || col<LEFT_COLUMN || row>RIGHT_COLUMN) {
+  if (row < BOTTOM_ROW || row > TOP_ROW || col < LEFT_COLUMN || row > RIGHT_COLUMN) {
     return null;
   }
   return board[TOP_ROW-row][col];
@@ -140,7 +140,7 @@ function getCellValue(board: WhichPlayer[][], row: number, col: number): WhichPl
 function setCellValue(board: WhichPlayer[][], row: number, col: number, value: WhichPlayer): boolean {
   const currentCellValue = getCellValue(board, row, col);
 
-  if(value===WhichPlayer.EMPTY || currentCellValue === null || currentCellValue !== WhichPlayer.EMPTY) {
+  if (value === WhichPlayer.EMPTY || currentCellValue === null || currentCellValue !== WhichPlayer.EMPTY) {
     return false;
   }
   board[TOP_ROW-row][col] = value;
@@ -163,7 +163,7 @@ enum Direction {
  * @param direction
  * @returns
  */
-function checkLine(board: WhichPlayer[][] , startRow: number, startCol: number, direction: Direction) : boolean{
+function checkLine(board: WhichPlayer[][], startRow: number, startCol: number, direction: Direction): boolean {
   const firstCellValue = getCellValue(board, startRow, startCol);
   if (firstCellValue === WhichPlayer.EMPTY || firstCellValue === null) { // The first cell is empty or out of the board bounds
     return false;
@@ -172,18 +172,18 @@ function checkLine(board: WhichPlayer[][] , startRow: number, startCol: number, 
   // The step for each of the 4 iterations
   let rowStep = 0;
   let colStep = 0;
-  switch(direction) {
-    case Direction.HORIZONTAL :
+  switch (direction) {
+    case Direction.HORIZONTAL:
       colStep = 1;
       break;
-    case Direction.VERTICAL :
+    case Direction.VERTICAL:
       rowStep = 1;
       break;
-    case Direction.OBLIQUE_UP :
+    case Direction.OBLIQUE_UP:
       rowStep = 1;
       colStep = 1;
       break;
-    case Direction.OBLIQUE_DOWN :
+    case Direction.OBLIQUE_DOWN:
       rowStep = -1;
       colStep = 1;
       break;
@@ -193,8 +193,8 @@ function checkLine(board: WhichPlayer[][] , startRow: number, startCol: number, 
   let col = startCol;
   let stillEqual = true;
   let count = 0;
-  while(count<4 && stillEqual){
-    stillEqual = firstCellValue===getCellValue(board, row, col);
+  while (count < 4 && stillEqual) {
+    stillEqual = firstCellValue === getCellValue(board, row, col);
     row += rowStep;
     col += colStep;
     count++;
@@ -210,15 +210,15 @@ function checkLine(board: WhichPlayer[][] , startRow: number, startCol: number, 
  */
 function checkWinner(board: WhichPlayer[][]): boolean {
 
-  for(let row = BOTTOM_ROW; row<=TOP_ROW; row++){
-    for(let col = LEFT_COLUMN; col<=RIGHT_COLUMN; col++){
+  for (let row = BOTTOM_ROW; row <= TOP_ROW; row++) {
+    for (let col = LEFT_COLUMN; col <= RIGHT_COLUMN; col++) {
       let winFound = false;
       winFound ||= checkLine(board, row, col, Direction.HORIZONTAL);
       winFound ||= checkLine(board, row, col, Direction.VERTICAL);
       winFound ||= checkLine(board, row, col, Direction.OBLIQUE_DOWN);
       winFound ||= checkLine(board, row, col, Direction.OBLIQUE_UP);
 
-      if(winFound) {
+      if (winFound) {
         return true;
       }
     }
@@ -234,7 +234,7 @@ function checkWinner(board: WhichPlayer[][]): boolean {
  * @returns true if there is a draw, false otherwise.
  */
 function checkDraw(board: WhichPlayer[][]): boolean {
-  for (let col = LEFT_COLUMN; col<=RIGHT_COLUMN; col++) {
+  for (let col = LEFT_COLUMN; col <= RIGHT_COLUMN; col++) {
     if (getCellValue(board, TOP_ROW, col) === WhichPlayer.EMPTY) {
       return false;     // not draw
     }
@@ -243,15 +243,15 @@ function checkDraw(board: WhichPlayer[][]): boolean {
 }
 /////////////////////////
 
-matchSchema.methods.addMove = function(playerUsername: string, column: number): boolean {
+matchSchema.methods.addMove = function (playerUsername: string, column: number): boolean {
   // check that the match is not terminated yet
-  if(this.status!==MatchStatus.IN_PROGRESS || this.playerTurn === WhichPlayer.EMPTY) {
+  if (this.status !== MatchStatus.IN_PROGRESS || this.playerTurn === WhichPlayer.EMPTY) {
     return false;
   }
 
   const role = getPlayerRole(this, playerUsername);
 
-  if(role!==this.playerTurn){ // The player username is not valid or the player does not have the current turn
+  if (role !== this.playerTurn) { // The player username is not valid or the player does not have the current turn
     return false;
   }
 
@@ -260,18 +260,18 @@ matchSchema.methods.addMove = function(playerUsername: string, column: number): 
   //   return false;
   // }
 
-  if(getCellValue(this.board, TOP_ROW, column)!==WhichPlayer.EMPTY) { // The selected column is full or invalid (null)
+  if (getCellValue(this.board, TOP_ROW, column) !== WhichPlayer.EMPTY) { // The selected column is full or invalid (null)
     return false;
   }
 
   // Find the first empty row of the column
-  let firstEmptyRow : number = BOTTOM_ROW;
+  let firstEmptyRow: number = BOTTOM_ROW;
   let found = false;
-  while(!found){
-    if(getCellValue(this.board, firstEmptyRow, column) === WhichPlayer.EMPTY){
+  while (!found) {
+    if (getCellValue(this.board, firstEmptyRow, column) === WhichPlayer.EMPTY) {
       found = true;
     }
-    else{
+    else {
       firstEmptyRow++;
     }
   }
@@ -296,7 +296,7 @@ matchSchema.methods.addMove = function(playerUsername: string, column: number): 
   return true;
 }
 
-matchSchema.methods.forfait = function(playerUsername: string): boolean {
+matchSchema.methods.forfait = function (playerUsername: string): boolean {
   const role = getPlayerRole(this, playerUsername);
 
   if (role === WhichPlayer.EMPTY) {   // The player username is not one of the match players
@@ -308,7 +308,7 @@ matchSchema.methods.forfait = function(playerUsername: string): boolean {
 }
 
 
-matchSchema.methods.countMoves = function(playerUsername: string): number {
+matchSchema.methods.countMoves = function (playerUsername: string): number {
   const role = getPlayerRole(this, playerUsername);
 
   if (role === WhichPlayer.EMPTY) {   // The player username is not one of the match players
@@ -316,8 +316,8 @@ matchSchema.methods.countMoves = function(playerUsername: string): number {
   }
 
   let count = 0;
-  for (let row = BOTTOM_ROW; row<=TOP_ROW; row++) {
-    for (let col = LEFT_COLUMN; col<=RIGHT_COLUMN; col++) {
+  for (let row = BOTTOM_ROW; row <= TOP_ROW; row++) {
+    for (let col = LEFT_COLUMN; col <= RIGHT_COLUMN; col++) {
       if (getCellValue(this.board, row, col) === role) {
         count++;
       }
@@ -335,7 +335,7 @@ export function getSchema() {
 // Mongoose Model
 let matchModel: MatchModel;  // This is not exposed outside the model
 export function getModel(): MatchModel { // Return Model as singleton
-  if(!matchModel) {
+  if (!matchModel) {
     matchModel = mongoose.model<MatchDocument, MatchModel>('Match', getSchema())
   }
   return matchModel;

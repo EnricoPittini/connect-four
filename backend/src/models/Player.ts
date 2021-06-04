@@ -1,8 +1,8 @@
 import mongoose = require('mongoose');
 import crypto = require('crypto');
 
-import stats = require("./Stats");
-import {StatsDocument} from "./Stats";
+import stats = require('./Stats');
+import { StatsDocument } from './Stats';
 
 
 function hashPassword(pwd: string): { digest: string, salt: string } {
@@ -69,8 +69,8 @@ const playerSchema = new mongoose.Schema<PlayerDocument, PlayerModel>({
     unique: true,
   },
   name: {
-      type: mongoose.SchemaTypes.String,
-      required: true,
+    type: mongoose.SchemaTypes.String,
+    required: true,
   },
   surname: {
     type: mongoose.SchemaTypes.String,
@@ -103,7 +103,7 @@ const playerSchema = new mongoose.Schema<PlayerDocument, PlayerModel>({
 });
 
 
-playerSchema.methods.validatePassword = function(pwd: string): boolean {
+playerSchema.methods.validatePassword = function (pwd: string): boolean {
   // To validate the password, we compute the digest with the
   // same HMAC to check if it matches with the digest we stored
   // in the database.
@@ -114,10 +114,10 @@ playerSchema.methods.validatePassword = function(pwd: string): boolean {
   return (this.digest === digest);
 }
 
-playerSchema.methods.confirmModerator = function(name: string,
-                                                 surname: string,
-                                                 avatar: string,
-                                                 pwd: string): void {
+playerSchema.methods.confirmModerator = function (name: string,
+                                                  surname: string,
+                                                  avatar: string,
+                                                  pwd: string): void {
 
   this.name = name;
   this.surname = surname;
@@ -133,7 +133,7 @@ playerSchema.methods.confirmModerator = function(name: string,
  * @param friendUsername - the username of the friend to add, must be an existing username
  * @returns
  */
-playerSchema.methods.addFriend = function(friendUsername: string): boolean {
+playerSchema.methods.addFriend = function (friendUsername: string): boolean {
   if (this.username === friendUsername || this.hasFriend(friendUsername)) {
     // friendUsername is your username or already in the friend list
     return false;
@@ -149,7 +149,7 @@ playerSchema.methods.addFriend = function(friendUsername: string): boolean {
  * @param friendUsername - the username of the friend to remove
  * @returns
  */
-playerSchema.methods.removeFriend = function(friendUsername: string): boolean {
+playerSchema.methods.removeFriend = function (friendUsername: string): boolean {
   if (!this.hasFriend(friendUsername)) {
     // not in the friend list
     return false;
@@ -164,13 +164,13 @@ playerSchema.methods.removeFriend = function(friendUsername: string): boolean {
  * @param friendUsername - the username of the friend
  * @returns
  */
-playerSchema.methods.hasFriend = function(friendUsername: string): boolean {
+playerSchema.methods.hasFriend = function (friendUsername: string): boolean {
   return !!this.friends.find(item => item === friendUsername);
 }
 
-playerSchema.methods.getStats = function(): Promise<StatsDocument> {
+playerSchema.methods.getStats = function (): Promise<StatsDocument> {
   // Cast to Promise<StatsDocument> because we are sure that the StatsDocument exists
-  return stats.getModel().findOne( { "_id" : this.stats} ).exec() as Promise<StatsDocument>;
+  return stats.getModel().findOne({ _id: this.stats }).exec() as Promise<StatsDocument>;
 }
 
 
@@ -182,7 +182,7 @@ export function getSchema() {
 // Mongoose Model
 let playerModel: PlayerModel;  // This is not exposed outside the model
 export function getModel(): PlayerModel { // Return Model as singleton
-  if(!playerModel) {
+  if (!playerModel) {
     playerModel = mongoose.model<PlayerDocument, PlayerModel>('Player', getSchema())
   }
   return playerModel;
@@ -198,11 +198,11 @@ export function newStandardPlayer(data: NewStandardPlayerParams): Promise<Player
 
   const { digest, salt } = hashPassword(data.password);
 
-  const statsDocument : StatsDocument = stats.newStats({
+  const statsDocument: StatsDocument = stats.newStats({
     player: data.username,
   });
 
-  return statsDocument.save().then(()=>{
+  return statsDocument.save().then(() => {
     const player: Player = {
       username: data.username,
       name: data.name,
@@ -227,11 +227,11 @@ export function newModerator(data: NewModeratorParams): Promise<PlayerDocument> 
 
   const { digest, salt } = hashPassword(data.password);
 
-  const statsDocument : StatsDocument = stats.newStats({
+  const statsDocument: StatsDocument = stats.newStats({
     player: data.username,
   });
 
-  return statsDocument.save().then(()=>{
+  return statsDocument.save().then(() => {
     const player: Player = {
       username: data.username,
       name: '',

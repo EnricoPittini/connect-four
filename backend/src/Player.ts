@@ -199,7 +199,9 @@ export function newStandardPlayer(data: NewStandardPlayerParams): Promise<Player
 
   const { digest, salt } = hashPassword(data.password);
 
-  const statsDocument : StatsDocument = stats.newStats();
+  const statsDocument : StatsDocument = stats.newStats({
+    player: data.username,
+  });
 
   return statsDocument.save().then(()=>{
     const player: Player = {
@@ -226,7 +228,9 @@ export function newModerator(data: NewModeratorParams): Promise<PlayerDocument> 
 
   const { digest, salt } = hashPassword(data.password);
 
-  const statsDocument : StatsDocument = stats.newStats();
+  const statsDocument : StatsDocument = stats.newStats({
+    player: data.username,
+  });
 
   return statsDocument.save().then(()=>{
     const player: Player = {

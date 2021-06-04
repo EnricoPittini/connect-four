@@ -7,13 +7,14 @@ import jsonwebtoken = require('jsonwebtoken');    // JWT generation
 import jwt = require('express-jwt');              // JWT parsing middleware for express
 import cors = require('cors');                    // Enable CORS middleware
 import { Server, Socket } from 'socket.io';
+import dotenv = require('dotenv');
 
 import player = require('./models/Player');
 
 
 console.info('Server starting...');
 
-const result = require('dotenv').config()     // The dotenv module will load a file named ".env"
+const result = dotenv.config()                // The dotenv module will load a file named ".env"
                                               // file and load all the key-value pairs into
                                               // process.env (environment variable)
 if (result.error) {

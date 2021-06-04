@@ -360,5 +360,3 @@ export function newMatch(data: NewMatchParams): MatchDocument {
 
   return new _matchModel(match);
 }
-
-//TODO sistemare Stats.ts

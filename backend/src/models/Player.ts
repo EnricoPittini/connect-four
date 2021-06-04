@@ -63,7 +63,6 @@ export interface PlayerModel extends mongoose.Model<PlayerDocument> {
 
 
 const playerSchema = new mongoose.Schema<PlayerDocument, PlayerModel>({
-  _id: false,         // TODO testare
   username: {
     type: mongoose.SchemaTypes.String,
     required: true,

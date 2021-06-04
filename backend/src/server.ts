@@ -10,6 +10,9 @@ import { Server, Socket } from 'socket.io';
 
 import player = require('./models/Player');
 
+
+console.info('Server starting...');
+
 const result = require('dotenv').config()     // The dotenv module will load a file named ".env"
                                               // file and load all the key-value pairs into
                                               // process.env (environment variable)
@@ -18,8 +21,8 @@ if (result.error) {
   process.exit(-1);
 }
 if (!process.env.JWT_SECRET
-    || !process.env.DB_SERVER_ADDRESS
-    || !process.env.DB_SERVER_PORT
+    || !process.env.DB_HOST
+    || !process.env.DB_PORT
     || !process.env.DB_NAME
     || !process.env.MAIN_MODERATOR_USERNAME
     || !process.env.MAIN_MODERATOR_PASSWORD
@@ -114,50 +117,55 @@ app.use((req, res, next) => {
 // Connect to mongodb and launch the HTTP server trough Express
 
 const {
-  DB_SERVER_ADDRESS,
-  DB_SERVER_PORT,
+  DB_HOST,
+  DB_PORT,
   DB_NAME,
   MAIN_MODERATOR_USERNAME,
   MAIN_MODERATOR_PASSWORD,
   SERVER_PORT,
 } = process.env;
 
-mongoose.connect(`mongodb://${DB_SERVER_ADDRESS}:${DB_SERVER_PORT}/${DB_NAME}`)
-  .then(() => {
-    console.info("Connected to MongoDB");
+mongoose.connect(`mongodb://${DB_HOST}:${DB_PORT}/${DB_NAME}`, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  useCreateIndex: true,
+  useFindAndModify: true,
+})
+.then(() => {
+  console.info("Connected to MongoDB");
 
-    return player.getModel().findOne({ username: MAIN_MODERATOR_USERNAME });
-  })
-  .then((playerDocument) => {
-    if (!playerDocument) {
-      console.info("Creating main moderator");
+  return player.getModel().findOne({ username: MAIN_MODERATOR_USERNAME });
+})
+.then((playerDocument) => {
+  if (!playerDocument) {
+    console.info("Creating main moderator");
 
-      return player.newModerator({
-        username: MAIN_MODERATOR_USERNAME,
-        password: 'temp'
-      });
-    }
-    else {
-      console.info("Main moderator already exists");
-    }
-  })
-  .then((moderatorDocument) => {
-    if (moderatorDocument) {
-      moderatorDocument.confirmModerator('John', 'Smith', 'TODO', MAIN_MODERATOR_PASSWORD);
-      return moderatorDocument.save();
-    }
-  })
-  .then(() => {
-    const server = http.createServer(app);
-
-    io = new Server(server);
-    io.on('connection', (socket) => {
-      console.info("Socket.io client connected");
+    return player.newModerator({
+      username: MAIN_MODERATOR_USERNAME,
+      password: 'temp'
     });
+  }
+  else {
+    console.info("Main moderator already exists");
+  }
+})
+.then((moderatorDocument) => {
+  if (moderatorDocument) {
+    moderatorDocument.confirmModerator('John', 'Smith', 'TODO', MAIN_MODERATOR_PASSWORD);
+    return moderatorDocument.save();
+  }
+})
+.then(() => {
+  const server = http.createServer(app);
 
-    server.listen(SERVER_PORT, () => console.info(`HTTP Server started on port ${SERVER_PORT}`));
-  })
-  .catch((err) => {
-    console.error("Error Occurred during initialization");
-    console.error(err);
+  io = new Server(server);
+  io.on('connection', (socket) => {
+    console.info("Socket.io client connected");
   });
+
+  server.listen(SERVER_PORT, () => console.info(`HTTP Server started on port ${SERVER_PORT}`));
+})
+.catch((err) => {
+  console.error("Error Occurred during initialization");
+  console.error(err);
+});

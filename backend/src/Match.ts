@@ -1,12 +1,12 @@
 import mongoose = require('mongoose');
 
-enum WhichPlayer{
+export enum WhichPlayer {
   PLAYER_1 = "PLAYER_1",
   PLAYER_2 = "PLAYER_2",
   EMPTY = "EMPTY",
 }
 
-enum MatchStatus{
+export enum MatchStatus {
   IN_PROGRESS = "IN_PROGRESS",
   NORMALLY_TERMINATED = "NORMALLY_TERMINATED",
   FORFAIT = "FORFAIT",
@@ -26,7 +26,7 @@ export interface Match{
 export interface MatchDocument extends Match, mongoose.Document {
   addMove: (playerUsername: string, column: number) => boolean,
   forfait: (playerUsername: string) => boolean,
-  countMoves: (playerUsername: string) => number, 
+  countMoves: (playerUsername: string) => number,
 }
 
 export interface MatchModel extends mongoose.Model<MatchDocument> {
@@ -67,16 +67,42 @@ const matchSchema = new mongoose.Schema<MatchDocument, MatchModel>({
   },
 });
 
-function getPlayerRole(match: Match, playerUsername: string) : WhichPlayer{
+// TODO eventualmente trasformarla in metodo o esportarla
+function getPlayerRole(match: Match, playerUsername: string): WhichPlayer {
   if(playerUsername===match.player1){
     return WhichPlayer.PLAYER_1;
-  } 
+  }
   else if(playerUsername===match.player2){
     return WhichPlayer.PLAYER_2;
   }
   else{
     return WhichPlayer.EMPTY;
   }
+}
+
+/**
+ * Updates the match object after the termination (win / draw / forfait).
+ *
+ * @param match
+ * @param status
+ * @param winner
+ * @returns
+ */
+function updateAfterTermination(match: Match, status: MatchStatus, winner: WhichPlayer): boolean {
+  if (match.status !== MatchStatus.IN_PROGRESS) {
+    return false;
+  }
+
+  if (status === MatchStatus.IN_PROGRESS) {
+    return false;
+  }
+
+  // Update match object
+  match.datetimeEnd = new Date();
+  match.status = status;
+  match.winner = winner;
+  match.playerTurn = WhichPlayer.EMPTY;
+  return true;
 }
 
 ///////////// FUNZIONI CHE TOCCANO LA BOARD
@@ -86,41 +112,68 @@ const BOTTOM_ROW = 0;
 const LEFT_COLUMN = 0;
 const RIGHT_COLUMN = 6;
 
-function getCellValue(board: WhichPlayer[][], row: number, col: number){
-  if(row<BOTTOM_ROW || row>TOP_ROW || col<LEFT_COLUMN || row>RIGHT_COLUMN){
-    return WhichPlayer.EMPTY;
+/**
+ * Interacts with the board to retrieve the value of a cell.
+ * Returns null if the given cell is out of the board.
+ *
+ * @param board
+ * @param row
+ * @param col
+ * @returns
+ */
+function getCellValue(board: WhichPlayer[][], row: number, col: number): WhichPlayer | null {
+  if(row<BOTTOM_ROW || row>TOP_ROW || col<LEFT_COLUMN || row>RIGHT_COLUMN) {
+    return null;
   }
   return board[TOP_ROW-row][col];
-  
 }
 
-function setCellValue(board: WhichPlayer[][], row: number, col: number, value: WhichPlayer): boolean{
-  if(value===WhichPlayer.EMPTY || row<BOTTOM_ROW || row>TOP_ROW || col<LEFT_COLUMN || row>RIGHT_COLUMN || 
-                getCellValue(board, row, col)!==WhichPlayer.EMPTY){
+/**
+ * Interacts with the board to fill the value of an empty cell.
+ *
+ * @param board
+ * @param row
+ * @param col
+ * @param value
+ * @returns
+ */
+function setCellValue(board: WhichPlayer[][], row: number, col: number, value: WhichPlayer): boolean {
+  const currentCellValue = getCellValue(board, row, col);
+
+  if(value===WhichPlayer.EMPTY || currentCellValue === null || currentCellValue !== WhichPlayer.EMPTY) {
     return false;
   }
   board[TOP_ROW-row][col] = value;
   return true;
 }
 
-enum Direction{
-  HORIZONTAL,
-  VERTICAL,
-  OBLIQUE_UP,
-  OBLIQUE_DOWN,
+enum Direction {
+  HORIZONTAL,       // from left to right
+  VERTICAL,         // from bottom to top
+  OBLIQUE_UP,       // from bottom left to top right
+  OBLIQUE_DOWN,     // from top left to bottom right
 }
 
+/**
+ * Checks if the given line of 4 contiguous cells contains the same player.
+ *
+ * @param board
+ * @param startRow
+ * @param startCol
+ * @param direction
+ * @returns
+ */
 function checkLine(board: WhichPlayer[][] , startRow: number, startCol: number, direction: Direction) : boolean{
   const firstCellValue = getCellValue(board, startRow, startCol);
-  if(firstCellValue===WhichPlayer.EMPTY){ // The first cell is empty or out of the board bounds
+  if (firstCellValue === WhichPlayer.EMPTY || firstCellValue === null) { // The first cell is empty or out of the board bounds
     return false;
   }
 
   // The step for each of the 4 iterations
   let rowStep = 0;
   let colStep = 0;
-  switch(direction){
-    case Direction.HORIZONTAL : 
+  switch(direction) {
+    case Direction.HORIZONTAL :
       colStep = 1;
       break;
     case Direction.VERTICAL :
@@ -150,17 +203,22 @@ function checkLine(board: WhichPlayer[][] , startRow: number, startCol: number, 
   return stillEqual;
 }
 
-function checkWinner(match: Match): boolean{
+/**
+ * Checks if the board has a winner.
+ * @param board
+ * @returns
+ */
+function checkWinner(board: WhichPlayer[][]): boolean {
 
   for(let row = BOTTOM_ROW; row<=TOP_ROW; row++){
     for(let col = LEFT_COLUMN; col<=RIGHT_COLUMN; col++){
       let winFound = false;
-      winFound ||= checkLine(match.board, row, col, Direction.HORIZONTAL);
-      winFound ||= checkLine(match.board, row, col, Direction.VERTICAL);
-      winFound ||= checkLine(match.board, row, col, Direction.OBLIQUE_DOWN);
-      winFound ||= checkLine(match.board, row, col, Direction.OBLIQUE_UP);
+      winFound ||= checkLine(board, row, col, Direction.HORIZONTAL);
+      winFound ||= checkLine(board, row, col, Direction.VERTICAL);
+      winFound ||= checkLine(board, row, col, Direction.OBLIQUE_DOWN);
+      winFound ||= checkLine(board, row, col, Direction.OBLIQUE_UP);
 
-      if(winFound){
+      if(winFound) {
         return true;
       }
     }
@@ -168,11 +226,26 @@ function checkWinner(match: Match): boolean{
 
   return false;
 }
+
+/**
+ * Checks if there is a draw, specifically checks if the board is full.
+ *
+ * @param board
+ * @returns true if there is a draw, false otherwise.
+ */
+function checkDraw(board: WhichPlayer[][]): boolean {
+  for (let col = LEFT_COLUMN; col<=RIGHT_COLUMN; col++) {
+    if (getCellValue(board, TOP_ROW, col) === WhichPlayer.EMPTY) {
+      return false;     // not draw
+    }
+  }
+  return true;          // draw
+}
 /////////////////////////
 
 matchSchema.methods.addMove = function(playerUsername: string, column: number): boolean {
-
-  if(this.status!==MatchStatus.IN_PROGRESS){
+  // check that the match is not terminated yet
+  if(this.status!==MatchStatus.IN_PROGRESS || this.playerTurn === WhichPlayer.EMPTY) {
     return false;
   }
 
@@ -182,11 +255,12 @@ matchSchema.methods.addMove = function(playerUsername: string, column: number): 
     return false;
   }
 
-  if(column<LEFT_COLUMN || column>RIGHT_COLUMN){
-    return false;
-  }
+  // questo controllo è compreso in quello successivo
+  // if(column<LEFT_COLUMN || column>RIGHT_COLUMN){
+  //   return false;
+  // }
 
-  if(getCellValue(this.board, TOP_ROW, column)!==WhichPlayer.EMPTY){ // The selected column is full
+  if(getCellValue(this.board, TOP_ROW, column)!==WhichPlayer.EMPTY) { // The selected column is full or invalid (null)
     return false;
   }
 
@@ -194,7 +268,7 @@ matchSchema.methods.addMove = function(playerUsername: string, column: number): 
   let firstEmptyRow : number = BOTTOM_ROW;
   let found = false;
   while(!found){
-    if(this.board[firstEmptyRow][column]===WhichPlayer.EMPTY){
+    if(getCellValue(this.board, firstEmptyRow, column) === WhichPlayer.EMPTY){
       found = true;
     }
     else{
@@ -205,12 +279,86 @@ matchSchema.methods.addMove = function(playerUsername: string, column: number): 
   // Put the move in the board
   setCellValue(this.board, firstEmptyRow, column, role);
 
-  //TODO controllo checkWin
-  //TODO cambiare turno
-  //TODO verificare se c'è altro da fare
+  // Check if there is a winner
+  if (checkWinner(this.board)) {
+    // Update match object
+    updateAfterTermination(this, MatchStatus.NORMALLY_TERMINATED, role);
+  }
+  else if (checkDraw(this.board)) {
+    // Update match object
+    updateAfterTermination(this, MatchStatus.NORMALLY_TERMINATED, WhichPlayer.EMPTY);
+  }
+  else {
+    // switch turn
+    this.playerTurn = (this.playerTurn === WhichPlayer.PLAYER_1 ? WhichPlayer.PLAYER_2 : WhichPlayer.PLAYER_1);
+  }
 
+  return true;
 }
 
-//TODO continuare implementazione Match
+matchSchema.methods.forfait = function(playerUsername: string): boolean {
+  const role = getPlayerRole(this, playerUsername);
+
+  if (role === WhichPlayer.EMPTY) {   // The player username is not one of the match players
+    return false;
+  }
+
+  const winner = (role === WhichPlayer.PLAYER_1 ? WhichPlayer.PLAYER_2 : WhichPlayer.PLAYER_1);
+  return updateAfterTermination(this, MatchStatus.FORFAIT, winner);
+}
+
+
+matchSchema.methods.countMoves = function(playerUsername: string): number {
+  const role = getPlayerRole(this, playerUsername);
+
+  if (role === WhichPlayer.EMPTY) {   // The player username is not one of the match players
+    return -1;        // TODO valutare se si può fare di meglio
+  }
+
+  let count = 0;
+  for (let row = BOTTOM_ROW; row<=TOP_ROW; row++) {
+    for (let col = LEFT_COLUMN; col<=RIGHT_COLUMN; col++) {
+      if (getCellValue(this.board, row, col) === role) {
+        count++;
+      }
+    }
+  }
+
+  return count;
+}
+
+
+export function getSchema() {
+  return matchSchema;
+}
+
+// Mongoose Model
+let matchModel: MatchModel;  // This is not exposed outside the model
+export function getModel(): MatchModel { // Return Model as singleton
+  if(!matchModel) {
+    matchModel = mongoose.model<MatchDocument, MatchModel>('Match', getSchema())
+  }
+  return matchModel;
+}
+
+interface NewMatchParams extends Pick<Match, 'player1' | 'player2'> {
+}
+
+export function newMatch(data: NewMatchParams): MatchDocument {
+  const _matchModel = getModel();
+
+  const match: Match = {
+    player1: data.player1,
+    player2: data.player2,
+    datetimeBegin: new Date(),
+    datetimeEnd: null,
+    board: Array(TOP_ROW-BOTTOM_ROW+1).fill(Array(RIGHT_COLUMN-LEFT_COLUMN+1).fill(WhichPlayer.EMPTY)),
+    status: MatchStatus.IN_PROGRESS,
+    winner: WhichPlayer.EMPTY,
+    playerTurn: WhichPlayer.PLAYER_1,
+  };
+
+  return new _matchModel(match);
+}
 
 //TODO sistemare Stats.ts

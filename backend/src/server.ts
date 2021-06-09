@@ -12,7 +12,20 @@ import dotenv = require('dotenv');
 import player = require('./models/Player');
 import {PlayerType} from './models/Player';
 
-import {ResponseBody, RootResponseBody, LoginResponseBody, ErrorResponseBody} from './httpTypes/responses';
+import {
+  ResponseBody,
+  RootResponseBody,
+  LoginResponseBody, 
+  ErrorResponseBody,
+  RegistrationResponseBody,
+} from './httpTypes/responses';
+import {
+  RegistrationRequestBody, 
+  StandardPlayerRegistrationRequestBody, 
+  ModeratorRegistrationRequestBody,
+  isStandardPlayerRegistrationRequestBody,
+  isModeratorRegistrationRequestBody,
+} from './httpTypes/requests';
 
 
 console.info('Server starting...');
@@ -172,7 +185,7 @@ app.get(`/v${version}/login`, passport.authenticate('basic', { session: false })
   };
 
   console.info("Login granted. Generating token" );
-  var tokenSigned = jsonwebtoken.sign(tokenData, process.env.JWT_SECRET as string);
+  const tokenSigned = jsonwebtoken.sign(tokenData, process.env.JWT_SECRET as string);
 
   // Note: You can manually check the JWT content at https://jwt.io
 
@@ -181,13 +194,134 @@ app.get(`/v${version}/login`, passport.authenticate('basic', { session: false })
 
 });
 
+/*
+app.post('/users', (req,res,next) => {
+
+  var u = user.newUser( req.body );
+  if( !req.body.password ) {
+    return next({ statusCode:404, error: true, errormessage: "Password field missing"} );
+  }
+  u.setPassword( req.body.password );
+
+  u.save().then( (data) => {
+    return res.status(200).json({ error: false, errormessage: "", id: data._id });
+  }).catch( (reason) => {
+    if( reason.code === 11000 )
+      return next({statusCode:404, error:true, errormessage: "User already exists"} );
+    return next({ statusCode:404, error: true, errormessage: "DB error: "+reason.errmsg });
+  })
+
+});*/
+
+// players endpoint
+app.post(`/v${version}/players`, (req,res,next) =>{
+
+  if(isStandardPlayerRegistrationRequestBody(req.body)){
+    // The request body fields are non empty (This is ensured authomatically by the body parsing system)
+    player.newStandardPlayer(req.body).then( newPlayer => {
+      return newPlayer.save();
+    })
+    .then( newPlayer => {
+      const tokenData = {
+        username: newPlayer.username,
+        name: newPlayer.name,
+        surname: newPlayer.surname,
+        type: newPlayer.type,
+        // TODO avatar?
+      };
+      console.info("New standard player correctly created, with username: "+newPlayer.username);
+      const tokenSigned = jsonwebtoken.sign(tokenData, process.env.JWT_SECRET as string);
+      const body : RegistrationResponseBody = {error:false, statusCode: 200, token: tokenSigned};
+      return res.status(200).json(body);
+    })
+    .catch( err => {
+      if( err.code === 11000 ){ // Player alredy exists
+        console.warn("Standard player already exists, with username: "+req.body.username);
+        const errorBody : ErrorResponseBody = {error:true, statusCode:409, errorMessage: "Player already exists"}; 
+        return next(errorBody);
+      }
+      // Generic DB error
+      console.error("Generic DB error during the registration process");
+      const errorBody : ErrorResponseBody = {error:true, statusCode:500, errorMessage: "Internal Server error"};
+      return next(errorBody);
+    });
+  }
+  else if(isModeratorRegistrationRequestBody(req.body)){
+    /*if(req.body.username==='' || req.body.password===''){
+      console.warn("Empty username or password");
+      const errorBody : ErrorResponseBody = {error:true, statusCode:400, errorMessage: "Empty username or password"};
+      return next(errorBody);
+    }
+    player.newModerator(req.body).then( newModerator => {
+      return newModerator.save();
+    })
+    .then( newModerator => {
+      console.info("New moderator player correctly created, with username: " + newModerator.username);
+      const body : ResponseBody = {error:false, statusCode: 200};
+      return res.status(200).json(body);
+    })
+    .catch( err => {
+      if( err.code === 11000 ){ // Player alredy exists
+        console.warn("Moderator already exists, with username: "+req.body.username);
+        const errorBody : ErrorResponseBody = {error:true, statusCode:409, errorMessage: "Player already exists"}; 
+        return next(errorBody);
+      }
+      // Generic DB error
+      console.error("Generic DB error during the registration process");
+      const errorBody : ErrorResponseBody = {error:true, statusCode:500, errorMessage: "Internal Server error"};
+      return next(errorBody);
+    });*/
+    return next();
+  }
+  else{
+    console.warn("Wrong registration body content "+JSON.stringify(req.body,null,2));
+    const errorBody : ErrorResponseBody = {error:true, statusCode:400, errorMessage: "Wrong registration body content"};
+    return next(errorBody);
+  }
+  
+}, auth, (req,res,next)=>{
+  if(req.user?.type !== PlayerType.MODERATOR){
+    console.warn("A non Moderator player asked to create a new Moderator, the player is "+JSON.stringify(req.user,null,2));
+    const errorBody : ErrorResponseBody = {error:true, statusCode:403, errorMessage:"You must be a Moderator to create a new Moderator"};
+    return next(errorBody);
+  } 
+  // The request body fields are non empty (This is ensured authomatically by the body parsing system)
+  player.newModerator(req.body).then( newModerator => {
+    return newModerator.save();
+  })
+  .then( newModerator => {
+    console.info("New moderator player correctly created, with username: " + newModerator.username);
+    const body : ResponseBody = {error:false, statusCode: 200};
+    return res.status(200).json(body);
+  })
+  .catch( err => {
+    if( err.code === 11000 ){ // Moderator alredy exists
+      console.warn("Moderator already exists, with username: "+req.body.username);
+      const errorBody : ErrorResponseBody = {error:true, statusCode:409, errorMessage: "Moderator already exists"}; 
+      return next(errorBody);
+    }
+    // Generic DB error
+    console.error("Generic DB error during the registration process "+JSON.stringify(err,null,2));
+    const errorBody : ErrorResponseBody = {error:true, statusCode:500, errorMessage: "Internal Server error"};
+    return next(errorBody);
+  });
+
+})
+
 
 
 
 // Add error handling middleware
-app.use((err: ErrorResponseBody, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error('Request error: ' + JSON.stringify(err));
-  res.status(err.statusCode || 500).json(err);
+app.use((err: ErrorResponseBody | jwt.UnauthorizedError, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  let errorBody : ErrorResponseBody;
+  if(err instanceof jwt.UnauthorizedError){
+    errorBody = {error:true, statusCode:err.status, errorMessage:"User unauthorized"}; 
+  }
+  else{
+    errorBody=err;
+  }
+  console.error('Request error: ' + JSON.stringify(errorBody));
+  res.status(errorBody.statusCode || 500).json(errorBody);
 });
 
 

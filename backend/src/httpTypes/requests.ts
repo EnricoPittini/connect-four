@@ -21,17 +21,17 @@ export interface ModeratorRegistrationRequestBody extends RegistrationRequestBod
 export function isStandardPlayerRegistrationRequestBody(arg: any): arg is StandardPlayerRegistrationRequestBody {
   return arg 
          && arg.username
-         && typeof(arg.username) == 'string'
+         && typeof(arg.username) === 'string'
          && arg.password
-         && typeof(arg.password) == 'string'
+         && typeof(arg.password) === 'string'
          && arg.isModerator!=undefined && arg.isModerator!=null // Check explicity the inequality to undefined and null
          && !arg.isModerator
          && arg.name
-         && typeof(arg.name) == 'string'
+         && typeof(arg.name) === 'string'
          && arg.surname
-         && typeof(arg.surname) == 'string'
+         && typeof(arg.surname) === 'string'
          && arg.avatar
-         && typeof(arg.avatar) == 'string' ;
+         && typeof(arg.avatar) === 'string' ;
 }
 
 export function isModeratorRegistrationRequestBody(arg: any): arg is ModeratorRegistrationRequestBody {

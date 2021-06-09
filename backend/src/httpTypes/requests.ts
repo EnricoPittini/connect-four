@@ -43,3 +43,22 @@ export function isModeratorRegistrationRequestBody(arg: any): arg is ModeratorRe
          && arg.isModerator!=undefined && arg.isModerator!=null // Check explicity the inequality to undefined and null
          && arg.isModerator ;
 }
+
+export interface ConfirmModeratorRequestBody extends RequestBody{
+  password: string,
+  name: string,
+  surname: string,
+  avatar: string, // TODO capire come gestire
+}
+
+export function isConfirmModeratorRequestBody(arg: any): arg is ConfirmModeratorRequestBody {
+  return arg 
+         && arg.password
+         && typeof(arg.password) === 'string'
+         && arg.name
+         && typeof(arg.name) === 'string'
+         && arg.surname
+         && typeof(arg.surname) === 'string'
+         && arg.avatar
+         && typeof(arg.avatar) === 'string' ;
+}

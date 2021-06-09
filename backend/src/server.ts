@@ -13,20 +13,23 @@ import player = require('./models/Player');
 import {PlayerType} from './models/Player';
 
 import {
+  RegistrationRequestBody, 
+  StandardPlayerRegistrationRequestBody, 
+  ModeratorRegistrationRequestBody,
+  isStandardPlayerRegistrationRequestBody,
+  isModeratorRegistrationRequestBody,
+  ConfirmModeratorRequestBody,
+  isConfirmModeratorRequestBody,
+} from './httpTypes/requests';
+import {
   ResponseBody,
   RootResponseBody,
   LoginResponseBody, 
   ErrorResponseBody,
   RegistrationResponseBody,
   GetPlayersResponseBody,
+  ConfirmModeratorResponseBody,
 } from './httpTypes/responses';
-import {
-  RegistrationRequestBody, 
-  StandardPlayerRegistrationRequestBody, 
-  ModeratorRegistrationRequestBody,
-  isStandardPlayerRegistrationRequestBody,
-  isModeratorRegistrationRequestBody,
-} from './httpTypes/requests';
 
 
 console.info('Server starting...');
@@ -321,6 +324,51 @@ app.get(`/v${version}/players`, auth, (req,res,next) =>{
     const errorBody = {error:true, statusCode:500, errorMessage:"Internal DB error"};
     return next(errorBody);
   })
+});
+
+app.get(`/v${version}/players/:username`, auth, (req,res,next) =>{
+  if(req.user?.type !== PlayerType.MODERATOR_FIRST_ACCESS){
+    console.warn("A non first time Moderator player asked to confirm his account, the player is "+JSON.stringify(req.user,null,2));
+    const errorBody : ErrorResponseBody = {
+      error:true, 
+      statusCode:403,
+      errorMessage:"You must be a Moderator first access to confirm your account"
+    };
+    return next(errorBody);
+  } 
+
+  if(!isConfirmModeratorRequestBody(req.body)){
+    console.warn("Wrong confirm Moderator body content "+JSON.stringify(req.body,null,2));
+    const errorBody : ErrorResponseBody = {error:true, statusCode:400, errorMessage: "Wrong confirm Moderator body content"};
+    return next(errorBody);
+  }
+  player.getModel().findOne({username:req.user.username}).then(moderator=>{
+    if(!moderator){
+      console.error("The first access Moderator was not found, but should have been found");
+      const errorBody : ErrorResponseBody = {error:true, statusCode:500, errorMessage: "Internal Server error"};
+      return next(errorBody);
+    }
+    moderator.confirmModerator(req.body.name, req.body.surname, req.body.avatar, req.body.password);
+    return moderator.save();
+  })
+  .then(moderator=>{
+    console.info("Confirmed Moderator: "+moderator!.username);
+    const tokenData = {
+      username: moderator!.username,
+      name: moderator!.name,
+      surname: moderator!.surname,
+      type: moderator!.type,
+      // TODO avatar?
+    };
+    const tokenSigned = jsonwebtoken.sign(tokenData, process.env.JWT_SECRET as string);
+    const body : ConfirmModeratorRequestBody = {error:false, statusCode: 200, token: tokenSigned};
+    return res.status(200).json(body);
+  })
+  .catch(err=>{
+    console.error("An error occoured during the confirmation of the first access moderator "+req.user?.username);
+    const errorBody : ErrorResponseBody = {error:true, statusCode:500, errorMessage: "Internal Server error"};
+    return next(errorBody);
+  }) 
 });
 
 

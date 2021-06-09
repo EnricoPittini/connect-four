@@ -13,6 +13,9 @@ export interface LoginResponseBody extends ResponseBody{
     token: string,
 }
 
+export interface RegistrationResponseBody extends LoginResponseBody{    
+}
+
 export interface ErrorResponseBody extends ResponseBody{
     error: true,
     errorMessage: string,

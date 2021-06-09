@@ -122,6 +122,7 @@ playerSchema.methods.confirmModerator = function (name: string,
   this.name = name;
   this.surname = surname;
   this.avatar = avatar;
+  this.type = PlayerType.MODERATOR;
 
   const { digest, salt } = hashPassword(pwd);
   this.digest = digest;
@@ -234,9 +235,9 @@ export function newModerator(data: NewModeratorParams): Promise<PlayerDocument> 
   return statsDocument.save().then(() => {
     const player: Player = {
       username: data.username,
-      name: '',
-      surname: '',
-      avatar: '',
+      name: 'TempName',
+      surname: 'TempSurname',
+      avatar: 'TempAvatar',
       type: PlayerType.MODERATOR_FIRST_ACCESS,
       friends: [],
       digest: digest,

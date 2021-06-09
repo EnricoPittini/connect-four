@@ -13,8 +13,8 @@ import player = require('./models/Player');
 import {PlayerType} from './models/Player';
 
 import {
-  RegistrationRequestBody, 
-  StandardPlayerRegistrationRequestBody, 
+  RegistrationRequestBody,
+  StandardPlayerRegistrationRequestBody,
   ModeratorRegistrationRequestBody,
   isStandardPlayerRegistrationRequestBody,
   isModeratorRegistrationRequestBody,
@@ -24,7 +24,7 @@ import {
 import {
   ResponseBody,
   RootResponseBody,
-  LoginResponseBody, 
+  LoginResponseBody,
   ErrorResponseBody,
   RegistrationResponseBody,
   GetPlayersResponseBody,
@@ -84,10 +84,10 @@ var auth = jwt({
   algorithms: ['HS256'],
 });
 
-// Configure HTTP basic authentication strategy 
+// Configure HTTP basic authentication strategy
 passport.use( new passportHTTP.BasicStrategy(
   function(username, password, done) {
- 
+
     console.info("New login attempt from " + username );
     // TODO togliere
     /*player.getModel().findOne( {username : username} , null, null, (err, player)=>{
@@ -154,7 +154,7 @@ app.get(`/v${version}`, (_, res) => {
   const body : RootResponseBody = {
     error: false,
     statusCode: 200,
-    apiVersion: version,   
+    apiVersion: version,
     endpoints: [
       // TODO
       '/login',
@@ -167,7 +167,7 @@ app.get(`/v${version}`, (_, res) => {
 
 // TODO endpoints
 
-// Login endpoint 
+// Login endpoint
 app.get(`/v${version}/login`, passport.authenticate('basic', { session: false }), (req,res,next) => {
 
   // If we reach this point, the user is successfully authenticated and
@@ -243,7 +243,7 @@ app.post(`/v${version}/players`, (req,res,next) =>{
     .catch( err => {
       if( err.code === 11000 ){ // Player alredy exists
         console.warn("Standard player already exists, with username: "+req.body.username);
-        const errorBody : ErrorResponseBody = {error:true, statusCode:409, errorMessage: "Player already exists"}; 
+        const errorBody : ErrorResponseBody = {error:true, statusCode:409, errorMessage: "Player already exists"};
         return next(errorBody);
       }
       // Generic DB error
@@ -260,13 +260,13 @@ app.post(`/v${version}/players`, (req,res,next) =>{
     const errorBody : ErrorResponseBody = {error:true, statusCode:400, errorMessage: "Wrong registration body content"};
     return next(errorBody);
   }
-  
+
 }, auth, (req,res,next)=>{
   if(req.user?.type !== PlayerType.MODERATOR){
     console.warn("A non Moderator player asked to create a new Moderator, the player is "+JSON.stringify(req.user,null,2));
     const errorBody : ErrorResponseBody = {error:true, statusCode:403, errorMessage:"You must be a Moderator to create a new Moderator"};
     return next(errorBody);
-  } 
+  }
   // The request body fields are non empty (This is ensured authomatically by the body parsing system)
   player.newModerator(req.body).then( newModerator => {
     return newModerator.save();
@@ -279,7 +279,7 @@ app.post(`/v${version}/players`, (req,res,next) =>{
   .catch( err => {
     if( err.code === 11000 ){ // Moderator alredy exists
       console.warn("Moderator already exists, with username: "+req.body.username);
-      const errorBody : ErrorResponseBody = {error:true, statusCode:409, errorMessage: "Moderator already exists"}; 
+      const errorBody : ErrorResponseBody = {error:true, statusCode:409, errorMessage: "Moderator already exists"};
       return next(errorBody);
     }
     // Generic DB error
@@ -326,28 +326,32 @@ app.get(`/v${version}/players`, auth, (req,res,next) =>{
   })
 });
 
-app.get(`/v${version}/players/:username`, auth, (req,res,next) =>{
+app.get(`/v${version}/players/:username`, auth, (req, res, next) =>  {
   if(req.user?.type !== PlayerType.MODERATOR_FIRST_ACCESS){
     console.warn("A non first time Moderator player asked to confirm his account, the player is "+JSON.stringify(req.user,null,2));
     const errorBody : ErrorResponseBody = {
-      error:true, 
+      error:true,
       statusCode:403,
       errorMessage:"You must be a Moderator first access to confirm your account"
     };
     return next(errorBody);
-  } 
+  }
 
   if(!isConfirmModeratorRequestBody(req.body)){
     console.warn("Wrong confirm Moderator body content "+JSON.stringify(req.body,null,2));
     const errorBody : ErrorResponseBody = {error:true, statusCode:400, errorMessage: "Wrong confirm Moderator body content"};
     return next(errorBody);
   }
-  player.getModel().findOne({username:req.user.username}).then(moderator=>{
+
+  player.getModel().findOne({ username: req.user.username }).then(moderator => {
     if(!moderator){
-      console.error("The first access Moderator was not found, but should have been found");
-      const errorBody : ErrorResponseBody = {error:true, statusCode:500, errorMessage: "Internal Server error"};
-      return next(errorBody);
+      throw new Error('The first access Moderator was not found, but should have been found');
+
+      // console.error("The first access Moderator was not found, but should have been found");
+      // const errorBody : ErrorResponseBody = {error:true, statusCode:500, errorMessage: "Internal Server error"};
+      // return next(errorBody);
     }
+
     moderator.confirmModerator(req.body.name, req.body.surname, req.body.avatar, req.body.password);
     return moderator.save();
   })
@@ -361,14 +365,15 @@ app.get(`/v${version}/players/:username`, auth, (req,res,next) =>{
       // TODO avatar?
     };
     const tokenSigned = jsonwebtoken.sign(tokenData, process.env.JWT_SECRET as string);
-    const body : ConfirmModeratorRequestBody = {error:false, statusCode: 200, token: tokenSigned};
+    const body : ConfirmModeratorResponseBody = {error:false, statusCode: 200, token: tokenSigned};
     return res.status(200).json(body);
   })
   .catch(err=>{
     console.error("An error occoured during the confirmation of the first access moderator "+req.user?.username);
+    console.error(JSON.stringify(err, null, 2));
     const errorBody : ErrorResponseBody = {error:true, statusCode:500, errorMessage: "Internal Server error"};
     return next(errorBody);
-  }) 
+  })
 });
 
 
@@ -377,7 +382,7 @@ app.get(`/v${version}/players/:username`, auth, (req,res,next) =>{
 app.use((err: ErrorResponseBody | jwt.UnauthorizedError, req: express.Request, res: express.Response, next: express.NextFunction) => {
   let errorBody : ErrorResponseBody;
   if(err instanceof jwt.UnauthorizedError){
-    errorBody = {error:true, statusCode:err.status, errorMessage:"User unauthorized"}; 
+    errorBody = {error:true, statusCode:err.status, errorMessage:"User unauthorized"};
   }
   else{
     errorBody=err;

@@ -18,6 +18,7 @@ import {
   LoginResponseBody, 
   ErrorResponseBody,
   RegistrationResponseBody,
+  GetPlayersResponseBody,
 } from './httpTypes/responses';
 import {
   RegistrationRequestBody, 
@@ -137,6 +138,8 @@ app.use((req, res, next) => {
   console.info('------------------------------------------------')
   console.info(`New request for: ${req.url}`);
   console.info(`Method: ${req.method}`);
+  console.info('Query section '+JSON.stringify(req.query));
+  console.info('Body'+JSON.stringify(req.body));
   next();
 });
 
@@ -247,30 +250,6 @@ app.post(`/v${version}/players`, (req,res,next) =>{
     });
   }
   else if(isModeratorRegistrationRequestBody(req.body)){
-    /*if(req.body.username==='' || req.body.password===''){
-      console.warn("Empty username or password");
-      const errorBody : ErrorResponseBody = {error:true, statusCode:400, errorMessage: "Empty username or password"};
-      return next(errorBody);
-    }
-    player.newModerator(req.body).then( newModerator => {
-      return newModerator.save();
-    })
-    .then( newModerator => {
-      console.info("New moderator player correctly created, with username: " + newModerator.username);
-      const body : ResponseBody = {error:false, statusCode: 200};
-      return res.status(200).json(body);
-    })
-    .catch( err => {
-      if( err.code === 11000 ){ // Player alredy exists
-        console.warn("Moderator already exists, with username: "+req.body.username);
-        const errorBody : ErrorResponseBody = {error:true, statusCode:409, errorMessage: "Player already exists"}; 
-        return next(errorBody);
-      }
-      // Generic DB error
-      console.error("Generic DB error during the registration process");
-      const errorBody : ErrorResponseBody = {error:true, statusCode:500, errorMessage: "Internal Server error"};
-      return next(errorBody);
-    });*/
     return next();
   }
   else{
@@ -306,8 +285,43 @@ app.post(`/v${version}/players`, (req,res,next) =>{
     return next(errorBody);
   });
 
-})
+});
 
+//?username_filter=<partial_username>&skip=<skip>&limit=<limit>
+app.get(`/v${version}/players`, auth, (req,res,next) =>{
+  const filter : any = {};
+  if( req.query.username_filter ) {
+    filter.username = { $regex: req.query.username_filter, $options: "i" } ;
+  }
+
+  const fields = {
+    username : 1,
+    name : 1,
+    surname : 1,
+    avatar : 1, // TODO Se è URL
+    type : 1,
+  };
+
+
+  console.info("Retrieving players, using filter: " + JSON.stringify(filter,null,2) );
+
+  if((req.query.skip && typeof(req.query.skip)!="string") || (req.query.limit && typeof(req.query.limit)!="string")){
+    const errorBody = {error:true, statusCode:405, errorMessage:"Invalid query section for the URL"};
+    return next(errorBody);
+  }
+
+  const skip = parseInt( req.query.skip || "0" ) || 0;
+  const limit = parseInt( req.query.limit || "20" ) || 20;
+
+  player.getModel().find( filter , fields).sort({timestamp:-1}).skip( skip ).limit( limit ).then( (documents) => {
+    const body : GetPlayersResponseBody = {error:false, statusCode:200, players:documents};
+    return res.status(200).json( body );
+  }).catch( (err) => {
+    console.error("Internal DB error "+JSON.stringify(err,null,2));
+    const errorBody = {error:true, statusCode:500, errorMessage:"Internal DB error"};
+    return next(errorBody);
+  })
+});
 
 
 

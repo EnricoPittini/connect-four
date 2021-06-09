@@ -1,6 +1,13 @@
+import {Player} from "../models/Player";
+
 export interface ResponseBody{
     error: boolean,
     statusCode: number,
+}
+
+export interface ErrorResponseBody extends ResponseBody{
+    error: true,
+    errorMessage: string,
 }
 
 export interface RootResponseBody extends ResponseBody { 
@@ -16,7 +23,6 @@ export interface LoginResponseBody extends ResponseBody{
 export interface RegistrationResponseBody extends LoginResponseBody{    
 }
 
-export interface ErrorResponseBody extends ResponseBody{
-    error: true,
-    errorMessage: string,
+export interface GetPlayersResponseBody extends ResponseBody{
+    players : Player[],
 }

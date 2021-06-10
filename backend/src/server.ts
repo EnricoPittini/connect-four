@@ -260,6 +260,7 @@ app.get(`/v${version}/players`, auth, (req, res, next) => {
   }
 
   const fields = {
+    _id: 0,     // TODO da testare
     username: 1,
     name: 1,
     surname: 1,
@@ -288,7 +289,8 @@ app.get(`/v${version}/players`, auth, (req, res, next) => {
   })
 });
 
-app.get(`/v${version}/players/:username`, auth, (req, res, next) => {
+
+app.put(`/v${version}/players/:username`, auth, (req, res, next) => {
   if (req.user?.type !== PlayerType.MODERATOR_FIRST_ACCESS) {
     console.warn('A non first time Moderator player asked to confirm his account, the player is ' + JSON.stringify(req.user, null, 2));
     const errorBody: ErrorResponseBody = {

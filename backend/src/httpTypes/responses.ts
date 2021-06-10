@@ -43,3 +43,7 @@ export interface GetPlayerResponseBody extends SuccessResponseBody {
 export interface GetPlayerStatsResponseBody extends SuccessResponseBody {
   stats: Stats,
 }
+
+export interface GetFriendsResponseBody extends SuccessResponseBody {
+  friends: string[],
+}

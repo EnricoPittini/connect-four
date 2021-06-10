@@ -1,4 +1,5 @@
 import { ClientPlayer } from '../models/Player';
+import { Stats } from '../models/Stats';
 
 export interface ResponseBody {
   error: boolean,
@@ -33,4 +34,12 @@ export interface GetPlayersResponseBody extends SuccessResponseBody {
 
 export interface ConfirmModeratorResponseBody extends SuccessResponseBody {
   token: string,
+}
+
+export interface GetPlayerResponseBody extends SuccessResponseBody {
+  player: ClientPlayer & { online: boolean, playing: boolean },
+}
+
+export interface GetPlayerStatsResponseBody extends SuccessResponseBody {
+  stats: Stats,
 }

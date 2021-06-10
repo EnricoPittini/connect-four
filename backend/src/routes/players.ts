@@ -4,6 +4,8 @@ import jsonwebtoken = require('jsonwebtoken');    // JWT generation
 import auth from '../middlewares/auth'
 import player = require('../models/Player');
 import { PlayerType } from '../models/Player';
+import stats = require('../models/Stats');
+
 import {
   RegistrationRequestBody,
   StandardPlayerRegistrationRequestBody,
@@ -14,17 +16,34 @@ import {
   isConfirmModeratorRequestBody,
 } from '../httpTypes/requests';
 import {
-  ResponseBody,
+  SuccessResponseBody,
   RootResponseBody,
   LoginResponseBody,
   ErrorResponseBody,
   RegistrationResponseBody,
   GetPlayersResponseBody,
   ConfirmModeratorResponseBody,
+  GetPlayerResponseBody,
+  GetPlayerStatsResponseBody,
 } from '../httpTypes/responses';
 
 const router = express.Router();
 export default router;
+
+
+// TODO sportare in cartella middlewares
+function ensureNotFirstAccessModerator(user: Express.User | undefined, next: express.NextFunction) {
+  if (user!.type === PlayerType.MODERATOR_FIRST_ACCESS) {
+    console.warn('A first access moderator tried to perform an unauthorized operation, user: ' + JSON.stringify(user, null, 2));
+    const errorBody: ErrorResponseBody = {
+      error: true,
+      statusCode: 403,
+      errorMessage: 'You must confirm your moderator profile first'
+    };
+    next(errorBody);
+  }
+}
+
 
 // /players
 
@@ -82,7 +101,7 @@ router.post(`/`, (req, res, next) => {
   })
   .then(newModerator => {
     console.info('New moderator player correctly created, with username: ' + newModerator.username);
-    const body: ResponseBody = { error: false, statusCode: 200 };
+    const body: SuccessResponseBody = { error: false, statusCode: 200 };
     return res.status(200).json(body);
   })
   .catch(err => {
@@ -106,7 +125,7 @@ router.get(`/`, auth, (req, res, next) => {
   }
 
   const fields = {
-    _id: 0,     // TODO da testare
+    _id: 0,
     username: 1,
     name: 1,
     surname: 1,
@@ -143,6 +162,16 @@ router.put(`/:username`, auth, (req, res, next) => {
       error: true,
       statusCode: 403,
       errorMessage: 'You must be a Moderator first access to confirm your account'
+    };
+    return next(errorBody);
+  }
+
+  if (req.params.username !== req.user.username) {
+    console.warn('A first access Moderator asked to confirm another first access moderator profile' + JSON.stringify(req.user, null, 2));
+    const errorBody: ErrorResponseBody = {
+      error: true,
+      statusCode: 403,
+      errorMessage: 'Cannot confirm another first access moderator profile'
     };
     return next(errorBody);
   }
@@ -184,4 +213,128 @@ router.put(`/:username`, auth, (req, res, next) => {
     const errorBody: ErrorResponseBody = { error: true, statusCode: 500, errorMessage: 'Internal Server error' };
     return next(errorBody);
   })
+});
+
+
+router.get(`/:username`, auth, (req, res, next) => {
+  const fields = {
+    _id: 0,
+    username: 1,
+    name: 1,
+    surname: 1,
+    avatar: 1, // TODO Se è URL
+    type: 1,
+  };
+
+  player.getModel().findOne({ username: req.params.username }, fields).then((document) => {
+    if (!document) {
+      const errorBody: ErrorResponseBody = { error: true, statusCode: 404, errorMessage: 'The selected player doesn\'t exist' };
+      throw errorBody;
+    }
+
+    // TODO online e playing
+    const player = { ...document, online: false, playing: false };
+    const body: GetPlayerResponseBody = { error: false, statusCode: 200, player: player };
+    return res.status(200).json(body);
+  }).catch((err) => {
+    if (err.statusCode === 404) {
+      console.warn('A client asked for a non existing player: ' + req.params.username);
+      return next(err);
+    }
+    console.error('Internal DB error ' + JSON.stringify(err, null, 2));
+    const errorBody: ErrorResponseBody = { error: true, statusCode: 500, errorMessage: 'Internal DB error' };
+    return next(errorBody);
+  })
+});
+
+
+router.delete(`/:username`, auth, (req, res, next) => {
+  if (req.params.username !== req.user?.username && req.user?.type !== PlayerType.MODERATOR) {
+    console.warn('A non moderator is trying to delete another player profile, user: ' + JSON.stringify(req.user, null, 2));
+    const errorBody: ErrorResponseBody = {
+      error: true,
+      statusCode: 403,
+      errorMessage: 'You must be a moderator to delete another player profile',
+    };
+    return next(errorBody);
+  }
+  // you are deleting your own profile or you are a moderator
+
+  player.getModel().findOne({ username: req.params.username }).then(document => {
+    if (!document) {
+      console.warn('Client asked to delete a non existing player, user: ' + JSON.stringify(req.user, null, 2));
+      const errorBody: ErrorResponseBody = { error: true, statusCode: 404, errorMessage: 'Player not found' };
+      throw errorBody;
+    }
+    else if (document.type === PlayerType.MODERATOR) {
+      console.warn('Client asked to delete a moderator, user: ' + JSON.stringify(req.user, null, 2));
+      const errorBody: ErrorResponseBody = { error: true, statusCode: 403, errorMessage: 'You can\'t delete a moderator' };
+      throw errorBody;
+    }
+
+    return player.getModel().deleteOne({ username: req.params.username });
+  })
+  .then(deleteInfo => {
+    if (!deleteInfo.ok) {
+      console.error('DB error while deleting a player profile');
+      const errorBody: ErrorResponseBody = { error: true, statusCode: 500, errorMessage: 'Internal Server error' };
+      throw errorBody;
+    }
+
+    console.info('Player profile deleted, ' + req.params.username);
+    const body: SuccessResponseBody = { error: false, statusCode: 200 };
+    return res.status(200).json(body);
+  })
+  .catch(err => {
+    if (err.statusCode) {         // we assume this means it is an ErrorResponseBody
+      return next(err);
+    }
+    const errorBody: ErrorResponseBody = { error: true, statusCode: 500, errorMessage: 'Internal Server error' };
+    return next(errorBody);
+  });
+});
+
+router.get(`/:username/stats`, auth, (req, res, next) => {
+  ensureNotFirstAccessModerator(req.user, next);
+
+  player.getModel().findOne({ username: req.params.username }).then(document => {
+    if (!document) {
+      console.warn('Client asked the stats of a non existing player');
+      const errorBody: ErrorResponseBody = { error: true, statusCode: 404, errorMessage: 'Player not found' };
+      throw errorBody;
+    }
+    if (req.user!.type !== PlayerType.MODERATOR
+        && req.user?.username !== req.params.username
+        && !document.hasFriend(req.user!.username)) {
+
+      console.warn('A standard player asked for the stats of another player that isn\'t his friend, user: ',
+                   JSON.stringify(req.user, null, 2));
+      const errorBody: ErrorResponseBody = {
+        error: true,
+        statusCode: 403,
+        errorMessage: 'You can\'t access the stats of another player that isn\'t your friend',
+      };
+      throw errorBody;
+    }
+
+    // you are a moderator or you are asking your own stats or the stats of a friend of your
+
+    return stats.getModel().findOne({ _id: document.stats }, { _id: 0 });
+  })
+  .then(statsDocument => {
+    if (!statsDocument) {
+      console.error('The stats for a player doesn\'t exist');
+      const errorBody: ErrorResponseBody = { error: true, statusCode: 500, errorMessage: 'Internal Server error' };
+      throw errorBody;
+    }
+    const body: GetPlayerStatsResponseBody = { error: false, statusCode: 200, stats: statsDocument };
+    res.status(200).json(body);
+  })
+  .catch(err => {
+    if (err.statusCode) {         // we assume this means it is an ErrorResponseBody
+      return next(err);
+    }
+    const errorBody: ErrorResponseBody = { error: true, statusCode: 500, errorMessage: 'Internal Server error' };
+    return next(errorBody);
+  });
 });

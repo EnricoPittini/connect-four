@@ -5,8 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node ./dist/server.js",
-    "compile": "npx tsc",
-    "dev": "npx tsc-watch --noClear --onSuccess \"node ./dist/server.js\"",
+    "compile": "tsc",
+    "dev": "tsc-watch --noClear --onSuccess \"node ./dist/server.js\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Enrico Pittini \u001e& Giacomo Rosin",

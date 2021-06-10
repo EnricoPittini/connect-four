@@ -35,12 +35,15 @@ export enum PlayerType {
   MODERATOR_FIRST_ACCESS = 'MODERATOR_FIRST_ACCESS',
 }
 
-export interface Player {
+export interface ClientPlayer {
   username: string,
   name: string,
   surname: string,
   avatar: string,     // TODO da capire come gestire
   type: PlayerType,
+}
+
+export interface Player extends ClientPlayer {
   friends: string[],
   digest: string,     // this is the hashed password (digest of the password)
   salt: string,       // salt is a random string that will be mixed with the actual password before hashing

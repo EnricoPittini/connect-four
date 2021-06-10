@@ -1,4 +1,4 @@
-import { Player } from '../models/Player';
+import { ClientPlayer } from '../models/Player';
 
 export interface ResponseBody {
   error: boolean,
@@ -28,7 +28,7 @@ export interface RegistrationResponseBody extends SuccessResponseBody {
 }
 
 export interface GetPlayersResponseBody extends SuccessResponseBody {
-  players: Player[],
+  players: ClientPlayer[],
 }
 
 export interface ConfirmModeratorResponseBody extends SuccessResponseBody {

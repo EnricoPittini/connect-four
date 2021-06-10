@@ -291,6 +291,7 @@ router.delete(`/:username`, auth, (req, res, next) => {
     if (err.statusCode) {         // we assume this means it is an ErrorResponseBody
       return next(err);
     }
+    console.error('Internal DB error ' + JSON.stringify(err, null, 2));
     const errorBody: ErrorResponseBody = { error: true, statusCode: 500, errorMessage: 'Internal Server error' };
     return next(errorBody);
   });
@@ -336,6 +337,7 @@ router.get(`/:username/stats`, auth, (req, res, next) => {
     if (err.statusCode) {         // we assume this means it is an ErrorResponseBody
       return next(err);
     }
+    console.error('Internal DB error ' + JSON.stringify(err, null, 2));
     const errorBody: ErrorResponseBody = { error: true, statusCode: 500, errorMessage: 'Internal Server error' };
     return next(errorBody);
   });

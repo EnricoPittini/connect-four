@@ -233,7 +233,9 @@ router.get(`/:username`, auth, (req, res, next) => {
     }
 
     // TODO online e playing
-    const player = { ...document, online: false, playing: false };
+    const player : any = document;
+    player.online = false;
+    player.playing = false ;
     const body: GetPlayerResponseBody = { error: false, statusCode: 200, player: player };
     return res.status(200).json(body);
   }).catch((err) => {
@@ -266,7 +268,7 @@ router.delete(`/:username`, auth, (req, res, next) => {
       const errorBody: ErrorResponseBody = { error: true, statusCode: 404, errorMessage: 'Player not found' };
       throw errorBody;
     }
-    else if (document.type === PlayerType.MODERATOR) {
+    else if (document.type === PlayerType.MODERATOR && req.params.username!=req.user!.username) {
       console.warn('Client asked to delete a moderator, user: ' + JSON.stringify(req.user, null, 2));
       const errorBody: ErrorResponseBody = { error: true, statusCode: 403, errorMessage: 'You can\'t delete a moderator' };
       throw errorBody;
@@ -319,7 +321,7 @@ router.get(`/:username/stats`, auth, (req, res, next) => {
 
     // you are a moderator or you are asking your own stats or the stats of a friend of your
 
-    return stats.getModel().findOne({ _id: document.stats }, { _id: 0 });
+    return stats.getModel().findOne({ _id: document.stats }, { _id: 0, __v: 0 });
   })
   .then(statsDocument => {
     if (!statsDocument) {

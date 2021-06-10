@@ -33,8 +33,11 @@ import jwt = require('express-jwt');              // JWT parsing middleware for 
 import cors = require('cors');                    // Enable CORS middleware
 import { Server, Socket } from 'socket.io';
 
+// import routes
 import playersRouter from './routes/players';
 import friendsRouter from './routes/friends';
+import friendRequestsRouter from './routes/friend_requests';
+
 import player = require('./models/Player');
 import { PlayerType } from './models/Player';
 
@@ -178,6 +181,7 @@ app.get(`/v${version}/login`, passport.authenticate('basic', { session: false })
 
 app.use(`/v${version}/players`, playersRouter);
 app.use(`/v${version}/friends`, friendsRouter);
+app.use(`/v${version}/friends`, friendRequestsRouter);
 
 
 

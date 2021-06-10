@@ -62,3 +62,13 @@ export function isConfirmModeratorRequestBody(arg: any): arg is ConfirmModerator
     && arg.avatar
     && typeof (arg.avatar) === 'string';
 }
+
+export interface NotifyAvailabilityFriendRequestRequestBody extends RequestBody {
+  username: string,
+}
+
+export function isNotifyAvailabilityFriendRequestRequestBody(arg: any): arg is NotifyAvailabilityFriendRequestRequestBody {
+  return arg
+    && arg.username
+    && typeof (arg.username) === 'string';
+}

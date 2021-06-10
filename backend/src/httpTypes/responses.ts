@@ -1,5 +1,6 @@
 import { ClientPlayer } from '../models/Player';
 import { Stats } from '../models/Stats';
+import { FriendRequest } from '../models/FriendRequest';
 
 export interface ResponseBody {
   error: boolean,
@@ -46,4 +47,8 @@ export interface GetPlayerStatsResponseBody extends SuccessResponseBody {
 
 export interface GetFriendsResponseBody extends SuccessResponseBody {
   friends: string[],
+}
+
+export interface GetFriendRequestsResponseBody extends SuccessResponseBody {
+  friendRequests: FriendRequest[],
 }

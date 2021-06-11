@@ -32,7 +32,7 @@ router.get(`/`, auth, (req, res, next) => {
     ],
   };
 
-  friendRequest.getModel().find(filter).then((friendRequestDocuments) => {
+  friendRequest.getModel().find(filter, { _id: 0, __v: 0 }).then((friendRequestDocuments) => {
     const body: GetFriendRequestsResponseBody = { error: false, statusCode: 200, friendRequests: friendRequestDocuments };
     return res.status(200).json(body);
   }).catch((err) => {
@@ -51,36 +51,75 @@ router.post(`/`, auth, async (req, res, next) => {
       throw errorBody;
     }
 
-    const otherPlayerDocument = await player.getModel().findOne({ username: req.body.username }).exec();
+    const myUsername = req.user!.username;
+    const otherUsername = req.body.username;
 
+    // Check that the usernames (mine and his) are different
+    if(myUsername === otherUsername){
+      console.warn('A player notified his availability for friend request to himself');
+      const errorBody: ErrorResponseBody = { 
+        error: true,
+        statusCode: 400, 
+        errorMessage: 'You can\'t notify your availability for friend request to yourself' 
+      };
+      throw errorBody;
+    }
+
+    const otherPlayerDocument = await player.getModel().findOne({ username: otherUsername }).exec();
+
+    // Check that the other username is valid
     if (!otherPlayerDocument) {
-      console.warn('A player notified his availability for friend request with an invalid username: ' + req.body.username);
+      console.warn('A player notified his availability for friend request with an invalid username: ' + otherUsername);
       const errorBody: ErrorResponseBody = { error: true, statusCode: 400, errorMessage: 'The specified username doesn\'t exist' };
       throw errorBody;
     }
 
-    const friendRequestDocument = await friendRequest.getModel().findOne({ from: req.body.username, to: req.user!.username }).exec();
+    const myPlayerDocument = await player.getModel().findOne({ username: myUsername }).exec();
 
-    if (!friendRequestDocument) {
-      await friendRequest.newFriendRequest({ from: req.user!.username, to: req.body.username }).save();
-
-      const body: NotifyAvailabilityFriendRequestResponseBody = { error: false, statusCode: 200, newFriend: false };
-      return res.status(200).json(body);
-    }
-
-    const myPlayerDocument = await player.getModel().findOne({ username: req.user!.username }).exec();
-
+    // Check that my username is valid
     if (!myPlayerDocument) {
       console.error('An invalid username notified his availability for friend request: ' + JSON.stringify(req.user, null, 2));
       const errorBody: ErrorResponseBody = { error: true, statusCode: 500, errorMessage: 'Internal Server error' };
       throw errorBody;
     }
 
+    // Check that we are alredy friends
     if (myPlayerDocument.hasFriend(otherPlayerDocument.username) || otherPlayerDocument.hasFriend(myPlayerDocument.username)) {
       console.warn('A player notified his availability for friend request but the other player is already his friend, user: ' + JSON.stringify(req.user, null, 2));
       const errorBody: ErrorResponseBody = { error: true, statusCode: 403, errorMessage: 'The specified username is already your friend' };
       throw errorBody;
     }
+
+    // We are sure that the 2 usernames (mine and his) are different valid usernames and we are sure that we aren't alredy friends
+
+    const friendRequestDocument = await friendRequest.getModel().findOne({ from: otherUsername, to: myUsername }).exec();
+
+    // Check if the other player has alredy made a friend request to me
+    if (!friendRequestDocument) { 
+      // The other player has not made a friend request to me yet
+      const myFriendRequestDocument = await friendRequest.getModel().findOne({ from: myUsername, to: otherUsername }).exec();
+
+      // Check that I haven't alredy made a friend request to him
+      if(myFriendRequestDocument){
+        console.warn('A player notified his availability for friend request but he has alredy done that');
+        const errorBody: ErrorResponseBody = { 
+          error: true,
+          statusCode: 400,
+          errorMessage: 'You have alredy notified your availability to become friend of this player' 
+        };
+        throw errorBody;
+      }
+
+      // We are sure that there are not friend request between us
+
+      await friendRequest.newFriendRequest({ from: myUsername, to: otherUsername }).save();
+
+      const body: NotifyAvailabilityFriendRequestResponseBody = { error: false, statusCode: 200, newFriend: false };
+      return res.status(200).json(body);
+    }
+
+    // The other player has alredy made a friend request to me : I accept the request
+
     myPlayerDocument.addFriend(otherPlayerDocument.username);
     otherPlayerDocument.addFriend(myPlayerDocument.username);
 
@@ -89,6 +128,7 @@ router.post(`/`, auth, async (req, res, next) => {
       otherPlayerDocument.save()
     ]);
 
+    // Deleting the friend request
     await friendRequest.getModel().deleteOne({ from: friendRequestDocument.from, to: friendRequestDocument.to });
 
     const body: NotifyAvailabilityFriendRequestResponseBody = { error: false, statusCode: 200, newFriend: true };
@@ -117,6 +157,16 @@ router.delete(`/`, auth, async (req, res, next) => {
 
     const myUsername = req.user!.username;
     const otherUsername = req.body.username;
+
+    if(myUsername === otherUsername){
+      console.warn('A player notified his unavailability for friend request to himself');
+      const errorBody: ErrorResponseBody = { 
+        error: true,
+        statusCode: 400, 
+        errorMessage: 'You can\'t notify your unavailability for friend request to yourself' 
+      };
+      throw errorBody;
+    }
 
     const otherPlayerDocument = await player.getModel().findOne({ username: otherUsername }).exec();
 

@@ -5,6 +5,7 @@ import auth from '../middlewares/auth'
 import player = require('../models/Player');
 import { PlayerType } from '../models/Player';
 import stats = require('../models/Stats');
+import friendRequest = require('../models/FriendRequest');
 
 import {
   RegistrationRequestBody,
@@ -251,7 +252,10 @@ router.get(`/:username`, auth, (req, res, next) => {
 
 
 router.delete(`/:username`, auth, (req, res, next) => {
-  if (req.params.username !== req.user?.username && req.user?.type !== PlayerType.MODERATOR) {
+  const myUsername = req.user!.username;
+  const otherUsername = req.params.username;
+
+  if (otherUsername !== myUsername && req.user?.type !== PlayerType.MODERATOR) {
     console.warn('A non moderator is trying to delete another player profile, user: ' + JSON.stringify(req.user, null, 2));
     const errorBody: ErrorResponseBody = {
       error: true,
@@ -262,28 +266,37 @@ router.delete(`/:username`, auth, (req, res, next) => {
   }
   // you are deleting your own profile or you are a moderator
 
-  player.getModel().findOne({ username: req.params.username }).then(document => {
-    if (!document) {
+  player.getModel().findOne({ username: otherUsername }).then(otherPlayerDocument => {
+    if (!otherPlayerDocument) {
       console.warn('Client asked to delete a non existing player, user: ' + JSON.stringify(req.user, null, 2));
       const errorBody: ErrorResponseBody = { error: true, statusCode: 404, errorMessage: 'Player not found' };
       throw errorBody;
     }
-    else if (document.type === PlayerType.MODERATOR && req.params.username!=req.user!.username) {
+    else if (otherPlayerDocument.type === PlayerType.MODERATOR && otherUsername!=myUsername) {
       console.warn('Client asked to delete a moderator, user: ' + JSON.stringify(req.user, null, 2));
       const errorBody: ErrorResponseBody = { error: true, statusCode: 403, errorMessage: 'You can\'t delete a moderator' };
       throw errorBody;
     }
 
-    return player.getModel().deleteOne({ username: req.params.username });
-  })
-  .then(deleteInfo => {
-    if (!deleteInfo.ok) {
-      console.error('DB error while deleting a player profile');
-      const errorBody: ErrorResponseBody = { error: true, statusCode: 500, errorMessage: 'Internal Server error' };
-      throw errorBody;
+    // TODO sistemare eventualmente problema del parallellismo delle operazioni nel DB (fallimento di una operazione e non delle altre) 
+    const promises : Promise<any>[] = [];
+
+    promises.push( friendRequest.getModel().deleteMany( { $or: [{from:otherUsername},{to:otherUsername}] } ).exec() );
+
+    for(let friend of otherPlayerDocument.friends){
+      const promise = player.getModel().findOne({username:friend}).then(friendDocument =>{
+        friendDocument?.removeFriend(otherUsername);
+        return friendDocument?.save();
+      });
+      promises.push(promise);      
     }
 
-    console.info('Player profile deleted, ' + req.params.username);
+    promises.push( player.getModel().deleteOne({ username: otherUsername }).exec() );
+
+    return Promise.all(promises);
+  })
+  .then(_ => {
+    console.info('Player profile deleted, ' + otherUsername);
     const body: SuccessResponseBody = { error: false, statusCode: 200 };
     return res.status(200).json(body);
   })

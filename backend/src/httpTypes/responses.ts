@@ -52,3 +52,7 @@ export interface GetFriendsResponseBody extends SuccessResponseBody {
 export interface GetFriendRequestsResponseBody extends SuccessResponseBody {
   friendRequests: FriendRequest[],
 }
+
+export interface NotifyAvailabilityFriendRequestResponseBody extends SuccessResponseBody {
+  newFriend: boolean,
+}

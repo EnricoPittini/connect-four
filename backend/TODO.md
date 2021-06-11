@@ -1,6 +1,8 @@
 # TODO
 
 - Verificare che FIRST_ACCESS_MOPDERATOR non posso fare nessuna operazione se non login e confirm moderator
+- Mettere websocket (login) (ricontrollare vari endpoint)
+- Aggiungere return in ogni res.status().json()
 
 
 ## JWT token management

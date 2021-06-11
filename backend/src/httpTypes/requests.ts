@@ -72,3 +72,13 @@ export function isNotifyAvailabilityFriendRequestRequestBody(arg: any): arg is N
     && arg.username
     && typeof (arg.username) === 'string';
 }
+
+export interface NotifyUnavailabilityFriendRequestRequestBody extends RequestBody {
+  username: string,
+}
+
+export function isNotifyUnavailabilityFriendRequestRequestBody(arg: any): arg is NotifyUnavailabilityFriendRequestRequestBody {
+  return arg
+    && arg.username
+    && typeof (arg.username) === 'string';
+}

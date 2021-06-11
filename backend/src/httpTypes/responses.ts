@@ -1,6 +1,7 @@
 import { ClientPlayer } from '../models/Player';
 import { Stats } from '../models/Stats';
 import { FriendRequest } from '../models/FriendRequest';
+import { Chat } from '../models/Chat';
 
 export interface ResponseBody {
   error: boolean,
@@ -55,4 +56,19 @@ export interface GetFriendRequestsResponseBody extends SuccessResponseBody {
 
 export interface NotifyAvailabilityFriendRequestResponseBody extends SuccessResponseBody {
   newFriend: boolean,
+}
+
+interface ChatInfo {
+  playerA: string,
+  playerB: string,
+  playerAHasNewMessages: boolean,
+  playerBHasNewMessages: boolean,
+}
+
+export interface GetChatsResponseBody extends SuccessResponseBody{
+  chats: ChatInfo[],
+}
+
+export interface GetChatResponseBody extends SuccessResponseBody{
+  chat: Chat,
 }

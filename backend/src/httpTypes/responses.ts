@@ -2,6 +2,7 @@ import { ClientPlayer } from '../models/Player';
 import { Stats } from '../models/Stats';
 import { FriendRequest } from '../models/FriendRequest';
 import { Chat } from '../models/Chat';
+import { Match } from '../models/Match';
 
 export interface ResponseBody {
   error: boolean,
@@ -71,4 +72,12 @@ export interface GetChatsResponseBody extends SuccessResponseBody{
 
 export interface GetChatResponseBody extends SuccessResponseBody{
   chat: Chat,
+}
+
+export interface GetMatchesResponseBody extends SuccessResponseBody{
+  matches: (Match & {_id : string})[],
+}
+
+export interface GetMatchResponseBody extends SuccessResponseBody{
+  match: Match & {_id : string},
 }

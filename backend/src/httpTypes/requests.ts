@@ -24,7 +24,7 @@ export function isStandardPlayerRegistrationRequestBody(arg: any): arg is Standa
     && typeof (arg.username) === 'string'
     && arg.password
     && typeof (arg.password) === 'string'
-    && arg.isModerator != undefined && arg.isModerator != null // Check explicity the inequality to undefined and null
+    && arg.isModerator !== undefined && arg.isModerator !== null // Check explicity the inequality to undefined and null
     && !arg.isModerator
     && arg.name
     && typeof (arg.name) === 'string'
@@ -37,10 +37,10 @@ export function isStandardPlayerRegistrationRequestBody(arg: any): arg is Standa
 export function isModeratorRegistrationRequestBody(arg: any): arg is ModeratorRegistrationRequestBody {
   return arg
     && arg.username
-    && typeof (arg.username) == 'string'
+    && typeof (arg.username) === 'string'
     && arg.password
-    && typeof (arg.password) == 'string'
-    && arg.isModerator != undefined && arg.isModerator != null // Check explicity the inequality to undefined and null
+    && typeof (arg.password) === 'string'
+    && arg.isModerator !== undefined && arg.isModerator !== null // Check explicity the inequality to undefined and null
     && arg.isModerator;
 }
 
@@ -82,3 +82,14 @@ export function isNotifyUnavailabilityFriendRequestRequestBody(arg: any): arg is
     && arg.username
     && typeof (arg.username) === 'string';
 }
+
+export interface AddMoveRequestBody extends RequestBody {
+  column: number,
+}
+
+export function isAddMoveRequestBody(arg: any): arg is AddMoveRequestBody {
+  return arg
+    && arg.column !== undefined
+    && typeof (arg.column) === 'number'; // TODO verificare se è numero o stringa
+}
+

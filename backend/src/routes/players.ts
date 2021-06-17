@@ -137,7 +137,7 @@ router.get(`/`, auth, (req, res, next) => {
 
   console.info('Retrieving players, using filter: ' + JSON.stringify(filter, null, 2));
 
-  if ((req.query.skip && typeof (req.query.skip) != 'string') || (req.query.limit && typeof (req.query.limit) != 'string')) {
+  if ((req.query.skip && typeof (req.query.skip) !== 'string') || (req.query.limit && typeof (req.query.limit) !== 'string')) {
     const errorBody = { error: true, statusCode: 405, errorMessage: 'Invalid query section for the URL' };
     return next(errorBody);
   }

@@ -17,7 +17,7 @@ export default router;
 
 //?skip=<skip>&limit=<limit>
 router.get(`/`, auth, (req, res, next) => {
-  if ((req.query.skip && typeof (req.query.skip) != 'string') || (req.query.limit && typeof (req.query.limit) != 'string')) {
+  if ((req.query.skip && typeof (req.query.skip) !== 'string') || (req.query.limit && typeof (req.query.limit) !== 'string')) {
     const errorBody = { error: true, statusCode: 405, errorMessage: 'Invalid query section for the URL' };
     return next(errorBody);
   }

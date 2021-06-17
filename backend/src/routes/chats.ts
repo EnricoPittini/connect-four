@@ -56,3 +56,6 @@ router.get(`/:username`, auth, (req, res, next) => {
     return next(errorBody);
   });
 });
+
+
+// TODO valutare POST /:username

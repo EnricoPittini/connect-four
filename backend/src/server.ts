@@ -43,6 +43,8 @@ import matchesRouter from './routes/matches';
 import player = require('./models/Player');
 import { PlayerType } from './models/Player';
 
+import { TransientDataHandler } from "./TransientDataHandler";
+
 import {
   RegistrationRequestBody,
   StandardPlayerRegistrationRequestBody,
@@ -78,6 +80,7 @@ declare global {
 
 const app = express();
 let io = undefined;
+const transientDataHandler = TransientDataHandler.getInstance();
 
 
 // Configure HTTP basic authentication strategy

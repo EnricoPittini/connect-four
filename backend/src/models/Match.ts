@@ -24,8 +24,8 @@ export interface Match {
 }
 
 export interface MatchDocument extends Match, mongoose.Document {
-  addMove: (playerUsername: string, column: number) => boolean,
-  forfait: (playerUsername: string) => boolean,
+  addMove: (playerUsername: string, column: number) => void,
+  forfait: (playerUsername: string) => void,
   countMoves: (playerUsername: string) => number,
 }
 
@@ -243,16 +243,17 @@ function checkDraw(board: WhichPlayer[][]): boolean {
 }
 /////////////////////////
 
-matchSchema.methods.addMove = function (playerUsername: string, column: number): boolean {
+matchSchema.methods.addMove = function (playerUsername: string, column: number): void {
   // check that the match is not terminated yet
   if (this.status !== MatchStatus.IN_PROGRESS || this.playerTurn === WhichPlayer.EMPTY) {
-    return false;
+    //return false;
+    throw new Error("The match is alredy terminated");
   }
 
   const role = getPlayerRole(this, playerUsername);
 
   if (role !== this.playerTurn) { // The player username is not valid or the player does not have the current turn
-    return false;
+    throw new Error("The player is not valid or the player does not have the current turn");
   }
 
   // questo controllo è compreso in quello successivo
@@ -261,7 +262,7 @@ matchSchema.methods.addMove = function (playerUsername: string, column: number):
   // }
 
   if (getCellValue(this.board, TOP_ROW, column) !== WhichPlayer.EMPTY) { // The selected column is full or invalid (null)
-    return false;
+    throw new Error("The selected column is invalid or full");
   }
 
   // Find the first empty row of the column
@@ -293,18 +294,22 @@ matchSchema.methods.addMove = function (playerUsername: string, column: number):
     this.playerTurn = (this.playerTurn === WhichPlayer.PLAYER_1 ? WhichPlayer.PLAYER_2 : WhichPlayer.PLAYER_1);
   }
 
-  return true;
+  //return true;
 }
 
-matchSchema.methods.forfait = function (playerUsername: string): boolean {
+matchSchema.methods.forfait = function (playerUsername: string): void {
   const role = getPlayerRole(this, playerUsername);
 
   if (role === WhichPlayer.EMPTY) {   // The player username is not one of the match players
-    return false;
+    //return false;
+    throw new Error("The player username is not one of the match players");
   }
 
   const winner = (role === WhichPlayer.PLAYER_1 ? WhichPlayer.PLAYER_2 : WhichPlayer.PLAYER_1);
-  return updateAfterTermination(this, MatchStatus.FORFAIT, winner);
+  const success = updateAfterTermination(this, MatchStatus.FORFAIT, winner);
+  if(!success){
+    throw new Error("The match is alredy terminated");
+  }
 }
 
 

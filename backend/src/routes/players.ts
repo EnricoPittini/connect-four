@@ -217,7 +217,7 @@ router.put(`/:username`, auth, (req, res, next) => {
     console.error(JSON.stringify(err, null, 2));
     const errorBody: ErrorResponseBody = { error: true, statusCode: 500, errorMessage: 'Internal Server error' };
     return next(errorBody);
-  })
+  });
 });
 
 
@@ -238,12 +238,13 @@ router.get(`/:username`, auth, (req, res, next) => {
     }
 
     // TODO online e playing
-    const player : any = document;
+    const player: any = document;
     player.online = false;
-    player.playing = false ;
+    player.playing = false;
     const body: GetPlayerResponseBody = { error: false, statusCode: 200, player: player };
     return res.status(200).json(body);
-  }).catch((err) => {
+  })
+  .catch((err) => {
     if (err.statusCode === 404) {
       console.warn('A client asked for a non existing player: ' + req.params.username);
       return next(err);
@@ -276,21 +277,21 @@ router.delete(`/:username`, auth, (req, res, next) => {
       const errorBody: ErrorResponseBody = { error: true, statusCode: 404, errorMessage: 'Player not found' };
       throw errorBody;
     }
-    else if (otherPlayerDocument.type === PlayerType.MODERATOR && otherUsername!=myUsername) {
+    else if (otherPlayerDocument.type === PlayerType.MODERATOR && otherUsername != myUsername) {
       console.warn('Client asked to delete a moderator, user: ' + JSON.stringify(req.user, null, 2));
       const errorBody: ErrorResponseBody = { error: true, statusCode: 403, errorMessage: 'You can\'t delete a moderator' };
       throw errorBody;
     }
 
     // TODO sistemare eventualmente problema del parallellismo delle operazioni nel DB (fallimento di una operazione e non delle altre)
-    const promises : Promise<any>[] = [];
+    const promises: Promise<any>[] = [];
 
     // Delete all the friend requests related to the specified player
-    promises.push( friendRequest.getModel().deleteMany( { $or: [{from:otherUsername},{to:otherUsername}] } ).exec() );
+    promises.push(friendRequest.getModel().deleteMany({ $or: [{ from: otherUsername }, { to: otherUsername }] }).exec());
 
     // Delete the specified player from the friend list of his past friends
-    for(let friend of otherPlayerDocument.friends) {
-      const promise = player.getModel().findOne({username:friend}).then(friendDocument => {
+    for (let friend of otherPlayerDocument.friends) {
+      const promise = player.getModel().findOne({ username: friend }).then(friendDocument => {
         friendDocument?.removeFriend(otherUsername);
         return friendDocument?.save();
       });
@@ -303,7 +304,7 @@ router.delete(`/:username`, auth, (req, res, next) => {
       }
     }
 
-    promises.push( player.getModel().deleteOne({ username: otherUsername }).exec() );
+    promises.push(player.getModel().deleteOne({ username: otherUsername }).exec());
 
     return Promise.all(promises);
   })

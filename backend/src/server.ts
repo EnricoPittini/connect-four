@@ -90,32 +90,31 @@ const transientDataHandler = TransientDataHandler.getInstance();
 
 // Configure HTTP basic authentication strategy
 passport.use(new passportHTTP.BasicStrategy((username, password, done) => {
-    console.info('New login attempt from ' + username);
+  console.info('New login attempt from ' + username);
 
-    player.getModel().findOne({ username: username }).then((player) => {
-      if (!player) {
-        console.warn('Invalid player username: ' + username);
-        const errorBody: ErrorResponseBody = { error: true, statusCode: 500, errorMessage: 'Invalid player' };
-        return (done as Function)(null, false, errorBody);
-      }
-
-      if (player.validatePassword(password)) {
-        console.info('Player logged in correctly, with username: ' + username);
-        return done(null, player);
-      }
-
-      console.warn('Invalid password for the username: ' + username);
-      const errorBody: ErrorResponseBody = { error: true, statusCode: 500, errorMessage: 'Invalid password' };
+  player.getModel().findOne({ username: username }).then((player) => {
+    if (!player) {
+      console.warn('Invalid player username: ' + username);
+      const errorBody: ErrorResponseBody = { error: true, statusCode: 500, errorMessage: 'Invalid player' };
       return (done as Function)(null, false, errorBody);
-    })
-    .catch(err => {
-      console.error('An error occoured during the login validation');
-      console.error('Error: ' + JSON.stringify(err, null, 2));
-      const errorBody: ErrorResponseBody = { error: true, statusCode: 500, errorMessage: 'Internal error' };
-      return done(errorBody);
-    })
-  }
-));
+    }
+
+    if (player.validatePassword(password)) {
+      console.info('Player logged in correctly, with username: ' + username);
+      return done(null, player);
+    }
+
+    console.warn('Invalid password for the username: ' + username);
+    const errorBody: ErrorResponseBody = { error: true, statusCode: 500, errorMessage: 'Invalid password' };
+    return (done as Function)(null, false, errorBody);
+  })
+  .catch(err => {
+    console.error('An error occoured during the login validation');
+    console.error('Error: ' + JSON.stringify(err, null, 2));
+    const errorBody: ErrorResponseBody = { error: true, statusCode: 500, errorMessage: 'Internal error' };
+    return done(errorBody);
+  })
+}));
 
 app.use(cors());
 

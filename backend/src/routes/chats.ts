@@ -18,8 +18,8 @@ export default router;
 
 // /chats
 router.get(`/`, auth, (req, res, next) => {
-  const filter = {$or: [{playerA: req.user?.username}, {playerB: req.user?.username}]};
-  chat.getModel().find(filter, {_id:0,__v:0,messages:0}).then((chatDocuments) => {
+  const filter = { $or: [{ playerA: req.user?.username }, { playerB: req.user?.username }] };
+  chat.getModel().find(filter, { _id: 0, __v: 0, messages: 0 }).then((chatDocuments) => {
     const body: GetChatsResponseBody = { error: false, statusCode: 200, chats: chatDocuments };
     return res.status(200).json(body);
   }).catch((err) => {
@@ -39,11 +39,11 @@ router.get(`/:username`, auth, (req, res, next) => {
       { playerA: otherUsername, playerB: myUsername },
     ]
   };
-  chat.getModel().findOne(filter, {_id:0,__v:0}).then((chatDocument) => {
-    if(!chatDocument){
+  chat.getModel().findOne(filter, { _id: 0, __v: 0 }).then((chatDocument) => {
+    if (!chatDocument) {
       console.warn('A player asked for a non existing chat, user: ' + JSON.stringify(req.user, null, 2));
       const errorBody: ErrorResponseBody = { error: true, statusCode: 404, errorMessage: 'The requested chat doesn\'t exist' };
-      throw errorBody;    
+      throw errorBody;
     }
     const body: GetChatResponseBody = { error: false, statusCode: 200, chat: chatDocument };
     return res.status(200).json(body);

@@ -57,7 +57,7 @@ router.post(`/`, auth, async (req, res, next) => {
     const otherUsername = req.body.username;
 
     // Check that the usernames (mine and his) are different
-    if(myUsername === otherUsername){
+    if (myUsername === otherUsername) {
       console.warn('A player notified his availability for friend request to himself');
       const errorBody: ErrorResponseBody = {
         error: true,
@@ -102,7 +102,7 @@ router.post(`/`, auth, async (req, res, next) => {
       const myFriendRequestDocument = await friendRequest.getModel().findOne({ from: myUsername, to: otherUsername }).exec();
 
       // Check that I haven't alredy made a friend request to him
-      if(myFriendRequestDocument){
+      if (myFriendRequestDocument) {
         console.warn('A player notified his availability for friend request but he has alredy done that');
         const errorBody: ErrorResponseBody = {
           error: true,
@@ -171,7 +171,7 @@ router.delete(`/`, auth, async (req, res, next) => {
     const myUsername = req.user!.username;
     const otherUsername = req.body.username;
 
-    if(myUsername === otherUsername){
+    if (myUsername === otherUsername) {
       console.warn('A player notified his unavailability for friend request to himself');
       const errorBody: ErrorResponseBody = {
         error: true,

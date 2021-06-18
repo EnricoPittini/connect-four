@@ -53,7 +53,7 @@ router.delete(`/:username`, auth, (req, res, next) => {
     player.getModel().findOne({ username: req.user?.username }, { friends: 1 }).exec(),
     player.getModel().findOne({ username: req.params.username }, { friends: 1 }).exec(),
   ])
-  .then( ([myPlayerDocument, otherPlayerDocument]) => {
+  .then(([myPlayerDocument, otherPlayerDocument]) => {
     if (!myPlayerDocument) {
       console.error('An invalid username asked to delete one of his friend: ' + JSON.stringify(req.user, null, 2));
       const errorBody: ErrorResponseBody = { error: true, statusCode: 500, errorMessage: 'Internal Server error' };

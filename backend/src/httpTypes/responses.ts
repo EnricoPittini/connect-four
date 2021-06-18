@@ -66,18 +66,18 @@ interface ChatInfo {
   playerBHasNewMessages: boolean,
 }
 
-export interface GetChatsResponseBody extends SuccessResponseBody{
+export interface GetChatsResponseBody extends SuccessResponseBody {
   chats: ChatInfo[],
 }
 
-export interface GetChatResponseBody extends SuccessResponseBody{
+export interface GetChatResponseBody extends SuccessResponseBody {
   chat: Chat,
 }
 
-export interface GetMatchesResponseBody extends SuccessResponseBody{
-  matches: (Match & {_id : string})[],
+export interface GetMatchesResponseBody extends SuccessResponseBody {
+  matches: (Match & { _id: string })[],
 }
 
-export interface GetMatchResponseBody extends SuccessResponseBody{
-  match: Match & {_id : string},
+export interface GetMatchResponseBody extends SuccessResponseBody {
+  match: Match & { _id: string },
 }

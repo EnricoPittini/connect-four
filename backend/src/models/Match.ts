@@ -307,7 +307,7 @@ matchSchema.methods.forfait = function (playerUsername: string): void {
 
   const winner = (role === WhichPlayer.PLAYER_1 ? WhichPlayer.PLAYER_2 : WhichPlayer.PLAYER_1);
   const success = updateAfterTermination(this, MatchStatus.FORFAIT, winner);
-  if(!success){
+  if (!success) {
     throw new Error("The match is alredy terminated");
   }
 }

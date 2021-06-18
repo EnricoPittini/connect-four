@@ -45,6 +45,11 @@ import { PlayerType } from './models/Player';
 
 import { TransientDataHandler } from "./TransientDataHandler";
 
+import ClientEvents from './socketsHandlers/eventTypes/ClientEvents';
+import ServerEvents from './socketsHandlers/eventTypes/ServerEvents';
+import registerOnlinePlayersHandlers from './socketsHandlers/onlinePlayerHandlers';
+
+
 import {
   RegistrationRequestBody,
   StandardPlayerRegistrationRequestBody,
@@ -79,7 +84,7 @@ declare global {
 
 
 const app = express();
-let io = undefined;
+let io: Server<ClientEvents, ServerEvents>;
 const transientDataHandler = TransientDataHandler.getInstance();
 
 
@@ -261,9 +266,11 @@ mongoose.connect(`mongodb://${DB_HOST}:${DB_PORT}/${DB_NAME}`, {
 .then(() => {
   const server = http.createServer(app);
 
-  io = new Server(server);
+  io = new Server<ClientEvents, ServerEvents>(server);
   io.on('connection', (socket) => {
     console.info('Socket.io client connected');
+
+    registerOnlinePlayersHandlers(io, socket);
   });
 
   server.listen(SERVER_PORT, () => console.info(`HTTP Server started on port ${SERVER_PORT}`));

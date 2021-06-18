@@ -1,11 +1,13 @@
 import { Socket } from 'socket.io';
+import ClientEvents from './socketsHandlers/eventTypes/ClientEvents';
+import ServerEvents from './socketsHandlers/eventTypes/ServerEvents';
 
 import { Player } from "./models/Player";
 import { MatchRequest } from "./models/MatchRequest";
 
 
 type PlayerSocketsMap = {
-  [key: string]: Socket[];
+  [key: string]: Socket<ClientEvents,ServerEvents>[];
 };
 type SocketIdPlayerMap = {
   [key: string]: string;
@@ -28,7 +30,7 @@ export class TransientDataHandler {
     return TransientDataHandler.instance;
   }
 
-  public addPlayerSocket(username: string, socket: Socket) : void {
+  public addPlayerSocket(username: string, socket: Socket<ClientEvents,ServerEvents>) : void {
     if (this.containsSocket(socket)) {
       return;
     }
@@ -43,7 +45,7 @@ export class TransientDataHandler {
     this.socketIdOnlinePlayerMap[socket.id] = username;
   }
 
-  public removePlayerSocket(socket: Socket): void {
+  public removePlayerSocket(socket: Socket<ClientEvents,ServerEvents>): void {
     const username = this.getSocketPlayer(socket);
     if (!username) {
       return;
@@ -55,11 +57,11 @@ export class TransientDataHandler {
     delete this.socketIdOnlinePlayerMap[socket.id];
   }
 
-  public getSocketPlayer(socket: Socket): string | undefined {
+  public getSocketPlayer(socket: Socket<ClientEvents,ServerEvents>): string | undefined {
     return this.socketIdOnlinePlayerMap[socket.id];
   }
 
-  public containsSocket(socket: Socket): boolean {
+  public containsSocket(socket: Socket<ClientEvents,ServerEvents>): boolean {
     return socket.id in this.socketIdOnlinePlayerMap;
   }
 

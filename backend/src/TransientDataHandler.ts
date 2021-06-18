@@ -57,6 +57,10 @@ export class TransientDataHandler {
     delete this.socketIdOnlinePlayerMap[socket.id];
   }
 
+  public getPlayerSockets(username: string): Socket<ClientEvents,ServerEvents>[] {
+    return this.onlinePlayerSocketsMap[username] || [];
+  }
+
   public getSocketPlayer(socket: Socket<ClientEvents,ServerEvents>): string | undefined {
     return this.socketIdOnlinePlayerMap[socket.id];
   }

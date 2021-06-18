@@ -3,6 +3,8 @@ import express from 'express';
 import auth from '../middlewares/auth'
 import player = require('../models/Player');
 
+import { TransientDataHandler } from "../TransientDataHandler";
+
 import {
   SuccessResponseBody,
   ErrorResponseBody,
@@ -12,6 +14,7 @@ import {
 const router = express.Router();
 export default router;
 
+const transientDataHandler = TransientDataHandler.getInstance();
 
 // /friends
 
@@ -46,7 +49,7 @@ router.get(`/`, auth, (req, res, next) => {
 
 
 router.delete(`/:username`, auth, (req, res, next) => {
-  Promise.all([ 
+  Promise.all([
     player.getModel().findOne({ username: req.user?.username }, { friends: 1 }).exec(),
     player.getModel().findOne({ username: req.params.username }, { friends: 1 }).exec(),
   ])
@@ -58,10 +61,10 @@ router.delete(`/:username`, auth, (req, res, next) => {
     }
     if (!otherPlayerDocument) {
       console.error('A player asked to delete from the list of his friends an invalid username');
-      const errorBody: ErrorResponseBody = { 
-        error: true, 
-        statusCode: 404, 
-        errorMessage: 'You asked to delete from the list of your friends an invalid username' 
+      const errorBody: ErrorResponseBody = {
+        error: true,
+        statusCode: 404,
+        errorMessage: 'You asked to delete from the list of your friends an invalid username'
       };
       throw errorBody;
     }
@@ -78,6 +81,12 @@ router.delete(`/:username`, auth, (req, res, next) => {
     ]);
   })
   .then(_ => {
+    // Notify the other player
+    const otherPlayerSockets = transientDataHandler.getPlayerSockets(req.params.username);
+    for (let otherPlayerSocket of otherPlayerSockets) {
+      otherPlayerSocket.emit('lostFriend', req.user!.username);
+    }
+
     const body: SuccessResponseBody = { error: false, statusCode: 200 };
     return res.status(200).json(body);
   })

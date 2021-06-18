@@ -7,6 +7,8 @@ import { PlayerType } from '../models/Player';
 import stats = require('../models/Stats');
 import friendRequest = require('../models/FriendRequest');
 
+import { TransientDataHandler } from "../TransientDataHandler";
+
 import {
   RegistrationRequestBody,
   StandardPlayerRegistrationRequestBody,
@@ -30,6 +32,8 @@ import {
 
 const router = express.Router();
 export default router;
+
+const transientDataHandler = TransientDataHandler.getInstance();
 
 
 // TODO sportare in cartella middlewares
@@ -278,17 +282,25 @@ router.delete(`/:username`, auth, (req, res, next) => {
       throw errorBody;
     }
 
-    // TODO sistemare eventualmente problema del parallellismo delle operazioni nel DB (fallimento di una operazione e non delle altre) 
+    // TODO sistemare eventualmente problema del parallellismo delle operazioni nel DB (fallimento di una operazione e non delle altre)
     const promises : Promise<any>[] = [];
 
+    // Delete all the friend requests related to the specified player
     promises.push( friendRequest.getModel().deleteMany( { $or: [{from:otherUsername},{to:otherUsername}] } ).exec() );
 
-    for(let friend of otherPlayerDocument.friends){
-      const promise = player.getModel().findOne({username:friend}).then(friendDocument =>{
+    // Delete the specified player from the friend list of his past friends
+    for(let friend of otherPlayerDocument.friends) {
+      const promise = player.getModel().findOne({username:friend}).then(friendDocument => {
         friendDocument?.removeFriend(otherUsername);
         return friendDocument?.save();
       });
-      promises.push(promise);      
+      promises.push(promise);
+
+      // Notify the past friends
+      const friendSockets = transientDataHandler.getPlayerSockets(friend);
+      for (let friendSocket of friendSockets) {
+        friendSocket.emit('lostFriend', otherUsername);
+      }
     }
 
     promises.push( player.getModel().deleteOne({ username: otherUsername }).exec() );

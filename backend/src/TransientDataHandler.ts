@@ -1,35 +1,71 @@
+import { Socket } from 'socket.io';
+
 import { Player } from "./models/Player";
 import { MatchRequest } from "./models/MatchRequest";
 
-export class TransientDataHandler{
-  private onlinePlayers : string[] = [];
+
+type PlayerSocketsMap = {
+  [key: string]: Socket[];
+};
+type SocketIdPlayerMap = {
+  [key: string]: string;
+};
+
+export class TransientDataHandler {
+  private onlinePlayerSocketsMap : PlayerSocketsMap = {};
+  private socketIdOnlinePlayerMap : SocketIdPlayerMap = {};
   private inGamePlayers : string[] = [];
-  private matchRequests : MatchRequest[] = []; 
+  private matchRequests : MatchRequest[] = [];
 
   private static instance : TransientDataHandler;
 
-  private constructor(){ }
+  private constructor() { }
 
-  public static getInstance(){
-    if(!TransientDataHandler.instance){
+  public static getInstance() {
+    if(!TransientDataHandler.instance) {
       TransientDataHandler.instance = new TransientDataHandler();
     }
     return TransientDataHandler.instance;
   }
 
-  public markOnline(username: string) : void{
-    if(this.isOnline(username)){
+  public addPlayerSocket(username: string, socket: Socket) : void {
+    if (this.containsSocket(socket)) {
       return;
     }
-    this.onlinePlayers.push(username);
+
+    if(this.isOnline(username)) {
+      this.onlinePlayerSocketsMap[username].push(socket);
+    }
+    else {
+      this.onlinePlayerSocketsMap[username] = [ socket ];
+    }
+
+    this.socketIdOnlinePlayerMap[socket.id] = username;
   }
 
-  public markOffline(username: string) : void{
-    this.onlinePlayers = this.onlinePlayers.filter(el => el!==username);
+  public removePlayerSocket(socket: Socket): void {
+    const username = this.getSocketPlayer(socket);
+    if (!username) {
+      return;
+    }
+    this.onlinePlayerSocketsMap[username] = this.onlinePlayerSocketsMap[username].filter(el => el.id !== socket.id);
+    if (this.onlinePlayerSocketsMap[username].length === 0) {
+      delete this.onlinePlayerSocketsMap[username];
+    }
+    delete this.socketIdOnlinePlayerMap[socket.id];
   }
 
-  public isOnline(username: string) : boolean{
-    return !!this.onlinePlayers.find(el => el===username);
+  public getSocketPlayer(socket: Socket): string | undefined {
+    return this.socketIdOnlinePlayerMap[socket.id];
+  }
+
+  public containsSocket(socket: Socket): boolean {
+    return socket.id in this.socketIdOnlinePlayerMap;
+  }
+
+  public isOnline(username: string): boolean {
+    return username in this.onlinePlayerSocketsMap
+           && this.onlinePlayerSocketsMap[username].length > 0;
   }
 
   public markInGame(username: string) : void{

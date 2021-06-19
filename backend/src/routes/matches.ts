@@ -128,7 +128,6 @@ router.get(`/:match_id`, auth, (req, res, next) => {
 });
 
 
-// TODO socket.io (notificare i giocatori)
 router.post(`/:match_id`, auth, (req, res, next) => {
   const io = getSocketIO();
 
@@ -185,7 +184,6 @@ router.post(`/:match_id`, auth, (req, res, next) => {
 });
 
 
-// TODO socket.io (notificare i giocatori)
 router.put(`/:match_id`, auth, (req, res, next) => {
   const io = getSocketIO();
 
@@ -244,9 +242,18 @@ router.post('/:match_id/observers', auth, (req, res, next) =>{
       throw errorBody;
     }
 
-    // Insert all the player sockets in the match observers room
-    const roomName = 'observersRoom:' + req.params.match_id;
+    // Check if the player is alredy an observer of another match
     const playerSockets = transientDataHandler.getPlayerSockets(req.user!.username);
+    for(let playerSocket of playerSockets){
+      if(playerSocket.rooms.size>0){ 
+        console.warn('A client asked to be an observer while he is alredy an observer, match_id: ' + req.params.match_id);
+        const errorBody: ErrorResponseBody = { error: true, statusCode: 404, errorMessage: 'You are alredy an observer of another match' };
+        throw errorBody;
+      }
+    }
+
+    // Now I can insert all the player sockets in the match observers room
+    const roomName = 'observersRoom:' + req.params.match_id;
     for(let playerSocket of playerSockets){
       playerSocket.join(roomName);
     }
@@ -270,9 +277,20 @@ router.delete('/:match_id/observers', auth, (req, res, next) =>{
       throw errorBody;
     }
 
-    // Take out all the player sockets in the match observers room
     const roomName = 'observersRoom:' + req.params.match_id;
+
+    // Check if the player is not an observer of that match
     const playerSockets = transientDataHandler.getPlayerSockets(req.user!.username);
+    for(let playerSocket of playerSockets){
+      if(!playerSocket.rooms.has(roomName)){ 
+        console.warn('A client asked to not be anymore an observer of a match he wasn\'t observing, match_id: '
+                     + req.params.match_id);
+        const errorBody: ErrorResponseBody = { error: true, statusCode: 404, errorMessage: 'You are not an observer of that match' };
+        throw errorBody;
+      }
+    }
+
+    // Now I can take out all the player sockets in the match observers room
     for(let playerSocket of playerSockets){
       playerSocket.leave(roomName);
     }

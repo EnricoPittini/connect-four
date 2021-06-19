@@ -48,8 +48,10 @@ import { TransientDataHandler } from "./TransientDataHandler";
 import ClientEvents from './socketsHandlers/eventTypes/ClientEvents';
 import ServerEvents from './socketsHandlers/eventTypes/ServerEvents';
 import registerOnlinePlayersHandlers from './socketsHandlers/onlinePlayerHandlers';
-import registerfriendsChatsHandlers from './socketsHandlers/friendsChatsHandlers';
+import registerFriendsChatsHandlers from './socketsHandlers/friendsChatsHandlers';
+import registerMatchRequestsHandlers from './socketsHandlers/matchRequestsHandlers';
 
+import {initializeSocketIO, getSocketIO} from './initializeSocketIO';
 
 import {
   RegistrationRequestBody,
@@ -85,7 +87,6 @@ declare global {
 
 
 const app = express();
-let io: Server<ClientEvents, ServerEvents>;
 const transientDataHandler = TransientDataHandler.getInstance();
 
 
@@ -266,12 +267,14 @@ mongoose.connect(`mongodb://${DB_HOST}:${DB_PORT}/${DB_NAME}`, {
 .then(() => {
   const server = http.createServer(app);
 
-  io = new Server<ClientEvents, ServerEvents>(server);
+  initializeSocketIO(server);
+  const io = getSocketIO();
   io.on('connection', (socket) => {
     console.info('Socket.io client connected');
 
     registerOnlinePlayersHandlers(io, socket);
-    registerfriendsChatsHandlers(io, socket);
+    registerFriendsChatsHandlers(io, socket);
+    registerMatchRequestsHandlers(io, socket);
   });
 
   server.listen(SERVER_PORT, () => console.info(`HTTP Server started on port ${SERVER_PORT}`));

@@ -7,6 +7,8 @@ import { MatchStatus } from '../models/Match';
 import stats = require('../models/Stats');
 import { StatsDocument } from '../models/Stats';
 
+import { getSocketIO } from '../initializeSocketIO';
+
 import {
   AddMoveRequestBody,
   isAddMoveRequestBody,

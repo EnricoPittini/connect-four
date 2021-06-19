@@ -1,3 +1,9 @@
+/*export interface ToClientMessage{
+  from : string,
+  text : string,
+}*/
+import { ClientMessage } from "../../models/Chat";
+
 /**
  * Events emitted from the server.
  */
@@ -16,4 +22,5 @@ export default interface ServerEvents {
 
   'lostFriend': (username: string) => void;
 
+  'chat': (message: ClientMessage) => void;
 }

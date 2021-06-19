@@ -48,6 +48,7 @@ import { TransientDataHandler } from "./TransientDataHandler";
 import ClientEvents from './socketsHandlers/eventTypes/ClientEvents';
 import ServerEvents from './socketsHandlers/eventTypes/ServerEvents';
 import registerOnlinePlayersHandlers from './socketsHandlers/onlinePlayerHandlers';
+import registerfriendsChatsHandlers from './socketsHandlers/friendsChatsHandlers';
 
 
 import {
@@ -270,6 +271,7 @@ mongoose.connect(`mongodb://${DB_HOST}:${DB_PORT}/${DB_NAME}`, {
     console.info('Socket.io client connected');
 
     registerOnlinePlayersHandlers(io, socket);
+    registerfriendsChatsHandlers(io, socket);
   });
 
   server.listen(SERVER_PORT, () => console.info(`HTTP Server started on port ${SERVER_PORT}`));

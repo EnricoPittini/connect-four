@@ -5,6 +5,12 @@ enum SenderPlayer {
   PLAYER_B = 'PLAYER_B',
 }
 
+export interface ClientMessage {
+  from : string,
+  to : string,
+  text: string
+}
+
 export interface Message {
   sender: SenderPlayer,
   text: string,

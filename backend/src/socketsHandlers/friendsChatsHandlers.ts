@@ -22,6 +22,10 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
       console.warn('An invalid player sent a message');
       return;
     }
+    if(fromUsername!==message.from){
+      console.warn('The from player doesn\'t have that socket');
+      return;
+    }
 
     // Player receiver of the message
     const toUsername = message.to;
@@ -65,22 +69,41 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
       if(!chatDocument){
         // The chat between the players doesn't exist : I have to create a new one
         const data : NewChatParams = {
-          playerA : fromUsername,
+          playerA : fromUsername, // Convenction : playerA is the one that started the chat
           playerB : toUsername
         }
-        return chat.newChat(data).save();
+        return chat.newChat(data); // TODO : salvare il documento o no?
       }
       return chatDocument;
     })
     .then( chatDocument => {
       // I add the message to the chat
       chatDocument.addMessage(fromUsername, message.text);
+      return chatDocument.save();
+    })
+    .then( _ =>{
+      // Notify the "from player"
+      const fromPlayerSockets = transientDataHandler.getPlayerSockets(fromUsername);
+      for (let fromPlayerSocket of fromPlayerSockets) {
+        fromPlayerSocket.emit('chat', {
+          from: fromUsername,
+          to: toUsername,
+          text: message.text
+        });
+      }
+
+      // Notify the "to player"
+      const toPlayerSockets = transientDataHandler.getPlayerSockets(toUsername);
+      for (let toPlayerSocket of toPlayerSockets) {
+        toPlayerSocket.emit('chat', {
+          from: fromUsername,
+          to: toUsername,
+          text: message.text
+        });
+      }
     })
     .catch(err =>{
       return;
-    });
-
-    
-
+    });  
   });
 }

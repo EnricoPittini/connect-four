@@ -25,32 +25,28 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
     // I search the "from player"
     player.getModel().findOne({ username: fromUsername }, { friends: 1 }).then(fromPlayerDocument => {
       if (!fromPlayerDocument) {
-        console.warn('An invalid player sent a message, username: ', fromUsername);
-        throw new Error();
+        throw new Error('An invalid player sent a message, username: ' + fromUsername);
       }
 
       // With this condition we check not only that the "to player" is a friend of "from player", but also that "to player" is a 
       // valid player 
       if(!fromPlayerDocument.friends.find( el => el===toUsername )){
-        console.warn('A player sent a match request to another player that isn\'t his friend; fromUsername,toUsername : ',
-                      fromUsername, toUsername);
-        throw new Error();
+        throw new Error('A player sent a match request to another player that isn\'t his friend; fromUsername: ' 
+                         + fromUsername + ' ,toUsername: ' + toUsername);
       }
 
       if(transientDataHandler.hasMatchRequest(fromUsername, toUsername)){
-        console.warn('A match request sent from this "from player" to this "to player" alredy exists; fromUsername,toUsername : ',
-                     fromUsername, toUsername);
-        throw new Error();
+        
+        throw new Error('A match request sent from this "from player" to this "to player" alredy exists; fromUsername: '
+                         + fromUsername + ' ,toUsername: ' + toUsername);
       }
 
       if(!transientDataHandler.isOnline(fromUsername) || transientDataHandler.isOnline(toUsername)){
-        console.warn('At least one of the two players is offline; fromUsername,toUsername : ', fromUsername, toUsername);
-        throw new Error();
+        throw new Error('At least one of the two players is offline; fromUsername: ' + fromUsername + ' ,toUsername: ' + toUsername);
       }
 
       if(transientDataHandler.isInGame(fromUsername) || transientDataHandler.isInGame(toUsername)){
-        console.warn('At least of the two players is alredy in game; fromUsername,toUsername : ', fromUsername, toUsername);
-        throw new Error();
+        throw new Error('At least of the two players is alredy in game; fromUsername: ' + fromUsername + ' ,toUsername: ' + toUsername);
       }
 
       // Here I have checked all the possible errors
@@ -122,6 +118,7 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
       }
     })
     .catch(err =>{
+      console.warn("An error occoured: " + err);
       return;
     });  
   });
@@ -157,6 +154,11 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
           receiver: toUsername,
         });
       }
+      return;
+    }
+    else{
+      console.warn('Nothing has been deleted');
+      return;
     }    
   });
 }

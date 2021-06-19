@@ -29,25 +29,21 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
     // I search the "to player"
     player.getModel().findOne({ username: toUsername }).then(toPlayerDocument => {
       if (!toPlayerDocument) {
-        console.warn('A player sent a message to an inalid player; fromUsername,toUsername : ',
-                      fromUsername, toUsername);
-        throw new Error();
+        throw new Error('A player sent a message to an inalid player; fromUsername: ' + fromUsername + ' ,toUsername: ' + toUsername);
       }
       return player.getModel().findOne({ username: fromUsername }, { friends: 1 });
     })
     // I search the "from player"
     .then(fromPlayerDocument => {
       if (!fromPlayerDocument) {
-        console.warn('An invalid player sent a message, username: ', fromUsername);
-        throw new Error();
+        throw new Error('An invalid player sent a message, username: ' + fromUsername);
       }
 
       const fromPlayerType = fromPlayerDocument.type;
 
       if(fromPlayerType!==PlayerType.MODERATOR && (!fromPlayerDocument.friends.find( el => el===toUsername ))){
-        console.warn('A  Standard player sent a message to another player that isn\'t his friend; fromUsername,toUsername : ',
-                      fromUsername, toUsername);
-        throw new Error();
+        throw new Error('A  Standard player sent a message to another player that isn\'t his friend; fromUsername: '
+                         + fromUsername + ' ,toUsername: ' + toUsername);
       }
 
       // Here I'm sure that the "from player" can send a message to the "to player"
@@ -99,6 +95,7 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
       }
     })
     .catch(err =>{
+      console.warn("An error occoured: " + err);
       return;
     });  
   });

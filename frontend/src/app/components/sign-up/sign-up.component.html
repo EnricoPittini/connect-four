@@ -1,1 +1,41 @@
-<p>sign-up works!</p>
+
+<h3>Sign Up</h3>
+
+<!-- Sign Up form -->
+<form [formGroup]="signUpForm" (ngSubmit)="onSubmit()">
+
+  <div>
+    <label for="username">Username</label>
+    <input id="username" type="text" formControlName="username" required>
+  </div>
+
+  <div>
+    <label for="password">Password</label>
+    <input id="password" type="password" formControlName="password" required>
+  </div>
+
+  <div>
+    <label for="name">Name</label>
+    <input id="name" type="text" formControlName="name" required>
+  </div>
+
+  <div>
+    <label for="surname">Surname</label>
+    <input id="surname" type="text" formControlName="surname" required>
+  </div>
+
+  <div>
+    <label for="avatar">Avatar</label>
+    <input id="avatar" type="text" formControlName="avatar" required>
+  </div>
+
+  <button type="submit" [disabled]="signUpForm.invalid">Sign Up</button>
+
+</form>
+
+
+<!--
+<p>
+  <a [routerLink]="['/signup']">Sign Up</a>
+</p>
+-->

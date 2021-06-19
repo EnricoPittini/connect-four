@@ -19,6 +19,9 @@ import {
   GetMatchesResponseBody,
   GetMatchResponseBody,
 } from '../httpTypes/responses';
+import { TransientDataHandler } from '../TransientDataHandler';
+
+const transientDataHandler = TransientDataHandler.getInstance();
 
 const router = express.Router();
 export default router;
@@ -184,6 +187,58 @@ router.put(`/:match_id`, auth, (req, res, next) => {
       const errorBody: ErrorResponseBody = { error: true, statusCode: 400, errorMessage: err.message };
       throw errorBody;
     }
+  }).catch((err) => {
+    if (err.statusCode) {
+      return next(err);
+    }
+    console.error('Internal DB error ' + JSON.stringify(err, null, 2));
+    const errorBody: ErrorResponseBody = { error: true, statusCode: 500, errorMessage: 'Internal DB error' };
+    return next(errorBody);
+  })
+});
+
+router.post('/:match_id/observers', auth, (req, res, next) =>{
+  const matchId = new mongoose.SchemaTypes.ObjectId(req.params.match_id);
+  match.getModel().findOne({_id:matchId}).then( matchDocument => {
+    if (!match) {
+      console.warn('A client asked to be an observer for a non existing match: ' + req.params.match_id);
+      const errorBody: ErrorResponseBody = { error: true, statusCode: 404, errorMessage: 'The selected match doesn\'t exist' };
+      throw errorBody;
+    }
+
+    // Insert all the player sockets in the match observers room
+    const roomName = 'observersRoom:' + req.params.match_id;
+    const playerSockets = transientDataHandler.getPlayerSockets(req.user!.username);
+    for(let playerSocket of playerSockets){
+      playerSocket.join(roomName);
+    }
+    return;
+  }).catch((err) => {
+    if (err.statusCode) {
+      return next(err);
+    }
+    console.error('Internal DB error ' + JSON.stringify(err, null, 2));
+    const errorBody: ErrorResponseBody = { error: true, statusCode: 500, errorMessage: 'Internal DB error' };
+    return next(errorBody);
+  })
+});
+
+router.delete('/:match_id/observers', auth, (req, res, next) =>{
+  const matchId = new mongoose.SchemaTypes.ObjectId(req.params.match_id);
+  match.getModel().findOne({_id:matchId}).then( matchDocument => {
+    if (!match) {
+      console.warn('A client asked to exit as an observer from a non existing match: ' + req.params.match_id);
+      const errorBody: ErrorResponseBody = { error: true, statusCode: 404, errorMessage: 'The selected match doesn\'t exist' };
+      throw errorBody;
+    }
+
+    // Take out all the player sockets in the match observers room
+    const roomName = 'observersRoom:' + req.params.match_id;
+    const playerSockets = transientDataHandler.getPlayerSockets(req.user!.username);
+    for(let playerSocket of playerSockets){
+      playerSocket.leave(roomName);
+    }
+    return;
   }).catch((err) => {
     if (err.statusCode) {
       return next(err);

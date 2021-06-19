@@ -62,8 +62,9 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
       return;
     }
 
-    // the player has become offline, notify all his friends
+    // the player has become offline
 
+    // Notify all his friends
     player.getModel().findOne({ username: username }, { friends: 1 }).then(playerDocument => {
       if (!playerDocument) {
         console.warn('An invalid player disconnected, username: ', username);
@@ -78,5 +79,21 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
         }
       }
     });
+
+    // Notify all the match requests opponents associated with that player
+    const matchRequestsOpponents = transientDataHandler.getPlayerMatchRequestsOpponents(username);
+    for(let opponent of matchRequestsOpponents){
+      const opponentSockets = transientDataHandler.getPlayerSockets(opponent);
+      for(let opponentSocket of opponentSockets){
+        opponentSocket.emit('deleteMatchRequest', {
+          sender: username,
+          receiver: opponent
+        });
+      }
+    }
+    // Remove all the match requests associated with that player
+    transientDataHandler.deletePlayerMatchRequests(username);
+
+    // TODO : gestire forfait automatico
   });
 }

@@ -110,13 +110,23 @@ export class TransientDataHandler {
   }
 
   // To call both for accept match requests and cancel match requests
-  public deleteMatchRequest(fromUsername: string, toUsername: string): void {
+  // Returns true if something is deleted, false otherwise
+  public deleteMatchRequest(fromUsername: string, toUsername: string): boolean {
     const previousLength = this.matchRequests.length;
     this.matchRequests = this.matchRequests.filter(matchRequest => matchRequest.from !== fromUsername || matchRequest.to !== toUsername);
     const currentLength = this.matchRequests.length;
-    if (previousLength === currentLength) {
-      throw new Error("There isn't a match request from that fromUsername to that toUsername");
-    }
+    return previousLength !== currentLength;
+  }
+
+  // Delete all the match requests of a player (both from and to)
+  public deletePlayerMatchRequests(username: string): void{
+    this.matchRequests = this.matchRequests.filter(matchRequest => matchRequest.from !== username && matchRequest.to !== username);
+  }
+
+  // Given a player, returns the list of players in a match request (either from or to) with the specified player 
+  public getPlayerMatchRequestsOpponents(username: string): string[]{
+    return this.matchRequests.filter(matchRequest => matchRequest.from === username || matchRequest.to === username)
+                             .map( matchRequest => matchRequest.to===username ? matchRequest.from : matchRequest.to );
   }
 
   public hasMatchRequest(fromUsername: string, toUsername: string): boolean {

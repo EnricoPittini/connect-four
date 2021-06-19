@@ -13,7 +13,7 @@ import { NewChatParams } from '../models/Chat';
 export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<ClientEvents, ServerEvents>) {
   const transientDataHandler = TransientDataHandler.getInstance();
 
-  socket.on('chat', (message) => {
+  socket.on('friendChat', (message) => {
     console.info('Socket event: "chat"');
 
     // Player that sent the message

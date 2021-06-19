@@ -50,6 +50,7 @@ import ServerEvents from './socketsHandlers/eventTypes/ServerEvents';
 import registerOnlinePlayersHandlers from './socketsHandlers/onlinePlayerHandlers';
 import registerFriendsChatsHandlers from './socketsHandlers/friendsChatsHandlers';
 import registerMatchRequestsHandlers from './socketsHandlers/matchRequestsHandlers';
+import registerMatchesChatsHandlers from './socketsHandlers/matchesChatsHandlers';
 
 import {initializeSocketIO, getSocketIO} from './initializeSocketIO';
 
@@ -275,6 +276,7 @@ mongoose.connect(`mongodb://${DB_HOST}:${DB_PORT}/${DB_NAME}`, {
     registerOnlinePlayersHandlers(io, socket);
     registerFriendsChatsHandlers(io, socket);
     registerMatchRequestsHandlers(io, socket);
+    registerMatchesChatsHandlers(io, socket);
   });
 
   server.listen(SERVER_PORT, () => console.info(`HTTP Server started on port ${SERVER_PORT}`));

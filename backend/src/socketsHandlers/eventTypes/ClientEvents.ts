@@ -1,5 +1,10 @@
-export interface FromClientMessage {
+export interface FromClientFriendMessage {
   to : string,
+  text: string
+}
+
+export interface FromClientChatMessage {
+  matchId: string,
   text: string
 }
 
@@ -13,7 +18,7 @@ export default interface ClientEvents {
   /**
    * Send a message to the specified username
    */
-  'chat': (message: FromClientMessage) => void; 
+  'friendChat': (message: FromClientFriendMessage) => void; 
 
   /**
    * Notify the Server the availability to play a match with the specified friend
@@ -24,4 +29,9 @@ export default interface ClientEvents {
    * Notify the Server the unavailability to play a match with the specified friend
    */
   'deleteMatchRequest': (toUsername: string) => void;
+
+  /**
+   * Send a message to the specified match
+   */
+  'matchChat': (text: FromClientChatMessage) => void;
 }

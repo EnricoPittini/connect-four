@@ -1,8 +1,13 @@
 import mongoose = require('mongoose');
 
-export interface ToClientMessage {
+export interface ToClientFriendMessage {
   from : string,
   to : string,
+  text: string
+}
+
+export interface ToClientMatchMessage{
+  from : string,
   text: string
 }
 
@@ -27,7 +32,7 @@ export default interface ServerEvents {
   /**
    * Event for notify the player chat about a new message
    */
-  'chat': (message: ToClientMessage) => void;
+  'chat': (message: ToClientFriendMessage) => void;
 
   /**
    * Event for notify the player about a match request deletion (both canceled and rejected)
@@ -49,4 +54,6 @@ export default interface ServerEvents {
    * Event for notify the two players of that match that something new happened in that match
    */
   'match': (match_id: mongoose.Schema.Types.ObjectId) => void;
+
+  'matchChat': (message: ToClientMatchMessage)=> void;
 }

@@ -1,6 +1,13 @@
 
 <h3>Login</h3>
 
+
+<!-- Error message card -->
+<div *ngIf="errorMessage" class="alert alert-danger">
+  <div>{{ errorMessage }}</div>
+</div>
+
+
 <!-- Login form -->
 <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
 
@@ -14,13 +21,17 @@
     <input id="password" type="password" formControlName="password" required>
   </div>
 
+  <div>
+    <label for="remember">Remember me</label>
+    <input id="remember" type="checkbox" formControlName="remember">
+  </div>
+
   <button type="submit" [disabled]="loginForm.invalid">Login</button>
 
 </form>
 
 
-<!--
+<!-- Link to signup page -->
 <p>
   <a [routerLink]="['/signup']">Sign Up</a>
 </p>
--->

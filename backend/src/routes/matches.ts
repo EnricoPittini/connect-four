@@ -130,6 +130,7 @@ router.get(`/:match_id`, auth, (req, res, next) => {
 
 // TODO socket.io (notificare i giocatori)
 router.post(`/:match_id`, auth, (req, res, next) => {
+  const io = getSocketIO();
 
   if (!isAddMoveRequestBody(req.body)) {
     console.warn('Wrong body content for the add move');
@@ -138,16 +139,16 @@ router.post(`/:match_id`, auth, (req, res, next) => {
   }
 
   const matchId = new mongoose.SchemaTypes.ObjectId(req.params.match_id);
-  match.getModel().findOne({ _id: matchId }, { __v: 0 }).then((match) => {
-    if (!match) {
+  match.getModel().findOne({ _id: matchId }, { __v: 0 }).then((matchDocument) => {
+    if (!matchDocument) {
       console.warn('A client asked for a non existing match: ' + req.params.match_id);
       const errorBody: ErrorResponseBody = { error: true, statusCode: 404, errorMessage: 'The selected match doesn\'t exist' };
       throw errorBody;
     }
 
     try {
-      match.addMove(req.user!.username, req.body.column);
-      return match.save();
+      matchDocument.addMove(req.user!.username, req.body.column);
+      return matchDocument.save();
     }
     catch (err) {
       console.warn('Add move error: ' + err.message);
@@ -155,7 +156,21 @@ router.post(`/:match_id`, auth, (req, res, next) => {
       throw errorBody;
     }
   })
-  .then( _ => {
+  .then( matchDocument => {
+    // Notify the 2 players (all the sockets)
+    const player1Sockets = transientDataHandler.getPlayerSockets(matchDocument.player1);
+    for(let player1Socket of player1Sockets){
+      player1Socket.emit('match', matchDocument._id);
+    }
+    const player2Sockets = transientDataHandler.getPlayerSockets(matchDocument.player2);
+    for(let player2Socket of player2Sockets){
+      player2Socket.emit('match', matchDocument._id);
+    }
+
+    // Notify all the observers
+    const roomName = 'observersRoom:' + matchDocument._id.toString();
+    io.to(roomName).emit('match', matchDocument._id);
+
     const body: SuccessResponseBody = { error: false, statusCode: 200 };
     return res.status(200).json(body);
   })
@@ -172,17 +187,19 @@ router.post(`/:match_id`, auth, (req, res, next) => {
 
 // TODO socket.io (notificare i giocatori)
 router.put(`/:match_id`, auth, (req, res, next) => {
+  const io = getSocketIO();
+
   const matchId = new mongoose.SchemaTypes.ObjectId(req.params.match_id);
-  match.getModel().findOne({ _id: matchId }, { __v: 0 }).then((match) => {
-    if (!match) {
+  match.getModel().findOne({ _id: matchId }, { __v: 0 }).then((matchDocument) => {
+    if (!matchDocument) {
       console.warn('A client asked for a non existing match: ' + req.params.match_id);
       const errorBody: ErrorResponseBody = { error: true, statusCode: 404, errorMessage: 'The selected match doesn\'t exist' };
       throw errorBody;
     }
 
     try {
-      match.forfait(req.user!.username);
-      return match.save();
+      matchDocument.forfait(req.user!.username);
+      return matchDocument.save();
     }
     catch (err) {
       console.warn('Forfait error: ' + err.message);
@@ -190,7 +207,21 @@ router.put(`/:match_id`, auth, (req, res, next) => {
       throw errorBody;
     }
   })
-  .then( _ =>{
+  .then( matchDocument =>{
+    // Notify the 2 players (all the sockets)
+    const player1Sockets = transientDataHandler.getPlayerSockets(matchDocument.player1);
+    for(let player1Socket of player1Sockets){
+      player1Socket.emit('match', matchDocument._id);
+    }
+    const player2Sockets = transientDataHandler.getPlayerSockets(matchDocument.player2);
+    for(let player2Socket of player2Sockets){
+      player2Socket.emit('match', matchDocument._id);
+    }
+
+    // Notify all the observers
+    const roomName = 'observersRoom:' + matchDocument._id.toString();
+    io.to(roomName).emit('match', matchDocument._id);
+
     const body: SuccessResponseBody = { error: false, statusCode: 200 };
     return res.status(200).json(body);
   })

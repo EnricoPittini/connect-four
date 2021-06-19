@@ -121,15 +121,19 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
       return Promise.all(promises);
     })
     .then( matchDocuments =>{
-      // Notify all the opponents about the forfait
+      // Notify all the opponents and observers about the forfait
       for(let matchDocument of matchDocuments){
+        // Notify the opponent (all his sockets)
         const opponent = matchDocument.player1===username ? matchDocument.player2 : matchDocument.player1;
         const opponentSockets = transientDataHandler.getPlayerSockets(opponent);
         for(let opponentSocket of opponentSockets){
           opponentSocket.emit('match', matchDocument._id);
         }
+
+        // Notify all the observers
+        const roomName = 'observersRoom:' + matchDocument._id.toString();
+        io.to(roomName).emit('match', matchDocument._id);
       }
-      // TODO notify the observers
       return;
     })
     .catch(err=>{

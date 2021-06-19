@@ -147,14 +147,17 @@ router.post(`/:match_id`, auth, (req, res, next) => {
 
     try {
       match.addMove(req.user!.username, req.body.column);
-      const body: SuccessResponseBody = { error: false, statusCode: 200 };
-      return res.status(200).json(body);
+      return match.save();
     }
     catch (err) {
       console.warn('Add move error: ' + err.message);
       const errorBody: ErrorResponseBody = { error: true, statusCode: 400, errorMessage: err.message };
       throw errorBody;
     }
+  })
+  .then( _ => {
+    const body: SuccessResponseBody = { error: false, statusCode: 200 };
+    return res.status(200).json(body);
   })
   .catch((err) => {
     if (err.statusCode) {
@@ -179,15 +182,19 @@ router.put(`/:match_id`, auth, (req, res, next) => {
 
     try {
       match.forfait(req.user!.username);
-      const body: SuccessResponseBody = { error: false, statusCode: 200 };
-      return res.status(200).json(body);
+      return match.save();
     }
     catch (err) {
       console.warn('Forfait error: ' + err.message);
       const errorBody: ErrorResponseBody = { error: true, statusCode: 400, errorMessage: err.message };
       throw errorBody;
     }
-  }).catch((err) => {
+  })
+  .then( _ =>{
+    const body: SuccessResponseBody = { error: false, statusCode: 200 };
+    return res.status(200).json(body);
+  })
+  .catch((err) => {
     if (err.statusCode) {
       return next(err);
     }

@@ -346,7 +346,7 @@ export function getModel(): MatchModel { // Return Model as singleton
   return matchModel;
 }
 
-interface NewMatchParams extends Pick<Match, 'player1' | 'player2'> {
+export interface NewMatchParams extends Pick<Match, 'player1' | 'player2'> {
 }
 
 export function newMatch(data: NewMatchParams): MatchDocument {

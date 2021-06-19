@@ -1,3 +1,4 @@
+import mongoose = require('mongoose');
 
 export interface ToClientMessage {
   from : string,
@@ -43,4 +44,9 @@ export default interface ServerEvents {
    * Event for notify the player about a new game
    */
   'newMatch': (otherUsername: string) => void;
+
+  /**
+   * Event for notify the two players of that match that something new happened in that match
+   */
+  'match': (match_id: mongoose.Schema.Types.ObjectId) => void;
 }

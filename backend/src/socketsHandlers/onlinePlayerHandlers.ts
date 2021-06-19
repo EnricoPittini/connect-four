@@ -6,6 +6,8 @@ import ServerEvents from './eventTypes/ServerEvents';
 import { TransientDataHandler } from "../TransientDataHandler";
 
 import player = require('../models/Player');
+import match = require('../models/Match');
+import { MatchStatus, MatchDocument } from '../models/Match';
 
 
 export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<ClientEvents, ServerEvents>) {
@@ -94,6 +96,45 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
     // Remove all the match requests associated with that player
     transientDataHandler.deletePlayerMatchRequests(username);
 
-    // TODO : gestire forfait automatico
+    // Authomatic forfait for the player
+    const filter = {
+      $or:[
+        {
+          player1: username,
+          status: MatchStatus.IN_PROGRESS
+        },
+        {
+          player2: username,
+          status: MatchStatus.IN_PROGRESS
+        }
+      ]
+    }
+    match.getModel().find(filter).then( matchDocuments => {
+      // The matches that the player was playing (In theory either one or zero)
+      // Authomatic forfait for all these matches
+      const promises : Promise<MatchDocument>[] = [];
+      for(let matchDocument of matchDocuments){
+        matchDocument.forfait(username);
+        promises.push(matchDocument.save());
+      }
+
+      return Promise.all(promises);
+    })
+    .then( matchDocuments =>{
+      // Notify all the opponents about the forfait
+      for(let matchDocument of matchDocuments){
+        const opponent = matchDocument.player1===username ? matchDocument.player2 : matchDocument.player1;
+        const opponentSockets = transientDataHandler.getPlayerSockets(opponent);
+        for(let opponentSocket of opponentSockets){
+          opponentSocket.emit('match', matchDocument._id);
+        }
+      }
+      // TODO notify the observers
+      return;
+    })
+    .catch(err=>{
+      console.warn("An error occoured: " + err);
+      return;
+    })
   });
 }

@@ -1,0 +1,86 @@
+import { Server, Socket } from 'socket.io';
+
+import ClientEvents from './eventTypes/ClientEvents';
+import ServerEvents from './eventTypes/ServerEvents';
+import { TransientDataHandler } from '../TransientDataHandler';
+
+import player = require('../models/Player');
+import { PlayerType } from '../models/Player';
+import chat = require('../models/Chat');
+import { NewChatParams } from '../models/Chat';
+
+
+export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<ClientEvents, ServerEvents>) {
+  const transientDataHandler = TransientDataHandler.getInstance();
+
+  socket.on('chat', (message) => {
+    console.info('Socket event: "chat"');
+
+    // Player that sent the message
+    const fromUsername = transientDataHandler.getSocketPlayer(socket);
+    if(!fromUsername){
+      console.warn('An invalid player sent a message');
+      return;
+    }
+
+    // Player receiver of the message
+    const toUsername = message.to;
+
+    // I search the "to player"
+    player.getModel().findOne({ username: toUsername }).then(toPlayerDocument => {
+      if (!toPlayerDocument) {
+        console.warn('A player sent a message to an inalid player; fromUsername,toUsername : ',
+                      fromUsername, toUsername);
+        throw new Error();
+      }
+      return player.getModel().findOne({ username: fromUsername }, { friends: 1 });
+    })
+    // I search the "from player"
+    .then(fromPlayerDocument => {
+      if (!fromPlayerDocument) {
+        console.warn('An invalid player sent a message, username: ', fromUsername);
+        throw new Error();
+      }
+
+      const fromPlayerType = fromPlayerDocument.type;
+
+      if(fromPlayerType!==PlayerType.MODERATOR && (!fromPlayerDocument.friends.find( el => el===toUsername ))){
+        console.warn('A  Standard player sent a message to another player that isn\'t his friend; fromUsername,toUsername : ',
+                      fromUsername, toUsername);
+        throw new Error();
+      }
+
+      // Here I'm sure that the "from player" can send a message to the "to player"
+
+      // I find the chat between the two players
+      const filter = {
+        $or: [
+          { from: fromUsername, to: toUsername },
+          { from: toUsername, to: fromUsername },
+        ],
+      };
+      return chat.getModel().findOne(filter);
+    })
+    .then( chatDocument => {      
+      if(!chatDocument){
+        // The chat between the players doesn't exist : I have to create a new one
+        const data : NewChatParams = {
+          playerA : fromUsername,
+          playerB : toUsername
+        }
+        return chat.newChat(data).save();
+      }
+      return chatDocument;
+    })
+    .then( chatDocument => {
+      // I add the message to the chat
+      chatDocument.addMessage(fromUsername, message.text);
+    })
+    .catch(err =>{
+      return;
+    });
+
+    
+
+  });
+}

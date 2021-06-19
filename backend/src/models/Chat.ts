@@ -111,7 +111,7 @@ export function getModel(): ChatModel { // Return Model as singleton
   return chatModel;
 }
 
-interface NewChatParams extends Pick<Chat, 'playerA' | 'playerB'> {
+export interface NewChatParams extends Pick<Chat, 'playerA' | 'playerB'> {
 }
 
 export function newChat(data: NewChatParams): ChatDocument {

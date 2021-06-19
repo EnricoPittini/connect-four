@@ -22,10 +22,6 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
       console.warn('An invalid player sent a message');
       return;
     }
-    if(fromUsername!==message.from){
-      console.warn('The from player doesn\'t have that socket');
-      return;
-    }
 
     // Player receiver of the message
     const toUsername = message.to;

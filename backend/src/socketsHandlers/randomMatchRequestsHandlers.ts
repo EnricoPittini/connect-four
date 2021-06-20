@@ -28,15 +28,16 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
         throw new Error('An invalid player sent a random match request, username: ' + username);
       }
 
-      transientDataHandler.addRandomMatchRequest(username);
+      return transientDataHandler.addRandomMatchRequest(username);
+    })
+    .then( () => {
+        // Notify the player (all the sockets)
+        const playerSockets = transientDataHandler.getPlayerSockets(username);
+        for (let playerSocket of playerSockets) {
+          playerSocket.emit('randomMatchRequest');
+        }
 
-      // Notify the player (all the sockets)
-      const playerSockets = transientDataHandler.getPlayerSockets(username);
-      for (let playerSocket of playerSockets) {
-        playerSocket.emit('randomMatchRequest');
-      }
-
-      return;
+        return;
     })
     .catch( err =>{
       console.warn('An error occourred, err: ' + err);

@@ -167,11 +167,12 @@ export class TransientDataHandler {
   }
 
   /**
-   * Adds a random match request
+   * Adds a random match request.
+   * Returns a promise
    * @param username 
    * @returns 
    */
-  public addRandomMatchRequest(username: string): void{
+  public addRandomMatchRequest(username: string): Promise<void>{
     if (!this.isOnline(username)) {
       throw new Error('The player is not online');
     }
@@ -183,7 +184,7 @@ export class TransientDataHandler {
       throw new Error('There is alredy a random match request made by this player');
     }
 
-    stats.getModel().findOne({player:username}).then( statsDocument=> {
+    return stats.getModel().findOne({player:username}).then( statsDocument=> {
       if(!statsDocument){
         throw new Error('The stats document wasn\'t found for that player');
       }
@@ -196,7 +197,7 @@ export class TransientDataHandler {
     })
     .catch( err=> {
       throw err;
-    })
+    });
   }
 
   public deleteRandomFriendMatchRequests(username: string): void{

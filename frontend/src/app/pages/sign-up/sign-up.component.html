@@ -1,0 +1,58 @@
+
+<h3>Sign Up</h3>
+
+
+<!-- Error message card -->
+<div *ngIf="errorMessage" class="alert alert-danger">
+  <div>{{ errorMessage }}</div>
+</div>
+
+
+<!-- Sign Up form -->
+<form [formGroup]="signUpForm" (ngSubmit)="onSubmit()">
+
+  <div>
+    <label for="username">Username</label>
+    <input id="username" type="text" formControlName="username" required>
+  </div>
+
+  <div>
+    <label for="password">Password</label>
+    <input id="password" type="password" formControlName="password" required>
+  </div>
+
+  <!-- TODO bug: segna verde anche se password è diversa -->
+  <div>
+    <label for="confirmPassword">Confirm password</label>
+    <input id="confirmPassword" type="password" formControlName="confirmPassword" required>
+  </div>
+
+  <div>
+    <label for="name">Name</label>
+    <input id="name" type="text" formControlName="name" required>
+  </div>
+
+  <div>
+    <label for="surname">Surname</label>
+    <input id="surname" type="text" formControlName="surname" required>
+  </div>
+
+  <div>
+    <label for="avatar">Avatar</label>
+    <input id="avatar" type="text" formControlName="avatar" required>
+  </div>
+
+  <div>
+    <label for="remember">Remember me</label>
+    <input id="remember" type="checkbox" formControlName="remember">
+  </div>
+
+  <button type="submit" [disabled]="signUpForm.invalid">Sign Up</button>
+
+</form>
+
+
+<!-- Link to login page -->
+<p>
+  <a [routerLink]="['/login']">Login</a>
+</p>

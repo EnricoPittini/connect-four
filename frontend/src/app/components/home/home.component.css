@@ -1,0 +1,6 @@
+/* Style page content */
+/* TODO forse vale la pena metterlo nel css globale */
+.main {
+  margin-left: 160px; /* Same as the width of the sidebar */
+  padding: 0px 10px;
+}

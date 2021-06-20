@@ -1,3 +1,7 @@
+// TODO eliminare
+
+/*
+
 export interface FriendMatchRequest {
   from: string,
   to: string,
@@ -8,3 +12,5 @@ export interface RandomMatchRequest {
   from: string,
   datetime: Date,
 }
+
+*/

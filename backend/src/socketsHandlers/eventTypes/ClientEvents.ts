@@ -1,8 +1,10 @@
+// Interface that represents the message sent by a Client to one of his friends
 export interface FromClientFriendMessage {
   to : string,
   text: string
 }
 
+// Interface that represents the message sent by a Client to one of his friends
 export interface FromClientChatMessage {
   matchId: string,
   text: string

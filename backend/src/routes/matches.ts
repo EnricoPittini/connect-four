@@ -164,16 +164,16 @@ router.post(`/:match_id`, auth, async (req, res, next) => {
     // Notify the 2 players (all the sockets)
     const player1Sockets = transientDataHandler.getPlayerSockets(matchDocument.player1);
     for(let player1Socket of player1Sockets){
-      player1Socket.emit('match', matchDocument._id);
+      player1Socket.emit('match', matchDocument._id.toString());
     }
     const player2Sockets = transientDataHandler.getPlayerSockets(matchDocument.player2);
     for(let player2Socket of player2Sockets){
-      player2Socket.emit('match', matchDocument._id);
+      player2Socket.emit('match', matchDocument._id.toString());
     }
 
     // Notify all the observers
     const roomName = 'observersRoom:' + matchDocument._id.toString();
-    io.to(roomName).emit('match', matchDocument._id);
+    io.to(roomName).emit('match', matchDocument._id.toString());
 
     // Check if the match is ended
     if(matchDocument.status!==MatchStatus.IN_PROGRESS){
@@ -247,16 +247,16 @@ router.put(`/:match_id`, auth, async (req, res, next) => {
     // Notify the 2 players (all the sockets)
     const player1Sockets = transientDataHandler.getPlayerSockets(matchDocument.player1);
     for(let player1Socket of player1Sockets){
-      player1Socket.emit('match', matchDocument._id);
+      player1Socket.emit('match', matchDocument._id.toString());
     }
     const player2Sockets = transientDataHandler.getPlayerSockets(matchDocument.player2);
     for(let player2Socket of player2Sockets){
-      player2Socket.emit('match', matchDocument._id);
+      player2Socket.emit('match', matchDocument._id.toString());
     }
 
     // Notify all the observers
     const roomName = 'observersRoom:' + matchDocument._id.toString();
-    io.to(roomName).emit('match', matchDocument._id);
+    io.to(roomName).emit('match', matchDocument._id.toString());
 
     // All the observers have to leave the match room
     const observersSocketsId = io.sockets.adapter.rooms.get(roomName);

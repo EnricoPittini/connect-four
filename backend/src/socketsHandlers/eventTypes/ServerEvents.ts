@@ -1,11 +1,11 @@
-import mongoose = require('mongoose');
-
+// Interface that represents the message, sent by a Client to one of his friends, that the Server forwards to the Clients
 export interface ToClientFriendMessage {
   from : string,
   to : string,
   text: string
 }
 
+// Interface that represents the message, sent by a Client to a match chat, that the Server forwards to the Clients
 export interface ToClientMatchMessage{
   from : string,
   text: string
@@ -53,7 +53,7 @@ export default interface ServerEvents {
   /**
    * Event for notify the two players of that match that something new happened in that match
    */
-  'match': (matchId: mongoose.Schema.Types.ObjectId) => void;
+  'match': (matchId: string) => void;
 
   /**
    * Event for notify the players, and eventually the observers, of a match about the chat of the match

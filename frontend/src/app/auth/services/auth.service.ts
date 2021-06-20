@@ -155,6 +155,15 @@ export class AuthService {
   }
 
   /**
+   * Checks if the user is authenticated.
+   *
+   * @returns true if the user is authenticated, false otherwise
+   */
+  isAuthenticated(): boolean {
+    return !!this.token;
+  }
+
+  /**
    * Stores the JWT token in memory and in the local storage if `remember` is true.
    *
    * @param token - The JWT token

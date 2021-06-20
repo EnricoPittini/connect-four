@@ -13,6 +13,7 @@ import { NavComponent } from './components/nav/nav.component';
 import { FriendsSideBarComponent } from './components/friends-side-bar/friends-side-bar.component';
 import { StatsComponent } from './components/stats/stats.component';
 import { LiveMatchesComponent } from './components/live-matches/live-matches.component';
+import { ChatListComponent } from './components/chat-list/chat-list.component';
 
 @NgModule({
   declarations: [
@@ -24,6 +25,7 @@ import { LiveMatchesComponent } from './components/live-matches/live-matches.com
     FriendsSideBarComponent,
     StatsComponent,
     LiveMatchesComponent,
+    ChatListComponent,
   ],
   imports: [
     BrowserModule,

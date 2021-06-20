@@ -1,0 +1,28 @@
+
+<!-- Side bar -->
+<app-friends-side-bar></app-friends-side-bar>
+
+
+<!-- Page content -->
+<div class="main">
+  <!-- Nav bar -->
+  <app-nav></app-nav>
+
+  <!-- The main content of the page -->
+  <main>
+
+    <h1>Chats</h1>
+
+    <!-- Chat list -->
+    <div *ngFor="let chat of chats" >
+      <!-- TODO eventualmente creare un component a parte (ChatCard) -->
+      <img src="" alt="Avatar">
+      {{ chat.player }}
+
+      <!-- TODO forse meglio un button -->
+      <a [routerLink]="['/chat/' + chat.player]">Go</a>
+    </div>
+
+  </main>
+
+</div>

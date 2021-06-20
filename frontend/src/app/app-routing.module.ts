@@ -2,11 +2,11 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { AuthGuard } from './auth/guards/auth.guard';
 import { ChatListComponent } from './components/chat-list/chat-list.component';
-import { HomeComponent } from './components/home/home.component';
-import { LiveMatchesComponent } from './components/live-matches/live-matches.component';
-import { LoginComponent } from './components/login/login.component';
-import { SignUpComponent } from './components/sign-up/sign-up.component';
-import { StatsComponent } from './components/stats/stats.component';
+import { HomeComponent } from './pages/home/home.component';
+import { LiveMatchesComponent } from './pages/live-matches/live-matches.component';
+import { LoginComponent } from './pages/login/login.component';
+import { SignUpComponent } from './pages/sign-up/sign-up.component';
+import { StatsComponent } from './pages/stats/stats.component';
 
 
 const routes: Routes = [

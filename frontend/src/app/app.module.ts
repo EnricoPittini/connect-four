@@ -5,14 +5,14 @@ import { HttpClientModule } from '@angular/common/http';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { LoginComponent } from './components/login/login.component';
-import { SignUpComponent } from './components/sign-up/sign-up.component';
+import { LoginComponent } from './pages/login/login.component';
+import { SignUpComponent } from './pages/sign-up/sign-up.component';
 import { AuthModule } from './auth/auth.module';
-import { HomeComponent } from './components/home/home.component';
+import { HomeComponent } from './pages/home/home.component';
 import { NavComponent } from './components/nav/nav.component';
 import { FriendsSideBarComponent } from './components/friends-side-bar/friends-side-bar.component';
-import { StatsComponent } from './components/stats/stats.component';
-import { LiveMatchesComponent } from './components/live-matches/live-matches.component';
+import { StatsComponent } from './pages/stats/stats.component';
+import { LiveMatchesComponent } from './pages/live-matches/live-matches.component';
 import { ChatListComponent } from './components/chat-list/chat-list.component';
 
 @NgModule({

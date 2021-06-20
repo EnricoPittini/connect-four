@@ -124,7 +124,7 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
         const opponent = matchDocument.player1===username ? matchDocument.player2 : matchDocument.player1;
         const opponentSockets = transientDataHandler.getPlayerSockets(opponent);
         for(let opponentSocket of opponentSockets){
-          opponentSocket.emit('match', matchDocument._id);
+          opponentSocket.emit('match', matchDocument._id.toString());
         }
 
         // Put the opponent of the match as out of game
@@ -132,7 +132,7 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
 
         // Notify all the observers of the match
         const roomName = 'observersRoom:' + matchDocument._id.toString();
-        io.to(roomName).emit('match', matchDocument._id); // TODO : cosa succede se la room non esiste? (Non dovrebbe fare nulla)
+        io.to(roomName).emit('match', matchDocument._id.toString()); // TODO : cosa succede se la room non esiste? (Non dovrebbe fare nulla)
 
         // All the observers of the match have to leave the match room
         const observersSocketsId = io.sockets.adapter.rooms.get(roomName);

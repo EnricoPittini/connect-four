@@ -73,8 +73,10 @@ import {
   GetPlayersResponseBody,
   ConfirmModeratorResponseBody,
 } from './httpTypes/responses';
+import { arrangeRandomMatchRequests } from './arrangeRandomMatchRequests';
 
-
+// The time in which, periodically, the Server arranges new random match requests
+const ARRANGE_RANDOM_MATCH_REQUESTS_DELAY_TIME = 5000;
 
 declare global {
   namespace Express {
@@ -280,6 +282,11 @@ mongoose.connect(`mongodb://${DB_HOST}:${DB_PORT}/${DB_NAME}`, {
     registerMatchesChatsHandlers(io, socket);
     registerRandomMatchRequestsHandlers(io, socket);
   });
+
+  // Periodically, arrange the random match requests till now made
+  setInterval( ()=>{
+    arrangeRandomMatchRequests();
+  }, ARRANGE_RANDOM_MATCH_REQUESTS_DELAY_TIME);
 
   server.listen(SERVER_PORT, () => console.info(`HTTP Server started on port ${SERVER_PORT}`));
 })

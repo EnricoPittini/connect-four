@@ -28,6 +28,7 @@ import {
   ConfirmModeratorResponseBody,
   GetPlayerResponseBody,
   GetPlayerStatsResponseBody,
+  GetMatchRequestInformationResponseBody,
 } from '../httpTypes/responses';
 
 const router = express.Router();
@@ -230,23 +231,68 @@ router.get(`/:username`, auth, (req, res, next) => {
     avatar: 1, // TODO Se è URL
     type: 1,
   };
-
   player.getModel().findOne({ username: req.params.username }, fields).then((document) => {
     if (!document) {
       const errorBody: ErrorResponseBody = { error: true, statusCode: 404, errorMessage: 'The selected player doesn\'t exist' };
       throw errorBody;
     }
 
-    // TODO online e playing
     const player: any = document;
-    player.online = false;
-    player.playing = false;
+    player.online = transientDataHandler.isOnline(req.params.username);
+    player.playing = transientDataHandler.isInGame(req.params.username);
     const body: GetPlayerResponseBody = { error: false, statusCode: 200, player: player };
     return res.status(200).json(body);
   })
   .catch((err) => {
     if (err.statusCode === 404) {
       console.warn('A client asked for a non existing player: ' + req.params.username);
+      return next(err);
+    }
+    console.error('Internal DB error ' + JSON.stringify(err, null, 2));
+    const errorBody: ErrorResponseBody = { error: true, statusCode: 500, errorMessage: 'Internal DB error' };
+    return next(errorBody);
+  })
+});
+
+// Endpoint used by a Client to get match request informations with respect to the specified player
+router.get(`/:username/match_request`, auth, (req, res, next) => {
+  player.getModel().findOne({ username: req.params.username }).then((playerDocument) => {
+    if (!playerDocument) {
+      console.warn('A client asked for a non existing player: ' + req.params.username);
+      const errorBody: ErrorResponseBody = { error: true, statusCode: 404, errorMessage: 'The selected player doesn\'t exist' };
+      throw errorBody;
+    }
+
+    if(!playerDocument.hasFriend(req.user!.username)){
+      console.warn('A client asked for match request informations for a player that isn\'t his friend');
+      const errorBody: ErrorResponseBody = { error: true, statusCode: 400, errorMessage: 'The selected player isn\'t your friend' };
+      throw errorBody;
+    }
+
+    let friendMatchRequest : FriendMatchRequest;
+    if(transientDataHandler.hasFriendMatchRequest(req.user!.username, req.params.username)){
+      friendMatchRequest = transientDataHandler.getFriendMatchRequest(req.user!.username, req.params.username);
+    }
+    else if(transientDataHandler.hasFriendMatchRequest(req.user!.username, req.params.username)){
+      friendMatchRequest = transientDataHandler.getFriendMatchRequest(req.user!.username, req.params.username);
+    }
+    else{
+      console.warn('A client asked for match request informations, but the match request doesn\'t exists');
+      const errorBody: ErrorResponseBody = { error: true, statusCode: 404, errorMessage: 'The selected match request doesn\'t exist' };
+      throw errorBody;
+    }
+
+    const body: GetMatchRequestInformationResponseBody = { 
+      error: false, 
+      statusCode: 200, 
+      from: friendMatchRequest.from,
+      to: friendMatchRequest.to,
+      datetime: friendMatchRequest.datetime,
+     };
+    return res.status(200).json(body);
+  })
+  .catch((err) => {
+    if (err.statusCode === 404) {
       return next(err);
     }
     console.error('Internal DB error ' + JSON.stringify(err, null, 2));

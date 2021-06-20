@@ -26,7 +26,7 @@ interface RandomMatchRequest extends MatchRequest{
   playerRating: number, 
 }
 
-// Interface that represents a Random match, arranged by the Server
+// Interface that represents a random match arranged by the Server
 export interface RandomMatchArrangement{
   player1: string,
   player2: string,
@@ -202,7 +202,7 @@ export class TransientDataHandler {
   }
 
   /**
-   * Returns the match arrangements for random match requests till now made
+   * Returns the matches arrangements for the random match requests till now made
    */
   public getRandomMatchRequestsArrangements(): RandomMatchArrangement[]{
     // Compute the arrangements

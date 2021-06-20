@@ -3,9 +3,14 @@ import { TransientDataHandler, RandomMatchArrangement } from './TransientDataHan
 import match = require('./models/Match');
 import { NewMatchParams, MatchDocument } from './models/Match';
 
-export function arrangeRandomMatchRequests(){
+/**
+ * Function that arranges the random match requests till now made
+ * 
+ */
+export function arrangeRandomMatchRequests(): void{
   const transientDataHandler = TransientDataHandler.getInstance();
 
+  // Get the arrangments of the random made requests till now made
   const randomMatchArrangments : RandomMatchArrangement[] = transientDataHandler.getRandomMatchRequestsArrangements();
 
   if(randomMatchArrangments.length<=0){ // None match arrangement was done

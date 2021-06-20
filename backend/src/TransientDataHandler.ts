@@ -3,7 +3,6 @@ import ClientEvents from './socketsHandlers/eventTypes/ClientEvents';
 import ServerEvents from './socketsHandlers/eventTypes/ServerEvents';
 
 import { Player, PlayerDocument, PlayerType } from "./models/Player";
-// import { FriendMatchRequest, RandomMatchRequest } from "./models/MatchRequest";
 import stats = require('./models/Stats');
 import { StatsDocument } from "./models/Stats";
 
@@ -14,15 +13,8 @@ type SocketIdPlayerMap = {
   [key: string]: string;
 };
 
-// Interfaces for the match requests
-interface MatchRequest {
-  from: string,
-  datetime: Date,
-}
-interface FriendMatchRequest extends MatchRequest{
-  to: string,
-}
-interface RandomMatchRequest extends MatchRequest{
+// Interface for the random match requests
+interface RandomMatchRequest extends Pick<FriendMatchRequest, 'from' | 'datetime'>{
   playerRating: number, 
 }
 
@@ -153,6 +145,16 @@ export class TransientDataHandler {
 
   public hasFriendMatchRequest(fromUsername: string, toUsername: string): boolean {
     return !!this.friendsMatchRequests.find(matchRequest => matchRequest.from === fromUsername && matchRequest.to === toUsername);
+  }
+
+  public getFriendMatchRequest(fromUsername: string, toUsername: string): FriendMatchRequest{
+    const friendMatchRequests = this.friendsMatchRequests.filter(matchRequest => matchRequest.from === fromUsername 
+                                                                && matchRequest.to === toUsername);
+    if(friendMatchRequests.length<=0){
+      throw new Error("There isn't a match request between these two players");
+    }
+
+    return friendMatchRequests[0];
   }
 
   /**

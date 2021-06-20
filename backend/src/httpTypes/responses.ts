@@ -43,6 +43,9 @@ export interface GetPlayerResponseBody extends SuccessResponseBody {
   player: ClientPlayer & { online: boolean, playing: boolean },
 }
 
+export interface GetMatchRequestInformationResponseBody extends SuccessResponseBody,FriendMatchRequest{
+}
+
 export interface GetPlayerStatsResponseBody extends SuccessResponseBody {
   stats: Stats,
 }

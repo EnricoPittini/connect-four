@@ -10,6 +10,7 @@ import { SignUpComponent } from './components/sign-up/sign-up.component';
 import { AuthModule } from './auth/auth.module';
 import { HomeComponent } from './components/home/home.component';
 import { NavComponent } from './components/nav/nav.component';
+import { FriendsSideBarComponent } from './components/friends-side-bar/friends-side-bar.component';
 
 @NgModule({
   declarations: [
@@ -18,6 +19,7 @@ import { NavComponent } from './components/nav/nav.component';
     SignUpComponent,
     HomeComponent,
     NavComponent,
+    FriendsSideBarComponent,
   ],
   imports: [
     BrowserModule,

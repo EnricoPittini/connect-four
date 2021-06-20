@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { AuthGuard } from './auth/guards/auth.guard';
-import { ChatListComponent } from './components/chat-list/chat-list.component';
+import { ChatListComponent } from './pages/chat-list/chat-list.component';
 import { HomeComponent } from './pages/home/home.component';
 import { LiveMatchesComponent } from './pages/live-matches/live-matches.component';
 import { LoginComponent } from './pages/login/login.component';

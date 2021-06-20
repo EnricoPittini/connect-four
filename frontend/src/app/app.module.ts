@@ -13,7 +13,7 @@ import { NavComponent } from './components/nav/nav.component';
 import { FriendsSideBarComponent } from './components/friends-side-bar/friends-side-bar.component';
 import { StatsComponent } from './pages/stats/stats.component';
 import { LiveMatchesComponent } from './pages/live-matches/live-matches.component';
-import { ChatListComponent } from './components/chat-list/chat-list.component';
+import { ChatListComponent } from './pages/chat-list/chat-list.component';
 
 @NgModule({
   declarations: [

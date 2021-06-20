@@ -3,7 +3,7 @@ import ClientEvents from './socketsHandlers/eventTypes/ClientEvents';
 import ServerEvents from './socketsHandlers/eventTypes/ServerEvents';
 
 import { Player } from "./models/Player";
-import { MatchRequest } from "./models/MatchRequest";
+import { FriendMatchRequest, RandomMatchRequest } from "./models/MatchRequest";
 
 
 type PlayerSocketsMap = {
@@ -17,7 +17,7 @@ export class TransientDataHandler {
   private onlinePlayerSocketsMap: PlayerSocketsMap = {};
   private socketIdOnlinePlayerMap: SocketIdPlayerMap = {};
   private inGamePlayers: string[] = [];
-  private matchRequests: MatchRequest[] = [];
+  private friendsMatchRequests: FriendMatchRequest[] = [];
 
   private static instance: TransientDataHandler;
 
@@ -89,7 +89,7 @@ export class TransientDataHandler {
     return !!this.inGamePlayers.find(el => el === username);
   }
 
-  public addMatchRequest(fromUsername: string, toUsername: string): void {
+  public addFriendMatchRequest(fromUsername: string, toUsername: string): void {
     if (!this.isOnline(fromUsername) || !this.isOnline(toUsername)) {
       throw new Error("At least one of the specified players isn't online");
     }
@@ -98,11 +98,11 @@ export class TransientDataHandler {
       throw new Error("At least one of the specified players is alredy in game");
     }
 
-    if (this.hasMatchRequest(fromUsername, toUsername) || this.hasMatchRequest(toUsername, fromUsername)) {
+    if (this.hasFriendMatchRequest(fromUsername, toUsername) || this.hasFriendMatchRequest(toUsername, fromUsername)) {
       throw new Error("There is alredy a match request between these two players");
     }
 
-    this.matchRequests.push({
+    this.friendsMatchRequests.push({
       from: fromUsername,
       to: toUsername,
       datetime: new Date(),
@@ -111,25 +111,25 @@ export class TransientDataHandler {
 
   // To call both for accept match requests and cancel match requests
   // Returns true if something is deleted, false otherwise
-  public deleteMatchRequest(fromUsername: string, toUsername: string): boolean {
-    const previousLength = this.matchRequests.length;
-    this.matchRequests = this.matchRequests.filter(matchRequest => matchRequest.from !== fromUsername || matchRequest.to !== toUsername);
-    const currentLength = this.matchRequests.length;
+  public deleteFriendMatchRequest(fromUsername: string, toUsername: string): boolean {
+    const previousLength = this.friendsMatchRequests.length;
+    this.friendsMatchRequests = this.friendsMatchRequests.filter(matchRequest => matchRequest.from !== fromUsername || matchRequest.to !== toUsername);
+    const currentLength = this.friendsMatchRequests.length;
     return previousLength !== currentLength;
   }
 
   // Delete all the match requests of a player (both from and to)
-  public deletePlayerMatchRequests(username: string): void{
-    this.matchRequests = this.matchRequests.filter(matchRequest => matchRequest.from !== username && matchRequest.to !== username);
+  public deletePlayerFriendMatchRequests(username: string): void{
+    this.friendsMatchRequests = this.friendsMatchRequests.filter(matchRequest => matchRequest.from !== username && matchRequest.to !== username);
   }
 
   // Given a player, returns the list of players in a match request (either from or to) with the specified player 
-  public getPlayerMatchRequestsOpponents(username: string): string[]{
-    return this.matchRequests.filter(matchRequest => matchRequest.from === username || matchRequest.to === username)
+  public getPlayerFriendMatchRequestsOpponents(username: string): string[]{
+    return this.friendsMatchRequests.filter(matchRequest => matchRequest.from === username || matchRequest.to === username)
                              .map( matchRequest => matchRequest.to===username ? matchRequest.from : matchRequest.to );
   }
 
-  public hasMatchRequest(fromUsername: string, toUsername: string): boolean {
-    return !!this.matchRequests.find(matchRequest => matchRequest.from === fromUsername && matchRequest.to === toUsername);
+  public hasFriendMatchRequest(fromUsername: string, toUsername: string): boolean {
+    return !!this.friendsMatchRequests.find(matchRequest => matchRequest.from === fromUsername && matchRequest.to === toUsername);
   }
 }

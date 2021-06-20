@@ -6,7 +6,6 @@ import { TransientDataHandler } from '../TransientDataHandler';
 
 import player = require('../models/Player');
 import match = require('../models/Match');
-import { NewMatchParams } from '../models/Match';
 
 
 export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<ClientEvents, ServerEvents>) {

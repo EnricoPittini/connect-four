@@ -35,15 +35,15 @@ export default interface ServerEvents {
   'chat': (message: ToClientFriendMessage) => void;
 
   /**
-   * Event for notify the player about a match request deletion (both canceled and rejected)
+   * Event for notify the player about a friend match request deletion (both canceled and rejected)
    */
   // TODO il tipo si può isolare, con nome SocketNotificationBetweenClients
-  'deleteMatchRequest': (message : {sender:string, receiver:string}) => void; 
+  'deleteFriendMatchRequest': (message : {sender:string, receiver:string}) => void; 
 
   /**
-   * Event for notify the player about a new match request 
+   * Event for notify the player about a new friend match request 
    */
-  'matchRequest': (message : {sender:string, receiver:string})=> void;
+  'friendMatchRequest': (message : {sender:string, receiver:string})=> void;
 
   /**
    * Event for notify the player about a new game
@@ -55,5 +55,14 @@ export default interface ServerEvents {
    */
   'match': (match_id: mongoose.Schema.Types.ObjectId) => void;
 
+  /**
+   * Event for notify the players, and eventually the observers, of a match about the chat of the match
+   */
   'matchChat': (message: ToClientMatchMessage)=> void;
+
+  /**
+   * Event for notify the clients about a random match request
+   *  (This event it's used only to notify the other sockets of the same player that made the request)
+   */
+   'randomMatchRequest': () => void;
 }

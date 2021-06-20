@@ -83,18 +83,18 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
       }
 
       // Notify all the match requests opponents associated with that player (both senders and receivers)
-      const matchRequestsOpponents = transientDataHandler.getPlayerMatchRequestsOpponents(username);
-      for(let opponent of matchRequestsOpponents){
+      const friendMatchRequestsOpponents = transientDataHandler.getPlayerFriendMatchRequestsOpponents(username);
+      for(let opponent of friendMatchRequestsOpponents){
         const opponentSockets = transientDataHandler.getPlayerSockets(opponent);
         for(let opponentSocket of opponentSockets){
-          opponentSocket.emit('deleteMatchRequest', {
+          opponentSocket.emit('deleteFriendMatchRequest', {
             sender: username,
             receiver: opponent
           });
         }
       }
       // Remove all the match requests associated with that player
-      transientDataHandler.deletePlayerMatchRequests(username);
+      transientDataHandler.deletePlayerFriendMatchRequests(username);
 
       // Authomatic forfait of the player in all the matches in which he is playing (In theory either one or zero) 
       const filter = {

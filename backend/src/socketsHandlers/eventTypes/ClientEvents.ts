@@ -23,15 +23,25 @@ export default interface ClientEvents {
   /**
    * Notify the Server the availability to play a match with the specified friend
    */
-  'matchRequest': (toUsername : string)=> void;
+  'friendMatchRequest': (toUsername : string)=> void;
 
   /**
    * Notify the Server the unavailability to play a match with the specified friend
    */
-  'deleteMatchRequest': (toUsername: string) => void;
+  'deleteFriendMatchRequest': (toUsername: string) => void;
 
   /**
    * Send a message to the specified match
    */
   'matchChat': (text: FromClientChatMessage) => void;
+
+  /**
+   * Notify the Server the availability to play a random match
+   */
+  'randomMatchRequest': () => void;
+
+  /**
+   * Cancel the availability to play a random match
+   */
+  'cancelRandomMatchRequest': ()=> void;
 }

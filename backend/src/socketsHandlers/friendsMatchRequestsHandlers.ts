@@ -12,8 +12,8 @@ import { NewMatchParams } from '../models/Match';
 export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<ClientEvents, ServerEvents>) {
   const transientDataHandler = TransientDataHandler.getInstance();
 
-  socket.on('matchRequest', (toUsername) => {
-    console.info('Socket event: "matchRequest"');
+  socket.on('friendMatchRequest', (toUsername) => {
+    console.info('Socket event: "friendMatchRequest"');
 
     // Player that sent the request
     const fromUsername = transientDataHandler.getSocketPlayer(socket);
@@ -35,7 +35,7 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
                          + fromUsername + ' ,toUsername: ' + toUsername);
       }
 
-      if(transientDataHandler.hasMatchRequest(fromUsername, toUsername)){
+      if(transientDataHandler.hasFriendMatchRequest(fromUsername, toUsername)){
         
         throw new Error('A match request sent from this "from player" to this "to player" alredy exists; fromUsername: '
                          + fromUsername + ' ,toUsername: ' + toUsername);
@@ -51,16 +51,16 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
 
       // Here I have checked all the possible errors
 
-      if(!transientDataHandler.hasMatchRequest(toUsername, fromUsername)){
+      if(!transientDataHandler.hasFriendMatchRequest(toUsername, fromUsername)){
         // The "to player" hasn't sent a match request to "from player" yet
 
         // Create a new match request
-        transientDataHandler.addMatchRequest(fromUsername, toUsername);
+        transientDataHandler.addFriendMatchRequest(fromUsername, toUsername);
 
         // Notify the "from player"
         const fromPlayerSockets = transientDataHandler.getPlayerSockets(fromUsername);
         for (let fromPlayerSocket of fromPlayerSockets) {
-          fromPlayerSocket.emit('matchRequest', {
+          fromPlayerSocket.emit('friendMatchRequest', {
             sender: fromUsername,
             receiver: toUsername
           });
@@ -69,7 +69,7 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
         // Notify the "to player"
         const toPlayerSockets = transientDataHandler.getPlayerSockets(toUsername);
         for (let toPlayerSocket of toPlayerSockets) {
-          toPlayerSocket.emit('matchRequest', {
+          toPlayerSocket.emit('friendMatchRequest', {
             sender: fromUsername,
             receiver: toUsername
           });
@@ -111,8 +111,8 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
         }
 
         // Deleting all the match requests for both player
-        transientDataHandler.deletePlayerMatchRequests(fromUsername);
-        transientDataHandler.deletePlayerMatchRequests(toUsername);
+        transientDataHandler.deletePlayerFriendMatchRequests(fromUsername);
+        transientDataHandler.deletePlayerFriendMatchRequests(toUsername);
 
         return;
       }
@@ -123,8 +123,8 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
     });  
   });
 
-  socket.on('deleteMatchRequest', (toUsername) => {
-    console.info('Socket event: "deleteMatchRequest"');
+  socket.on('deleteFriendMatchRequest', (toUsername) => {
+    console.info('Socket event: "deleteFriendMatchRequest"');
 
     // Player that sent the request
     const fromUsername = transientDataHandler.getSocketPlayer(socket);
@@ -133,14 +133,14 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
       return;
     }
 
-    let deleted = transientDataHandler.deleteMatchRequest(fromUsername, toUsername);
-    deleted = transientDataHandler.deleteMatchRequest(toUsername, fromUsername) || deleted;
+    let deleted = transientDataHandler.deleteFriendMatchRequest(fromUsername, toUsername);
+    deleted = transientDataHandler.deleteFriendMatchRequest(toUsername, fromUsername) || deleted;
 
     if(deleted){ // Something has been deleted
       // Notify the "from player"
       const fromPlayerSockets = transientDataHandler.getPlayerSockets(fromUsername);
       for (let fromPlayerSocket of fromPlayerSockets) {
-        fromPlayerSocket.emit('deleteMatchRequest', {
+        fromPlayerSocket.emit('deleteFriendMatchRequest', {
           sender: fromUsername,
           receiver: toUsername,
         });
@@ -149,7 +149,7 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
       // Notify the "to player"
       const toPlayerSockets = transientDataHandler.getPlayerSockets(toUsername);
       for (let toPlayerSocket of toPlayerSockets) {
-        toPlayerSocket.emit('deleteMatchRequest', {
+        toPlayerSocket.emit('deleteFriendMatchRequest', {
           sender: fromUsername,
           receiver: toUsername,
         });

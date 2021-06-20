@@ -49,8 +49,9 @@ import ClientEvents from './socketsHandlers/eventTypes/ClientEvents';
 import ServerEvents from './socketsHandlers/eventTypes/ServerEvents';
 import registerOnlinePlayersHandlers from './socketsHandlers/onlinePlayerHandlers';
 import registerFriendsChatsHandlers from './socketsHandlers/friendsChatsHandlers';
-import registerMatchRequestsHandlers from './socketsHandlers/matchRequestsHandlers';
+import registerFriendsMatchRequestsHandlers from './socketsHandlers/friendsMatchRequestsHandlers';
 import registerMatchesChatsHandlers from './socketsHandlers/matchesChatsHandlers';
+import registerRandomMatchRequestsHandlers from './socketsHandlers/randomMatchRequestsHandlers';
 
 import {initializeSocketIO, getSocketIO} from './initializeSocketIO';
 
@@ -275,8 +276,9 @@ mongoose.connect(`mongodb://${DB_HOST}:${DB_PORT}/${DB_NAME}`, {
 
     registerOnlinePlayersHandlers(io, socket);
     registerFriendsChatsHandlers(io, socket);
-    registerMatchRequestsHandlers(io, socket);
+    registerFriendsMatchRequestsHandlers(io, socket);
     registerMatchesChatsHandlers(io, socket);
+    registerRandomMatchRequestsHandlers(io, socket);
   });
 
   server.listen(SERVER_PORT, () => console.info(`HTTP Server started on port ${SERVER_PORT}`));

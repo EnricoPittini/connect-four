@@ -53,7 +53,7 @@ export default interface ServerEvents {
   /**
    * Event for notify the two players of that match that something new happened in that match
    */
-  'match': (match_id: mongoose.Schema.Types.ObjectId) => void;
+  'match': (matchId: mongoose.Schema.Types.ObjectId) => void;
 
   /**
    * Event for notify the players, and eventually the observers, of a match about the chat of the match
@@ -65,4 +65,10 @@ export default interface ServerEvents {
    *  (This event it's used only to notify the other sockets of the same player that made the request)
    */
    'randomMatchRequest': () => void;
+
+   /**
+     * Event for notify the clients about a random match request cancelation
+     *  (This event it's used only to notify the other sockets of the same player that made the cancelation)
+    */
+   'cancelRandomMatchRequest': () => void;
 }

@@ -51,6 +51,7 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
     }
   });
 
+  // A socket disconnected
   socket.on('disconnect', async () => {
     console.info('Socket event: "disconnect"');
 
@@ -65,7 +66,7 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
       return;
     }
 
-    // the player has become offline
+    // The player has become offline: several actions to do
 
     try{
       // Notify all his friends
@@ -81,7 +82,7 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
         }
       }
 
-      // Notify all the match requests opponents associated with that player
+      // Notify all the match requests opponents associated with that player (both senders and receivers)
       const matchRequestsOpponents = transientDataHandler.getPlayerMatchRequestsOpponents(username);
       for(let opponent of matchRequestsOpponents){
         const opponentSockets = transientDataHandler.getPlayerSockets(opponent);
@@ -108,9 +109,8 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
           }
         ]
       }
+      // The matches that the player was playing (In theory either one or zero). Authomatic forfait for all these matches
       const matchDocuments = await match.getModel().find(filter).exec();
-      // The matches that the player was playing (In theory either one or zero)
-      // Authomatic forfait for all these matches
       const promises : Promise<MatchDocument>[] = [];
       for(let matchDocument of matchDocuments){
         matchDocument.forfait(username);
@@ -118,7 +118,7 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
       }
       await Promise.all(promises);
 
-      // Ending all the matches
+      // Ending all these matches
       for(let matchDocument of matchDocuments){
         // Notify the opponent of the match (all his sockets)
         const opponent = matchDocument.player1===username ? matchDocument.player2 : matchDocument.player1;

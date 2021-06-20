@@ -1,0 +1,31 @@
+
+<!-- Side bar -->
+<app-friends-side-bar></app-friends-side-bar>
+
+
+<!-- Page content -->
+<div class="main">
+  <!-- Nav bar -->
+  <app-nav></app-nav>
+
+  <!-- The main content of the page -->
+  <main>
+
+    <h1>Live matches</h1>
+
+    <h2>Friends live matches</h2>
+    <!-- TODO simile a sotto -->
+
+    <h2>Best global live matches</h2>
+
+    <div *ngFor="let liveMatch of globalLiveMatches" >
+      <!-- TODO eventualmente creare un component a parte (MatchCard) -->
+      {{ liveMatch.playerA }} vs {{ liveMatch.playerB }}
+
+      <!-- TODO forse meglio un button -->
+      <a [routerLink]="['/game/' + liveMatch.matchId + '/observe']">Observe</a>
+    </div>
+
+  </main>
+
+</div>

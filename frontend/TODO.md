@@ -10,6 +10,7 @@ https://github.com/bartosz-io/jwt-auth-angular/blob/master/src/app/auth/services
 
 - Add Role Guard: allow only the roles passed
 
+- Emettere evento onlne ???
 
 ## Nav bar
 - Sarebbe bello inserire un puntino rosso se ci sono nuove notifiche (messaggi / richieste

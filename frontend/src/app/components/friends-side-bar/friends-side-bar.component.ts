@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import {FriendService} from 'src/app/services/friend.service';
 
 
 
@@ -16,7 +17,9 @@ export class FriendsSideBarComponent implements OnInit {
 
 
   // TODO probabile FriendService
-  constructor() { }
+  constructor(
+    public friendService: FriendService,
+  ) { }
 
   ngOnInit(): void {
   }

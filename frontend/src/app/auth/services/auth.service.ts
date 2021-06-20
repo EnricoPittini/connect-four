@@ -143,6 +143,15 @@ export class AuthService {
   }
 
   /**
+   * Returns the JWT token.
+   * @returns The JWT token of the authenticated user, or the empty string
+   *          if the user is not authenticated.
+   */
+  getToken(): string {
+    return this.token || '';
+  }
+
+  /**
    * Gets the user username.
    *
    * @returns The username of the authenticated user, or the empty string

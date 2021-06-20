@@ -1,4 +1,4 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { from, Observable, of } from 'rxjs';
 import { map, mergeMap } from 'rxjs/operators';
@@ -52,10 +52,14 @@ export class FriendService {
   /**
    * Http headers.
    */
-  private static HttpOptions = {
-    headers: new HttpHeaders({
-      'Content-Type': 'application/json',
-    })
+  private createHttpOptions(params: any = {}) {
+    return {
+      headers: new HttpHeaders({
+        'Authorization': `Bearer ${this.auth.getToken()}`,
+        'Content-Type': 'application/json',
+      }),
+      params: new HttpParams({ fromObject: params }),
+    };
   };
 
   /**
@@ -139,7 +143,7 @@ export class FriendService {
     this.http.post<NotifyAvailabilityFriendRequestResponseBody>(
       `${FriendService.BASE_URL}/friend_requests`,
       body,
-      FriendService.HttpOptions
+      this.createHttpOptions()
     )
     .subscribe(
       response => console.info('Friend request sent correctly'),
@@ -163,7 +167,7 @@ export class FriendService {
     this.http.request(
       'delete',
       `${FriendService.BASE_URL}/friend_requests`,
-      { ...FriendService.HttpOptions, body: body }
+      { ...this.createHttpOptions(), body: body }
     )
     .subscribe(
       response => console.info('Friend request cancelled correctly'),
@@ -178,7 +182,7 @@ export class FriendService {
    */
   private populateFriendList(): void {
     // Get information about the friends
-    this.http.get<GetFriendsResponseBody>(`${FriendService.BASE_URL}/friends`, FriendService.HttpOptions)
+    this.http.get<GetFriendsResponseBody>(`${FriendService.BASE_URL}/friends`, this.createHttpOptions())
       .pipe(
         mergeMap(response => from(response.friends)),       // flatten the object into an array of usernames
         mergeMap(this.getFriendInfo)
@@ -346,7 +350,7 @@ export class FriendService {
    */
    private populateFriendRequestList(): void {
     // Get the pending friend request from the backend
-    this.http.get<GetFriendRequestsResponseBody>(`${FriendService.BASE_URL}/friend_requests`, FriendService.HttpOptions)
+    this.http.get<GetFriendRequestsResponseBody>(`${FriendService.BASE_URL}/friend_requests`, this.createHttpOptions())
       .pipe(
         mergeMap(response => from(response.friendRequests)),        // flatten the object into an array of FriendRequest
       )

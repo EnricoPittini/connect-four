@@ -3,6 +3,8 @@ import { Observable, of, throwError } from 'rxjs';
 import { catchError, map, mapTo, retry, tap } from 'rxjs/operators';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 
+import jwt_decode from "jwt-decode";
+
 
 // TODO creare tipi HttpRequestBody e HttpResponseBody (quelli in backend)
 // TODO rimuovere questo tipo di prova
@@ -157,10 +159,26 @@ export class AuthService {
   /**
    * Checks if the user is authenticated.
    *
-   * @returns true if the user is authenticated, false otherwise
+   * @returns true if the user is authenticated, false otherwise.
    */
   isAuthenticated(): boolean {
     return !!this.token;
+  }
+
+  /**
+   * Gets the user username.
+   *
+   * @returns The username of the authenticated user, or the empty string
+   *          if the user is not authenticated.
+   */
+  getUsername(): string {
+    if (!this.token) {
+      // The user is not authenticated, return empty string
+      return '';
+    }
+    // Decode the token and return the username field
+    const tokenData = jwt_decode<TokenData>(this.token);
+    return tokenData.username;
   }
 
   /**

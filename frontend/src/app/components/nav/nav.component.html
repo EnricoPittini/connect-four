@@ -7,8 +7,8 @@
 
   <!-- Link to chat page -->
   <a [routerLink]="['/']">Chat</a> |
-  <!-- Link to stats page -->
-  <a [routerLink]="['/']">Stats</a> |
+  <!-- Link to (current authenticated user) stats page-->
+  <a [routerLink]="['/player/' + auth.getUsername()]">Stats</a> |
   <!-- Link to friend requests page -->
   <a [routerLink]="['/']">Friend requests</a> |
   <!-- Link to live matches page -->

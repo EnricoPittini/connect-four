@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 
+
 // TODO da capire se va bene e forse metterla in un file a parte
 interface FriendInfo {
   username: string,
@@ -10,6 +11,9 @@ interface FriendInfo {
   // TODO forse unreadMessages: boolean,    // non serve in sidebar, ma in chat
 }
 
+/**
+ * A side bar that shows information about the player's friends.
+ */
 @Component({
   selector: 'app-friends-side-bar',
   templateUrl: './friends-side-bar.component.html',

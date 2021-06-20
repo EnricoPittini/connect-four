@@ -5,43 +5,20 @@ import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http
 
 import jwt_decode from "jwt-decode";
 
+import { ErrorResponseBody, LoginResponseBody, RegistrationResponseBody } from 'src/app/models/httpTypes/responses.model';
+import { PlayerType } from 'src/app/models/player.model';
+import { StandardPlayerRegistrationRequestBody } from 'src/app/models/httpTypes/requests.model';
 
-// TODO creare tipi HttpRequestBody e HttpResponseBody (quelli in backend)
-// TODO rimuovere questo tipo di prova
-export interface ResponseBody {
-  error: boolean,
-  statusCode: number,
-}
 
-export interface LoginResponseBody extends ResponseBody {
-  error: false,
-  token: string,
-}
-
-export interface RegistrationResponseBody extends ResponseBody {
-  error: false,
-  token: string,
-}
-
-export interface ErrorResponseBody extends ResponseBody {
-  error: true,
-  errorMessage: string,
-}
-
-export interface TokenData {
+// TODO va bene definita qui internamente ?
+interface TokenData {
   username: string,
   name: string,
   surname: string,
-  type: string,   // TODO PlayerType enum
+  type: PlayerType,
 }
 
-// TODO eventualmente PlayerLogInParams
-export interface PlayerSignUpParams {
-  username: string,
-  password: string,
-  name: string,
-  surname: string,
-  avatar: string,
+export interface PlayerSignUpParams extends Omit<StandardPlayerRegistrationRequestBody, 'isModerator'> {
 }
 
 
@@ -56,6 +33,7 @@ export class AuthService {
   /**
    * Base REST api server url.
    */
+  // TODO .env per host, porta e versione ?
   private static readonly BASE_URL = 'http://localhost:8080/v0.0.1';
 
   /**
@@ -146,8 +124,7 @@ export class AuthService {
       })
     };
 
-    // TODO HTTP type
-    const body = { ...player, isModerator: false };
+    const body: StandardPlayerRegistrationRequestBody = { ...player, isModerator: false };
 
     return this.http.post<RegistrationResponseBody>(`${AuthService.BASE_URL}/players`, body, options)
       .pipe(

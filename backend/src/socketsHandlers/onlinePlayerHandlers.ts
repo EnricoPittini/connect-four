@@ -130,10 +130,25 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
           opponentSocket.emit('match', matchDocument._id);
         }
 
+        // Put the opponent as out of game
+        transientDataHandler.markOffGame(opponent);
+
         // Notify all the observers
         const roomName = 'observersRoom:' + matchDocument._id.toString();
-        io.to(roomName).emit('match', matchDocument._id);
+        io.to(roomName).emit('match', matchDocument._id); // TODO : cosa succede se la room non esiste? (Non dovrebbe fare nulla)
+
+        // All the observers have to leave the match room
+        const observersSocketsId = io.sockets.adapter.rooms.get(roomName);
+        if(observersSocketsId){ // The match observers room exists
+          observersSocketsId.forEach( socketId => {
+            const observerSocket = io.sockets.sockets.get(socketId);
+            observerSocket?.leave(roomName);
+          } );
+        }
       }
+
+      // Put the player as out of the game
+      transientDataHandler.markOffGame(username);
       return;
     })
     .catch(err=>{

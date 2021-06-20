@@ -8,6 +8,7 @@ import { TransientDataHandler } from "../TransientDataHandler";
 import player = require('../models/Player');
 import match = require('../models/Match');
 import { MatchStatus, MatchDocument } from '../models/Match';
+import stats = require('../models/Stats');
 
 
 export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<ClientEvents, ServerEvents>) {
@@ -50,7 +51,7 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
     }
   });
 
-  socket.on('disconnect', () => {
+  socket.on('disconnect', async () => {
     console.info('Socket event: "disconnect"');
 
     const username = transientDataHandler.getSocketPlayer(socket);
@@ -66,50 +67,48 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
 
     // the player has become offline
 
-    // Notify all his friends
-    player.getModel().findOne({ username: username }, { friends: 1 }).then(playerDocument => {
+    try{
+      // Notify all his friends
+      const playerDocument = await player.getModel().findOne({ username: username }, { friends: 1 }).exec();
       if (!playerDocument) {
         console.warn('An invalid player disconnected, username: ', username);
         return;
       }
-
       for (let friendUsername of playerDocument.friends) {
         const friendSockets = transientDataHandler.getPlayerSockets(friendUsername);
-
         for (let friendSocket of friendSockets) {
           friendSocket.emit('friendOffline', username);
         }
       }
-    });
 
-    // Notify all the match requests opponents associated with that player
-    const matchRequestsOpponents = transientDataHandler.getPlayerMatchRequestsOpponents(username);
-    for(let opponent of matchRequestsOpponents){
-      const opponentSockets = transientDataHandler.getPlayerSockets(opponent);
-      for(let opponentSocket of opponentSockets){
-        opponentSocket.emit('deleteMatchRequest', {
-          sender: username,
-          receiver: opponent
-        });
-      }
-    }
-    // Remove all the match requests associated with that player
-    transientDataHandler.deletePlayerMatchRequests(username);
-
-    // Authomatic forfait for the player
-    const filter = {
-      $or:[
-        {
-          player1: username,
-          status: MatchStatus.IN_PROGRESS
-        },
-        {
-          player2: username,
-          status: MatchStatus.IN_PROGRESS
+      // Notify all the match requests opponents associated with that player
+      const matchRequestsOpponents = transientDataHandler.getPlayerMatchRequestsOpponents(username);
+      for(let opponent of matchRequestsOpponents){
+        const opponentSockets = transientDataHandler.getPlayerSockets(opponent);
+        for(let opponentSocket of opponentSockets){
+          opponentSocket.emit('deleteMatchRequest', {
+            sender: username,
+            receiver: opponent
+          });
         }
-      ]
-    }
-    match.getModel().find(filter).then( matchDocuments => {
+      }
+      // Remove all the match requests associated with that player
+      transientDataHandler.deletePlayerMatchRequests(username);
+
+      // Authomatic forfait of the player in all the matches in which he is playing (In theory either one or zero) 
+      const filter = {
+        $or:[
+          {
+            player1: username,
+            status: MatchStatus.IN_PROGRESS
+          },
+          {
+            player2: username,
+            status: MatchStatus.IN_PROGRESS
+          }
+        ]
+      }
+      const matchDocuments = await match.getModel().find(filter).exec();
       // The matches that the player was playing (In theory either one or zero)
       // Authomatic forfait for all these matches
       const promises : Promise<MatchDocument>[] = [];
@@ -117,27 +116,25 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
         matchDocument.forfait(username);
         promises.push(matchDocument.save());
       }
+      await Promise.all(promises);
 
-      return Promise.all(promises);
-    })
-    .then( matchDocuments =>{
-      // Notify all the opponents and observers about the forfait
+      // Ending all the matches
       for(let matchDocument of matchDocuments){
-        // Notify the opponent (all his sockets)
+        // Notify the opponent of the match (all his sockets)
         const opponent = matchDocument.player1===username ? matchDocument.player2 : matchDocument.player1;
         const opponentSockets = transientDataHandler.getPlayerSockets(opponent);
         for(let opponentSocket of opponentSockets){
           opponentSocket.emit('match', matchDocument._id);
         }
 
-        // Put the opponent as out of game
+        // Put the opponent of the match as out of game
         transientDataHandler.markOffGame(opponent);
 
-        // Notify all the observers
+        // Notify all the observers of the match
         const roomName = 'observersRoom:' + matchDocument._id.toString();
         io.to(roomName).emit('match', matchDocument._id); // TODO : cosa succede se la room non esiste? (Non dovrebbe fare nulla)
 
-        // All the observers have to leave the match room
+        // All the observers of the match have to leave the match room
         const observersSocketsId = io.sockets.adapter.rooms.get(roomName);
         if(observersSocketsId){ // The match observers room exists
           observersSocketsId.forEach( socketId => {
@@ -145,15 +142,27 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
             observerSocket?.leave(roomName);
           } );
         }
+
+        // Find the stats documents of the 2 players of the match, in order to refresh them
+        const statsDocumentPlayer1 = await stats.getModel().findOne({player:matchDocument.player1}).exec();
+        const statsDocumentPlayer2 = await stats.getModel().findOne({player:matchDocument.player2}).exec();
+        if(!statsDocumentPlayer1 || !statsDocumentPlayer2){
+          console.warn('At least one of the player of the match doesn\'t have an associated stats document');
+          return;
+        }
+        statsDocumentPlayer1.refresh(matchDocument);
+        statsDocumentPlayer2.refresh(matchDocument);
+        await statsDocumentPlayer1.save();
+        await statsDocumentPlayer2.save();
       }
 
       // Put the player as out of the game
       transientDataHandler.markOffGame(username);
       return;
-    })
-    .catch(err=>{
-      console.warn("An error occoured: " + err);
+    }
+    catch(err){
+      console.warn("An internal DB error occoured: " + JSON.stringify(err,null,2));
       return;
-    })
+    }
   });
 }

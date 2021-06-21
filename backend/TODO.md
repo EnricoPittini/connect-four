@@ -5,6 +5,7 @@
 - Aggiungere return in ogni res.status().json()
 - Cambiare il nome friend chat in private chat
 - Creare funzione per rendere un giocatore offline (codice più modulare) (Tale codice è usato sia quando un giocatore va offline che quando viene eliminato)
+- Creare funzione per terminare una partita (codice più modulare) (Tale codice è usato sia quando un giocatore va offline che negli endpoints post e put in matches/:match_id)
 
 
 ## JWT token management

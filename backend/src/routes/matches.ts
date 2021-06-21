@@ -1,3 +1,5 @@
+// MATCHES ENDPOINTS
+
 import express from 'express';
 import mongoose = require('mongoose');
 
@@ -21,19 +23,27 @@ import {
 } from '../httpTypes/responses';
 import { TransientDataHandler } from '../TransientDataHandler';
 
+// Handler of the non-persistent data
 const transientDataHandler = TransientDataHandler.getInstance();
 
 const router = express.Router();
 export default router;
 
+
 // TODO eventualmente restituire solo lista id di matches e non tutti i dati
+/**
+ * Returns all the matches (both terminated and in progress)
+ */
+//?live=<live>&username=<username>&skip=<skip>&limit=<limit>
 router.get(`/`, auth, async (req, res, next) => {
+
+  // Check the consistency of the query section
   if ((req.query.skip && typeof (req.query.skip) !== 'string') || (req.query.limit && typeof (req.query.limit) !== 'string')
       || (req.query.live && typeof (req.query.live) !== 'string') || (req.query.username && typeof (req.query.username) !== 'string')) {
     const errorBody = { error: true, statusCode: 405, errorMessage: 'Invalid query section for the URL' };
     return next(errorBody);
   }
-
+  // Parse the 'live' query parameter
   let live = false;
   if (req.query.live) {
     if (req.query.live.toLowerCase() !== "true" || req.query.live.toLowerCase() !== "false") {
@@ -44,12 +54,13 @@ router.get(`/`, auth, async (req, res, next) => {
       return next(errorBody);
     }
   }
-
+  // Parse the 'skip' and 'limit' query parameters
   const skip = parseInt(req.query.skip || '0') || 0;
   const limit = parseInt(req.query.limit || '20') || 20;
-
+  // 'username' query parameter
   const username = req.query.username;
 
+  // Object used to filter the query
   const filter: any = {};
   if (live) {
     filter.status = MatchStatus.IN_PROGRESS;
@@ -58,7 +69,13 @@ router.get(`/`, auth, async (req, res, next) => {
     filter.username = username;
   }
 
-  if (!live) {
+  
+  if (!live) { 
+    // The Client asked for all the matches (both in progress and terminated)
+    // In this case the matches are sorted by datetime (from the oldest to the latest)
+
+    // TODO chiedere a Giacomo
+
     return match.getModel().find(filter, { __v: 0 }).sort({ datetimeBegin: -1 }).then((matchDocuments) => {
       const filteredMatchDocuments = matchDocuments.slice(skip, skip+limit);
       const body: GetMatchesResponseBody = { error: false, statusCode: 200, matches: filteredMatchDocuments as any };
@@ -70,10 +87,18 @@ router.get(`/`, auth, async (req, res, next) => {
       return next(errorBody);
     });
   }
+
   else {
+    // The Client asked only for the in progress matches
+    // In this case the matches are sorted by match rating (e.g. the mean of the ratings of the two players)
+
     try {
+      // Search the matches
       const matchDocuments = await match.getModel().find(filter, { __v: 0 });
 
+      // Array of promise, where there is a promise for each match
+      // Each promise is a promise of 2 numbers (e.g. array of numbers). These two numbers are the two ratings of the 
+      // players a match. 
       const matchPlayersRatingsPromises: Promise<number[]>[] = [];
       for (let matchDocument of matchDocuments) {
         const matchPlayersRatingsPromise = Promise.all([
@@ -87,8 +112,11 @@ router.get(`/`, auth, async (req, res, next) => {
         matchPlayersRatingsPromises.push(matchPlayersRatingsPromise);
       }
       const matchPlayersRatings = await Promise.all(matchPlayersRatingsPromises);
+
+      // Array that contains, for each match, the associated rating.
       const matchRatings: number[] = matchPlayersRatings.map(matchRatings => (matchRatings[0] + matchRatings[1]) / 2);
 
+      // Matches sorted by rating
       const sortedMatchDocuments = matchDocuments
         .map((matchDocument, index) => ({ rating: matchRatings[index], document: matchDocument }))
         .sort((a, b) => b.rating - a.rating)
@@ -106,8 +134,16 @@ router.get(`/`, auth, async (req, res, next) => {
   }
 });
 
+
+
+/**
+ * Returns all the informations about a specific match
+ */
 router.get(`/:match_id`, auth, (req, res, next) => {
+
   const matchId = new mongoose.SchemaTypes.ObjectId(req.params.match_id);
+
+  // Search the match document
   match.getModel().findOne({ _id: matchId }, { __v: 0 }).then((document) => {
     if (!document) {
       const errorBody: ErrorResponseBody = { error: true, statusCode: 404, errorMessage: 'The selected match doesn\'t exist' };
@@ -129,8 +165,12 @@ router.get(`/:match_id`, auth, (req, res, next) => {
 
 
 
-// A player wants to add a move in the specified match
+/**
+ * The Client asks to add a move in the specified match
+ */
 router.post(`/:match_id`, auth, async (req, res, next) => {
+
+  // socketIO instance
   const io = getSocketIO();
 
   // Not valid body
@@ -142,6 +182,7 @@ router.post(`/:match_id`, auth, async (req, res, next) => {
 
   try{
     const matchId = new mongoose.SchemaTypes.ObjectId(req.params.match_id);
+
     // Search for the match document
     const matchDocument = await match.getModel().findOne({ _id: matchId }, { __v: 0 }).exec();
     if (!matchDocument) {
@@ -177,6 +218,8 @@ router.post(`/:match_id`, auth, async (req, res, next) => {
 
     // Check if the match is ended
     if(matchDocument.status!==MatchStatus.IN_PROGRESS){
+      // The match is endend: several operations to do
+
       // All the observers have to leave the match room
       const observersSocketsId = io.sockets.adapter.rooms.get(roomName);
       if(observersSocketsId){ // The match observers room exists
@@ -219,12 +262,17 @@ router.post(`/:match_id`, auth, async (req, res, next) => {
 
 
 
-// A player wants to end prematurely his match
+/**
+ * The Client asks to end prematurely the specified match
+ */
 router.put(`/:match_id`, auth, async (req, res, next) => {
+
+  // socketIO instance
   const io = getSocketIO();
 
   try{
     const matchId = new mongoose.SchemaTypes.ObjectId(req.params.match_id);
+
     // Search for the match document
     const matchDocument = await match.getModel().findOne({ _id: matchId }, { __v: 0 }).exec();
     if (!matchDocument) {
@@ -243,6 +291,8 @@ router.put(`/:match_id`, auth, async (req, res, next) => {
       throw errorBody;
     }
     await matchDocument.save();
+
+    // The match is endend: several operations to do
     
     // Notify the 2 players (all the sockets)
     const player1Sockets = transientDataHandler.getPlayerSockets(matchDocument.player1);
@@ -299,8 +349,11 @@ router.put(`/:match_id`, auth, async (req, res, next) => {
 
 
 
-// Endpoint to become an observer of a game
+/**
+ * The Client asks to become an observer of the specified game
+ */
 router.post('/:match_id/observers', auth, (req, res, next) =>{
+
   const matchId = new mongoose.SchemaTypes.ObjectId(req.params.match_id);
 
   // Search for the match
@@ -311,7 +364,7 @@ router.post('/:match_id/observers', auth, (req, res, next) =>{
       throw errorBody;
     }
 
-    //Check if the player is one of the two players of the match
+    //Check if the Client is one of the two players of the match
     if(req.user!.username===matchDocument.player1 || req.user!.username===matchDocument.player2){
       console.warn('A client asked to be an observer for a match in which he is playing: ' + req.params.match_id);
       const errorBody: ErrorResponseBody = { 
@@ -322,9 +375,9 @@ router.post('/:match_id/observers', auth, (req, res, next) =>{
       throw errorBody;
     }
 
-    // Check if the player is alredy an observer of another match
+    // Check if the Client is alredy an observer of another match
     const playerSockets = transientDataHandler.getPlayerSockets(req.user!.username);
-    for(let playerSocket of playerSockets){ // At least one of the player sockets is in alredy an abserver
+    for(let playerSocket of playerSockets){ // At least one of the Client sockets is in alredy an abserver
       if(playerSocket.rooms.size>0){ 
         console.warn('A client asked to be an observer while he is alredy an observer, match_id: ' + req.params.match_id);
         const errorBody: ErrorResponseBody = { error: true, statusCode: 404, errorMessage: 'You are alredy an observer of another match' };
@@ -332,7 +385,7 @@ router.post('/:match_id/observers', auth, (req, res, next) =>{
       }
     }
 
-    // Now I can insert all the player sockets in the match observers room
+    // Now I can insert all the Client sockets in the match observers room
     const roomName = 'observersRoom:' + req.params.match_id;
     for(let playerSocket of playerSockets){
       playerSocket.join(roomName);
@@ -350,8 +403,12 @@ router.post('/:match_id/observers', auth, (req, res, next) =>{
   })
 });
 
-// Endpoint to not be anymore an observer of a match
+
+/**
+ * The Client asks to not be anymore an observer of a match 
+ */
 router.delete('/:match_id/observers', auth, (req, res, next) =>{
+
   const matchId = new mongoose.SchemaTypes.ObjectId(req.params.match_id);
 
   // Search for the match
@@ -364,9 +421,9 @@ router.delete('/:match_id/observers', auth, (req, res, next) =>{
 
     const roomName = 'observersRoom:' + req.params.match_id;
 
-    // Check if the player is not an observer of that match
+    // Check if the Client is not an observer of that match
     const playerSockets = transientDataHandler.getPlayerSockets(req.user!.username);
-    for(let playerSocket of playerSockets){ // All the player sockets must be in the match room
+    for(let playerSocket of playerSockets){ // All the Client sockets must be in the match room
       if(!playerSocket.rooms.has(roomName)){ 
         console.warn('A client asked to not be anymore an observer of a match he wasn\'t observing, match_id: '
                      + req.params.match_id);
@@ -375,7 +432,7 @@ router.delete('/:match_id/observers', auth, (req, res, next) =>{
       }
     }
 
-    // Now I can take out all the player sockets from the match observers room
+    // Now I can take out all the Client sockets from the match observers room
     for(let playerSocket of playerSockets){
       playerSocket.leave(roomName);
     }

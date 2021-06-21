@@ -1,18 +1,29 @@
+// Interfaces for the HTTP responses
+
 import { ClientPlayer } from '../models/Player';
 import { Stats } from '../models/Stats';
 import { FriendRequest } from '../models/FriendRequest';
 import { Chat } from '../models/Chat';
 import { Match } from '../models/Match';
 
+/**
+ * Represents a generic response
+ */
 export interface ResponseBody {
   error: boolean,
   statusCode: number,
 }
 
+/**
+ * Represents a generic success response
+ */
 export interface SuccessResponseBody extends ResponseBody {
   error: false,
 }
 
+/**
+ * Represents an error response
+ */
 export interface ErrorResponseBody extends ResponseBody {
   error: true,
   errorMessage: string,
@@ -40,7 +51,7 @@ export interface ConfirmModeratorResponseBody extends SuccessResponseBody {
 }
 
 export interface GetPlayerResponseBody extends SuccessResponseBody {
-  player: ClientPlayer & { online: boolean, playing: boolean },
+  player: ClientPlayer & { online: boolean, ingame: boolean },
 }
 
 export interface GetMatchRequestInformationResponseBody extends SuccessResponseBody,FriendMatchRequest{

@@ -21,7 +21,7 @@ export interface Stats {
  * Represents a stats document(e.g. a stats memorized in the database)
  */
 export interface StatsDocument extends Stats, mongoose.Document {
-  refresh: (match: MatchDocument) => void,
+  refresh: (match: MatchDocument) => Promise<void>,
 }
 
 export interface StatsModel extends mongoose.Model<StatsDocument> {

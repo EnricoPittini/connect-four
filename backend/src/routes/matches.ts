@@ -74,8 +74,6 @@ router.get(`/`, auth, async (req, res, next) => {
     // The Client asked for all the matches (both in progress and terminated)
     // In this case the matches are sorted by datetime (from the oldest to the latest)
 
-    // TODO chiedere a Giacomo
-
     return match.getModel().find(filter, { __v: 0 }).sort({ datetimeBegin: -1 }).then((matchDocuments) => {
       const filteredMatchDocuments = matchDocuments.slice(skip, skip+limit);
       const body: GetMatchesResponseBody = { error: false, statusCode: 200, matches: filteredMatchDocuments as any };

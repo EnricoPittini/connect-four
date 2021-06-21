@@ -23,14 +23,14 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
     }
 
     // I search the "from player"
-    player.getModel().findOne({ username: fromUsername }, { friends: 1 }).then(fromPlayerDocument => {
+    player.getModel().findOne({ username: fromUsername }).then(fromPlayerDocument => {
       if (!fromPlayerDocument) {
         throw new Error('An invalid player sent a message, username: ' + fromUsername);
       }
 
       // With this condition we check not only that the "to player" is a friend of "from player", but also that "to player" is a 
       // valid player 
-      if(!fromPlayerDocument.friends.find( el => el===toUsername )){
+      if(!fromPlayerDocument.hasFriend(toUsername)){
         throw new Error('A player sent a match request to another player that isn\'t his friend; fromUsername: ' 
                          + fromUsername + ' ,toUsername: ' + toUsername);
       }

@@ -41,7 +41,7 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
 
       const fromPlayerType = fromPlayerDocument.type;
 
-      if(fromPlayerType!==PlayerType.MODERATOR && (!fromPlayerDocument.friends.find( el => el===toUsername ))){
+      if(fromPlayerType!==PlayerType.MODERATOR && (!fromPlayerDocument.hasFriend(toUsername))){
         throw new Error('A  Standard player sent a message to another player that isn\'t his friend; fromUsername: '
                          + fromUsername + ' ,toUsername: ' + toUsername);
       }

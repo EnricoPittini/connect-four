@@ -28,6 +28,7 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
         throw new Error('An invalid player sent a random match request, username: ' + username);
       }
 
+      // The several checks are made by transientDataHandler
       return transientDataHandler.addRandomMatchRequest(username);
     })
     .then( () => {

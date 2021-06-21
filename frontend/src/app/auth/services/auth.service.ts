@@ -5,6 +5,10 @@ import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http
 
 import jwt_decode from "jwt-decode";
 
+import { io, Socket } from 'socket.io-client';
+import ClientEvents from 'src/app/models/eventTypes/client-events.model';
+import ServerEvents from 'src/app/models/eventTypes/server-events.model';
+
 import { ErrorResponseBody, LoginResponseBody, RegistrationResponseBody } from 'src/app/models/httpTypes/responses.model';
 import { PlayerType } from 'src/app/models/player.model';
 import { StandardPlayerRegistrationRequestBody } from 'src/app/models/httpTypes/requests.model';
@@ -37,9 +41,19 @@ export class AuthService {
   private static readonly BASE_URL = 'http://localhost:8080/v0.0.1';
 
   /**
+   * Base WebSocket server url.
+   */
+  private static readonly BASE_SOCKET_URL = 'http://localhost:8080';
+
+  /**
    * The local storage key where to store the JWT token.
    */
   private static readonly JWT_TOKEN_STORAGE_KEY = 'JWT_TOKEN';
+
+  /**
+   * The socket to interact with the backend.
+   */
+  socket: Socket<ServerEvents, ClientEvents>;
 
   /**
    * The JWT token.
@@ -57,13 +71,16 @@ export class AuthService {
   ) {
     console.info('Auth service instantiated');
 
-    // load the JWT token from localStorage
-    this.token = localStorage.getItem(AuthService.JWT_TOKEN_STORAGE_KEY);
-    if (!this.token) {
-      console.info('No token found in local storage');
-    } else {
-      console.info('JWT token loaded from local storage')
-    }
+    // Connect to the server
+    this.socket = io(AuthService.BASE_SOCKET_URL);
+    this.socket.on('disconnect', () => {
+      // Auto reconnect
+      this.socket.connect();
+    });
+
+    // Load the JWT token
+    this.token = null;
+    this.loadToken();
   }
 
   /**
@@ -103,6 +120,8 @@ export class AuthService {
     // delete the token
     this.token = null;
     localStorage.removeItem(AuthService.JWT_TOKEN_STORAGE_KEY);
+    // Notify the backend that the user is offline
+    this.notifyOffline();
   }
 
   /**
@@ -168,7 +187,29 @@ export class AuthService {
   }
 
   /**
+   * Tries to load the JWT token from the local storage into the `token` field.
+   * If the token is not found, `token` field === null.
+   * If the token is found, the backend is notified, so it knows
+   * the user is online.
+   */
+  private loadToken(): void {
+    // load the JWT token from localStorage
+    this.token = localStorage.getItem(AuthService.JWT_TOKEN_STORAGE_KEY);
+    if (!this.token) {
+      // Token not found, the user is not authenticated
+      console.info('No token found in local storage');
+    }
+    else {
+      // Token found, the user is authenticated
+      console.info('JWT token loaded from local storage');
+      // Notify the backend that the user is online
+      this.notifyOnline();
+    }
+  }
+
+  /**
    * Stores the JWT token in memory and in the local storage if `remember` is true.
+   * Then notify the backend that the user is online.
    *
    * @param token - The JWT token
    * @param remember - Whether to keep the user logged in or not
@@ -179,7 +220,27 @@ export class AuthService {
     if (remember) {
       // the user asked to remember him, store token in localStorage
       localStorage.setItem(AuthService.JWT_TOKEN_STORAGE_KEY, token);
+      // Notify the backend that the user is online
+      this.notifyOnline();
     }
+  }
+
+  /**
+   * Notifies the backend that the user is online.
+   */
+  private notifyOnline(): void {
+    if (!this.token) {
+      console.error('notifyOnline called, but token is not present');
+      return;
+    }
+    this.socket.emit('online', this.token);
+  }
+
+  /**
+   * Notifies the backend that the user is offline.
+   */
+  private notifyOffline(): void {
+    this.socket.disconnect();
   }
 
   /**

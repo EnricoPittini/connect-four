@@ -27,7 +27,7 @@ export default interface ClientEvents {
   /**
    * The Client socket sends a message to the specified username
    */
-  'friendChat': (message: FromClientFriendMessage) => void; 
+  'friendChat': (message: FromClientFriendMessage) => void;
 
   /**
    * The Client socket notifies the Server his availability to play a match with the specified friend

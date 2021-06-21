@@ -22,7 +22,7 @@ import {
 interface FriendInfo {
   username: string,
   online: boolean,
-  playing: boolean,
+  ingame: boolean,
   matchRequestSent: boolean,
   matchRequestReceived: boolean,
   // TODO forse unreadMessages: boolean,    // non serve in sidebar, ma in chat
@@ -194,7 +194,7 @@ export class FriendService {
           const friendInfo: FriendInfo = {
             username: friendInfoResponseBody.player.username,
             online: friendInfoResponseBody.player.online,
-            playing: friendInfoResponseBody.player.playing,
+            ingame: friendInfoResponseBody.player.ingame,
             // TODO matchRequestSent e matchRequestReceived andrebbero ricavate da un endpoint (non ancora esistente)
             matchRequestSent: false,
             matchRequestReceived: false,
@@ -244,7 +244,7 @@ export class FriendService {
           // We set them to their correct value, even though it wouldn't
           // be necessary, cause they would be setted by the other socket
           // event handlers.
-          friendInfo.playing = false;
+          friendInfo.ingame = false;
           friendInfo.matchRequestSent = false;
           friendInfo.matchRequestReceived = false;
         }
@@ -327,7 +327,7 @@ export class FriendService {
         const friendInfo: FriendInfo = {
           username: friendInfoResponseBody.player.username,
           online: friendInfoResponseBody.player.online,
-          playing: friendInfoResponseBody.player.playing,
+          ingame: friendInfoResponseBody.player.ingame,
           // TODO matchRequestSent e matchRequestReceived andrebbero ricavate da un endpoint (non ancora esistente)
           matchRequestSent: false,
           matchRequestReceived: false,

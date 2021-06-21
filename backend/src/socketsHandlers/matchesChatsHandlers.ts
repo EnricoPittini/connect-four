@@ -44,12 +44,13 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
       // Name of the observers room
       const roomName = 'observersRoom:' + matchDocument._id.toString();
 
-      // Check if the player is not one of the players and is not one of the observers
+      // Check if the player one of the players of the match or one of the observers of the match
       if(matchDocument.player1!==fromUsername && matchDocument.player2!==fromUsername){
         // The player is not one of the two players of the match. I check if it's not one of the observers
         const playerSockets = transientDataHandler.getPlayerSockets(fromUsername);
         for(let playerSocket of playerSockets){
-          if(!playerSocket.rooms.has(roomName)){ // At least one of the players sockets is not inside the match room
+          if(!playerSocket.rooms.has(roomName)){ 
+            // At least one of the players sockets is not inside the match room : the player it's not an observer of the match
             throw new Error('A player sent a message to a match in which he doesn\'t either play or observe, match_id: ' 
                             + message.matchId);
           }
@@ -58,6 +59,16 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
 
       // Here I'm sure the player can send the message (Or is one of the players of the match or is one of the observers)
 
+      const currentDate = new Date();
+
+      // Send the message to all the observers of the match
+      io.to(roomName).emit('matchChat', {
+        matchId: message.matchId,
+        from: fromUsername,
+        text: message.text,
+        datetime: currentDate,
+      });
+      
       if(matchDocument.player1===fromUsername || matchDocument.player2===fromUsername){
         // The sender of the message is one of the two players : I send the message also to the two players
         const player1Sockets = transientDataHandler.getPlayerSockets(matchDocument.player1);
@@ -66,7 +77,7 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
             matchId: message.matchId,
             from: fromUsername,
             text: message.text,
-            datetime: new Date(),
+            datetime: currentDate,
           });
         }
         const player2Sockets = transientDataHandler.getPlayerSockets(matchDocument.player2);
@@ -75,18 +86,10 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
             matchId: message.matchId,
             from: fromUsername,
             text: message.text,
-            datetime: new Date(),
+            datetime: currentDate,
           });
         }
-      }
-
-      // Send the message to all the observers of the match
-      io.to(roomName).emit('matchChat', {
-        matchId: message.matchId,
-        from: fromUsername,
-        text: message.text,
-        datetime: new Date(),
-      });    
+      }    
     }
     catch(err){
         console.warn("An error occoured: " + err);

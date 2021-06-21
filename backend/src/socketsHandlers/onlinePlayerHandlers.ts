@@ -96,6 +96,11 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
       // Remove all the match requests associated with that player
       transientDataHandler.deletePlayerFriendMatchRequests(username);
 
+      // Remove the (potential) random match request
+      if(transientDataHandler.hasRandomMatchReuqest(username)){
+        transientDataHandler.deleteRandomFriendMatchRequests(username);
+      }
+
       // Authomatic forfait of the player in all the matches in which he is playing (In theory either one or zero) 
       const filter = {
         $or:[

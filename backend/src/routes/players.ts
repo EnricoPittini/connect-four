@@ -424,6 +424,11 @@ router.delete(`/:username`, auth, async (req, res, next) => {
     // Remove all the match requests associated with that player
     transientDataHandler.deletePlayerFriendMatchRequests(otherUsername);
 
+    // Remove the (potential) random match request
+    if(transientDataHandler.hasRandomMatchReuqest(otherUsername)){
+      transientDataHandler.deleteRandomFriendMatchRequests(otherUsername);
+    }
+
     // Authomatic forfait of the player in all the matches in which he is playing (In theory either one or zero) 
     const filter = {
       $or:[
@@ -517,12 +522,15 @@ router.delete(`/:username`, auth, async (req, res, next) => {
 router.get(`/:username/stats`, auth, (req, res, next) => {
   ensureNotFirstAccessModerator(req.user, next);
 
+  // Search the specified player document
   player.getModel().findOne({ username: req.params.username }).then(document => {
     if (!document) {
       console.warn('Client asked the stats of a non existing player');
       const errorBody: ErrorResponseBody = { error: true, statusCode: 404, errorMessage: 'Player not found' };
       throw errorBody;
     }
+
+    // Checks if the Client is a moderator or he is asking for his own stats or for the stats of a friend of him
     if (req.user!.type !== PlayerType.MODERATOR
         && req.user?.username !== req.params.username
         && !document.hasFriend(req.user!.username)) {
@@ -537,7 +545,7 @@ router.get(`/:username/stats`, auth, (req, res, next) => {
       throw errorBody;
     }
 
-    // you are a moderator or you are asking your own stats or the stats of a friend of your
+    // The Client is a  moderator or he is asking his own stats or the stats of a friend of him
 
     return stats.getModel().findOne({ _id: document.stats }, { _id: 0, __v: 0 });
   })

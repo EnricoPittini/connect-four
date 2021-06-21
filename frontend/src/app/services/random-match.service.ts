@@ -4,6 +4,7 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { io, Socket } from 'socket.io-client';
 import ClientEvents from 'src/app/models/eventTypes/client-events.model';
 import ServerEvents from 'src/app/models/eventTypes/server-events.model';
+import getSocket from 'src/app/utils/initialize-socket-io';
 
 import { AuthService } from '../auth/services/auth.service';
 
@@ -29,7 +30,7 @@ export class RandomMatchService {
   /**
    * The socket to interact with the backend.
    */
-  socket: Socket<ServerEvents, ClientEvents>;
+  private socket: Socket<ServerEvents, ClientEvents>;
 
   /**
    * Whether the user is waiting for an opponent to be matched.
@@ -44,7 +45,7 @@ export class RandomMatchService {
     console.info('Random match service instantiated');
 
     // Connect to the server
-    this.socket = io(RandomMatchService.BASE_SOCKET_URL);
+    this.socket = getSocket();
 
     // Handle random match request
     this.waitingMatch = false;

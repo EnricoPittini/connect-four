@@ -6,6 +6,7 @@ import { map, mergeMap } from 'rxjs/operators';
 import { io, Socket } from 'socket.io-client';
 import ClientEvents from 'src/app/models/eventTypes/client-events.model';
 import ServerEvents from 'src/app/models/eventTypes/server-events.model';
+import getSocket from 'src/app/utils/initialize-socket-io';
 
 import { AuthService } from '../auth/services/auth.service';
 import { FriendRequest } from '../models/friend-request.model';
@@ -90,7 +91,7 @@ export class FriendService {
     console.info('Friend service instantiated');
 
     // Connect to the server
-    this.socket = io(FriendService.BASE_SOCKET_URL);
+    this.socket = getSocket();
 
     // Friend list management
     this.friends = [];
@@ -212,6 +213,7 @@ export class FriendService {
    * @returns An Observable that yields the information about the given friend.
    */
   private getFriendInfo(friendUsername: string): Observable<GetPlayerResponseBody> {
+    // TODO posso usare getPlayer di PlayerService
     return this.http.get<GetPlayerResponseBody>(`${FriendService.BASE_URL}/players/${friendUsername}`);
   }
 

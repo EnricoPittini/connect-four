@@ -4,6 +4,7 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { io, Socket } from 'socket.io-client';
 import ClientEvents from 'src/app/models/eventTypes/client-events.model';
 import ServerEvents from 'src/app/models/eventTypes/server-events.model';
+import getSocket from 'src/app/utils/initialize-socket-io';
 
 import { AuthService } from '../auth/services/auth.service';
 import { GetMatchResponseBody, SuccessResponseBody } from '../models/httpTypes/responses.model';
@@ -59,7 +60,7 @@ export class GameService {
     console.info('Friend service instantiated');
 
     // Connect to the server
-    this.socket = io(GameService.BASE_SOCKET_URL);
+    this.socket = getSocket();
 
     // TODO chiedere a backend se sono in game
     this.matchId = null;

@@ -4,13 +4,12 @@ import match = require('./models/Match');
 import { NewMatchParams, MatchDocument } from './models/Match';
 
 /**
- * Function that arranges the random match requests till now made
- * 
+ * Function that arranges the random match requests till now made * 
  */
 export function arrangeRandomMatchRequests(): void{
   const transientDataHandler = TransientDataHandler.getInstance();
 
-  // Get the arrangments of the random made requests till now made
+  // Get the arrangments of the random match requests till now made
   const randomMatchArrangments : RandomMatchArrangement[] = transientDataHandler.getRandomMatchRequestsArrangements();
 
   if(randomMatchArrangments.length<=0){ // None match arrangement was done
@@ -49,7 +48,7 @@ export function arrangeRandomMatchRequests(): void{
         player2Socket.emit('newMatch', player1);
       }
 
-      // Deleting all the match requests for both player
+      // Deleting all the (potential) friend match requests for both players
       transientDataHandler.deletePlayerFriendMatchRequests(player1);
       transientDataHandler.deletePlayerFriendMatchRequests(player2);
     }

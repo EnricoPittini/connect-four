@@ -1,5 +1,9 @@
 # TODO (frontend)
 
+- Rimpiazzare 'Stats' con 'Profile' nella home
+- Aggiungere evento socketIO 'deletedChat' che permette al Server di notificare un Client quando una chat viene eliminata (o player eliminato o friend eliminato).
+- Cambiare 'friend chat' in 'private chat' (o solo chat) (sia lato Client che lato Server)
+
 
 ## AuthService
 - Add `isAutheticated` method

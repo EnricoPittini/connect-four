@@ -60,7 +60,7 @@ export interface NotifyAvailabilityFriendRequestResponseBody extends SuccessResp
   newFriend: boolean,
 }
 
-interface ChatInfo {
+export interface ChatInfo {
   playerA: string,
   playerB: string,
   playerAHasNewMessages: boolean,

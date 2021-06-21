@@ -1,4 +1,4 @@
-enum SenderPlayer {
+export enum SenderPlayer {
   PLAYER_A = 'PLAYER_A',
   PLAYER_B = 'PLAYER_B',
 }

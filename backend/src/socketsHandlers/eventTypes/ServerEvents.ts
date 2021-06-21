@@ -12,8 +12,10 @@ export interface ToClientFriendMessage {
  * Represents the message, sent by a Client to a match chat, that the Server forwards to the Clients
  */
 export interface ToClientMatchMessage{
+  matchId: string,
   from : string,
   text: string,
+  datetime: Date,
   // TODO : aggiungere datetime?
 }
 

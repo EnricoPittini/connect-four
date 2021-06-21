@@ -63,23 +63,29 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
         const player1Sockets = transientDataHandler.getPlayerSockets(matchDocument.player1);
         for(let player1Socket of player1Sockets){
           player1Socket.emit('matchChat', {
+            matchId: message.matchId,
             from: fromUsername,
-            text: message.text
+            text: message.text,
+            datetime: new Date(),
           });
         }
         const player2Sockets = transientDataHandler.getPlayerSockets(matchDocument.player2);
         for(let player2Socket of player2Sockets){
           player2Socket.emit('matchChat', {
+            matchId: message.matchId,
             from: fromUsername,
-            text: message.text
+            text: message.text,
+            datetime: new Date(),
           });
         }
       }
 
       // Send the message to all the observers of the match
       io.to(roomName).emit('matchChat', {
+        matchId: message.matchId,
         from: fromUsername,
-        text: message.text
+        text: message.text,
+        datetime: new Date(),
       });    
     }
     catch(err){

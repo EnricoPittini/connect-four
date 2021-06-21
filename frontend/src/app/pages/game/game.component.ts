@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from 'src/app/auth/services/auth.service';
-import { WhichPlayer } from 'src/app/models/match.model';
+import { Match, MatchStatus, WhichPlayer } from 'src/app/models/match.model';
 import { GameService } from 'src/app/services/game.service';
 
 @Component({
@@ -10,6 +10,8 @@ import { GameService } from 'src/app/services/game.service';
 })
 export class GameComponent implements OnInit {
 
+  private static readonly ROWS = 6;
+  private static readonly COLS = 7;
 
 
   constructor(
@@ -25,21 +27,44 @@ export class GameComponent implements OnInit {
   }
 
   getOtherUsername(): string {
-    // TODO da controllare
     if (this.getMyUsername() === this.gameService.match?.player1) {
-      return this.gameService.match?.player2;
+      return this.gameService.match.player2;
     }
     else {
       return this.gameService.match?.player1 || 'No name found';
     }
   }
 
-
-  getPlayer1Username(): string {
-    return this.gameService.match?.player1 || 'No name found';
+  getBoard(): Match['board'] {
+    // TODO molto probabilmente la board arriva rovesciata
+    return this.gameService.match?.board
+           || Array(GameComponent.ROWS).fill(Array(GameComponent.COLS).fill(WhichPlayer.EMPTY));
   }
 
-  getPlayer2Username(): string {
-    return this.gameService.match?.player2 || 'No name found';
+  forfait(): void {
+    console.info('Forfait button clicked');
+    this.gameService.forfait();
   }
+
+  isGameEnded(): boolean {
+    return this.gameService.isGameEnded();
+  }
+
+  getWinner(): string | null {
+    if (!this.gameService.match || this.gameService.match.winner === WhichPlayer.EMPTY) {
+      return null;
+    }
+
+    if (this.gameService.match.winner === WhichPlayer.PLAYER_1) {
+      return this.gameService.getPlayer1Username();
+    }
+    else {
+      return this.gameService.getPlayer2Username();
+    }
+  }
+
+  makeMove(column: number): void {
+    this.gameService.makeMove(column);
+  }
+
 }

@@ -23,3 +23,12 @@ https://github.com/bartosz-io/jwt-auth-angular/blob/master/src/app/auth/services
 
 ## Env
 - environment.ts
+
+
+## Socket.io
+- Verificare di aver gestito tutti gli eventi in client-events e server-events
+
+
+## Game page
+- Il boardi dei riquadri dei giocatori sono sbagliati: ora il rosso è sempre a sinistra,
+  ma potrebbe essere anche a destra.

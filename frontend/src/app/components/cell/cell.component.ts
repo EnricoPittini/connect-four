@@ -13,14 +13,21 @@ import { WhichPlayer } from 'src/app/models/match.model';
 })
 export class CellComponent implements OnInit {
 
+  /**
+   * The player that owns the cell.
+   */
   @Input() value!: WhichPlayer;
 
   constructor() { }
 
   ngOnInit() {
+    // Make sure that `value` has been provided
     this.assertInputsProvided();
   }
 
+  /**
+   * Make sure all the required inputs has been provided.
+   */
   private assertInputsProvided(): void {
     if (!this.value) {
       const errorMessage = 'The required input [WhichPlayer] was not provided';
@@ -28,6 +35,5 @@ export class CellComponent implements OnInit {
       throw new Error(errorMessage);
     }
   }
-
 
 }

@@ -62,6 +62,7 @@ export class RandomMatchService {
       return;
     }
     console.info('Sending a random match request.');
+    this.waitingMatch = true;
     this.socket.emit('randomMatchRequest');
   }
 
@@ -74,29 +75,30 @@ export class RandomMatchService {
       return;
     }
     console.info('Cancelling the random match request');
+    this.waitingMatch = false;
     this.socket.emit('cancelRandomMatchRequest');
   }
 
   /**
    * Initializes the `waitingMatch` field asking to the server its value.
    */
-  // TODO decommentare appena viene creato evento
-  initializeWaitingMatch(): void {
-    // // Ask to the server if there is a random match request pending
-    // this.socket.emit('hasMatchRequest');
+  private initializeWaitingMatch(): void {
+    // Ask to the server if there is a random match request pending
+    this.socket.emit('hasRandomMatchRequest');
 
-    // // 'Wait' for the server response
-    // // hasMatchRequest: the user has a random match request
-    // this.socket.once('hasMatchRequest', (hasMatchRequest) => {
-    //   this.waitingMatch = hasMatchRequest;
-    // });
+    // 'Wait' for the server response
+    // hasMatchRequest: the user has a random match request
+    this.socket.once('hasRandomMatchRequest', (hasMatchRequest) => {
+      console.info('hasRandomMatchRequest repsonse:', hasMatchRequest)
+      this.waitingMatch = hasMatchRequest;
+    });
   }
 
   /**
    * Sets the handler for the socket events related to the random match requests.
    * It takes care of mantaining `waitingMatch` field updated.
    */
-  listenForRandomMatchRequestUpdates(): void {
+  private listenForRandomMatchRequestUpdates(): void {
     // randomMatchRequest: the user sent a random match request
     this.socket.on('randomMatchRequest', () => {
       this.waitingMatch = true;

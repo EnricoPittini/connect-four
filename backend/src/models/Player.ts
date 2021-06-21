@@ -5,6 +5,11 @@ import stats = require('./Stats');
 import { StatsDocument } from './Stats';
 
 
+/**
+ * Given a plain text password, returns the digest of that password with the salt used in the encryption
+ * @param pwd 
+ * @returns 
+ */
 function hashPassword(pwd: string): { digest: string, salt: string } {
 
   const salt = crypto.randomBytes(16).toString('hex'); // We use a random 16-bytes hex string for salt
@@ -35,6 +40,9 @@ export enum PlayerType {
   MODERATOR_FIRST_ACCESS = 'MODERATOR_FIRST_ACCESS',
 }
 
+/**
+ * Represents the player accessible by the Client-side
+ */
 export interface ClientPlayer {
   username: string,
   name: string,
@@ -43,6 +51,9 @@ export interface ClientPlayer {
   type: PlayerType,
 }
 
+/**
+ * Represents the actual player
+ */
 export interface Player extends ClientPlayer {
   friends: string[],
   digest: string,     // this is the hashed password (digest of the password)
@@ -50,6 +61,9 @@ export interface Player extends ClientPlayer {
   stats: StatsDocument['_id'],
 }
 
+/**
+ * Represents a player document (e.g. a player memorized in the database)
+ */
 export interface PlayerDocument extends Player, mongoose.Document {
   validatePassword: (pwd: string) => boolean,
   confirmModerator: (name: string, surname: string, avatar: string, pwd: string) => void,
@@ -106,6 +120,11 @@ const playerSchema = new mongoose.Schema<PlayerDocument, PlayerModel>({
 });
 
 
+/**
+ * Given a plain text password, checks if it's the correct password of the player
+ * @param pwd 
+ * @returns 
+ */
 playerSchema.methods.validatePassword = function (pwd: string): boolean {
   // To validate the password, we compute the digest with the
   // same HMAC to check if it matches with the digest we stored
@@ -117,6 +136,13 @@ playerSchema.methods.validatePassword = function (pwd: string): boolean {
   return (this.digest === digest);
 }
 
+/**
+ * Updates a moderator first access profile, usign the given data.
+ * @param name 
+ * @param surname 
+ * @param avatar 
+ * @param pwd 
+ */
 playerSchema.methods.confirmModerator = function (name: string,
                                                   surname: string,
                                                   avatar: string,
@@ -133,7 +159,7 @@ playerSchema.methods.confirmModerator = function (name: string,
 }
 
 /**
- *
+ * Adds a friend to that player
  * @param friendUsername - the username of the friend to add, must be an existing username
  * @returns
  */
@@ -149,7 +175,7 @@ playerSchema.methods.addFriend = function (friendUsername: string): boolean {
 
 
 /**
- *
+ * Remove a friend from that player
  * @param friendUsername - the username of the friend to remove
  * @returns
  */
@@ -164,7 +190,7 @@ playerSchema.methods.removeFriend = function (friendUsername: string): boolean {
 }
 
 /**
- *
+ * Checks if that player has the specified friends
  * @param friendUsername - the username of the friend
  * @returns
  */
@@ -172,6 +198,10 @@ playerSchema.methods.hasFriend = function (friendUsername: string): boolean {
   return !!this.friends.find(item => item === friendUsername);
 }
 
+/**
+ * Returns the stats document of that player
+ * @returns 
+ */
 playerSchema.methods.getStats = function (): Promise<StatsDocument> {
   // Cast to Promise<StatsDocument> because we are sure that the StatsDocument exists
   return stats.getModel().findOne({ _id: this.stats }).exec() as Promise<StatsDocument>;
@@ -193,15 +223,24 @@ export function getModel(): PlayerModel { // Return Model as singleton
 }
 
 
+/**
+ * Represents the type of the input data needed to create a new standard player document
+ */
 export interface NewStandardPlayerParams extends Pick<Player, 'username' | 'name' | 'surname' | 'avatar'> {
   password: string,
 }
 
+/**
+ * Creates a new standard player document
+ * @param data 
+ * @returns 
+ */
 export function newStandardPlayer(data: NewStandardPlayerParams): Promise<PlayerDocument> {
   const _playerModel = getModel();
 
   const { digest, salt } = hashPassword(data.password);
 
+  // Creates also the stats document associated to that player
   const statsDocument: StatsDocument = stats.newStats({
     player: data.username,
   });
@@ -222,15 +261,24 @@ export function newStandardPlayer(data: NewStandardPlayerParams): Promise<Player
   });
 }
 
+/**
+ * Represents the type of the input data needed to create a new moderator document
+ */
 export interface NewModeratorParams extends Pick<Player, 'username'> {
   password: string,
 }
 
+/**
+ * Creates a new moderator document
+ * @param data 
+ * @returns 
+ */
 export function newModerator(data: NewModeratorParams): Promise<PlayerDocument> {
   const _playerModel = getModel();
 
   const { digest, salt } = hashPassword(data.password);
 
+  // Creates also the stats document associated to that moderator
   const statsDocument: StatsDocument = stats.newStats({
     player: data.username,
   });

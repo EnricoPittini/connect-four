@@ -10,26 +10,34 @@ import match = require('../models/Match');
 import { MatchStatus, MatchDocument } from '../models/Match';
 import stats = require('../models/Stats');
 
-
+/**
+ * Registers to the specified Client socket the handlers about the online/offline managment 
+ * @param io 
+ * @param socket 
+ */
 export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<ClientEvents, ServerEvents>) {
+
   const transientDataHandler = TransientDataHandler.getInstance();
 
+  // Handler of the online event
   socket.on('online', (jwtToken) => {
     console.info('Socket event: "online"');
 
     try {
+      // Verify the token given by the Client
       const playerToken: Express.User = jsonwebtoken.verify(jwtToken, process.env.JWT_SECRET as string) as Express.User;
       const username = playerToken.username;
 
       const wasOnline = transientDataHandler.isOnline(username);
 
+      // Add the verified socket
       transientDataHandler.addPlayerSocket(username, socket);
 
       if (wasOnline) {
         return;
       }
 
-      // the player was offline, and now is online: notify all his friends
+      // The player was offline, and now is online: notify all his friends
 
       player.getModel().findOne({ username: username }, { friends: 1 }).then(playerDocument => {
         if (!playerDocument) {
@@ -51,22 +59,24 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
     }
   });
 
-  // A socket disconnected
+  // Handler of the socket diconnection
   socket.on('disconnect', async () => {
     console.info('Socket event: "disconnect"');
 
     const username = transientDataHandler.getSocketPlayer(socket);
-    if (!username) {          // not registered socket, probably the player is offline
+    if (!username) {          // Not registered socket, probably the player is offline
       return;
     }
 
+    // Remove the disconnected socket
     transientDataHandler.removePlayerSocket(socket);
 
-    if (transientDataHandler.isOnline(username)) {
+    if (transientDataHandler.isOnline(username)) { // The player is stil online (e.g. he has other sockets connected)
       return;
     }
 
-    // The player has become offline: several actions to do
+    // The player has become offline (he doesn't have any sockets still connected).
+    // Several actions to do.
 
     try{
       // Notify all his friends
@@ -82,6 +92,9 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
         }
       }
 
+      // Remove all the match requests associated with that player
+      transientDataHandler.deletePlayerFriendMatchRequests(username);
+
       // Notify all the match requests opponents associated with that player (both senders and receivers)
       const friendMatchRequestsOpponents = transientDataHandler.getPlayerFriendMatchRequestsOpponents(username);
       for(let opponent of friendMatchRequestsOpponents){
@@ -93,8 +106,11 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
           });
         }
       }
-      // Remove all the match requests associated with that player
-      transientDataHandler.deletePlayerFriendMatchRequests(username);
+
+      // Remove the (potential) random match request
+      if(transientDataHandler.hasRandomMatchReuqest(username)){
+        transientDataHandler.deleteRandomMatchRequests(username);
+      }
 
       // Authomatic forfait of the player in all the matches in which he is playing (In theory either one or zero) 
       const filter = {
@@ -118,7 +134,7 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
       }
       await Promise.all(promises);
 
-      // Ending all these matches
+      // For each just ended match, there are some actions to do
       for(let matchDocument of matchDocuments){
         // Notify the opponent of the match (all his sockets)
         const opponent = matchDocument.player1===username ? matchDocument.player2 : matchDocument.player1;
@@ -150,8 +166,8 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
           console.warn('At least one of the player of the match doesn\'t have an associated stats document');
           return;
         }
-        statsDocumentPlayer1.refresh(matchDocument);
-        statsDocumentPlayer2.refresh(matchDocument);
+        await statsDocumentPlayer1.refresh(matchDocument);
+        await statsDocumentPlayer2.refresh(matchDocument);
         await statsDocumentPlayer1.save();
         await statsDocumentPlayer2.save();
       }

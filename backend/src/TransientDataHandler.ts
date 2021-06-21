@@ -6,6 +6,23 @@ import { Player, PlayerDocument, PlayerType } from "./models/Player";
 import stats = require('./models/Stats');
 import { StatsDocument } from "./models/Stats";
 
+
+/**
+ * Represents the random match requests
+ */
+interface RandomMatchRequest extends Pick<FriendMatchRequest, 'from' | 'datetime'>{
+  playerRating: number, 
+}
+
+/**
+ * Represents a random match request arranged by the Server
+ */
+export interface RandomMatchArrangement{
+  player1: string,
+  player2: string,
+}
+
+
 type PlayerSocketsMap = {
   [key: string]: Socket<ClientEvents,ServerEvents>[];
 };
@@ -13,30 +30,39 @@ type SocketIdPlayerMap = {
   [key: string]: string;
 };
 
-// Interface for the random match requests
-interface RandomMatchRequest extends Pick<FriendMatchRequest, 'from' | 'datetime'>{
-  playerRating: number, 
-}
 
-// Interface that represents a random match arranged by the Server
-export interface RandomMatchArrangement{
-  player1: string,
-  player2: string,
-}
-
+/**
+ * Handle the non-persistent data of the application (e.g. players online, players in game, friend match
+ * requests and random match requests)
+ */
 export class TransientDataHandler {
+
+  // Map usernames -> sockets
+  // A player is considered online if and only if his username is present in the keys of this map. In other words, he must have 
+  // at least one socket associated
+  // A player can have multiple sockets associated (the same player is connected with multiple devices)
   private onlinePlayerSocketsMap: PlayerSocketsMap = {};
+  // Map socketId -> username
   private socketIdOnlinePlayerMap: SocketIdPlayerMap = {};
+
+  // List of in game players usernames
   private inGamePlayers: string[] = [];
+
+  // List of friend match requests
   private friendsMatchRequests: FriendMatchRequest[] = [];
 
-  // Is kept ordered by datetime
+  // List of random match requests. 
+  // (Is kept ordered by datetime)
   private randomMatchRequests: RandomMatchRequest[] = [];
 
   private static instance: TransientDataHandler;
 
   private constructor() { }
 
+  /**
+   * Returns the single TransientDataHandler instance
+   * @returns 
+   */
   public static getInstance() {
     if (!TransientDataHandler.instance) {
       TransientDataHandler.instance = new TransientDataHandler();
@@ -44,6 +70,12 @@ export class TransientDataHandler {
     return TransientDataHandler.instance;
   }
 
+  /**
+   * Adds a socket of a certain player 
+   * @param username 
+   * @param socket 
+   * @returns 
+   */
   public addPlayerSocket(username: string, socket: Socket<ClientEvents,ServerEvents>): void {
     if (this.containsSocket(socket)) {
       return;
@@ -59,6 +91,11 @@ export class TransientDataHandler {
     this.socketIdOnlinePlayerMap[socket.id] = username;
   }
 
+  /**
+   * Removes a socket of a certain player
+   * @param socket 
+   * @returns 
+   */
   public removePlayerSocket(socket: Socket<ClientEvents,ServerEvents>): void {
     const username = this.getSocketPlayer(socket);
     if (!username) {
@@ -71,23 +108,48 @@ export class TransientDataHandler {
     delete this.socketIdOnlinePlayerMap[socket.id];
   }
 
+  /**
+   * Returns all the sockets of a certain player
+   * @param username 
+   * @returns 
+   */
   public getPlayerSockets(username: string): Socket<ClientEvents,ServerEvents>[] {
     return this.onlinePlayerSocketsMap[username] || [];
   }
 
+  /**
+   * Returns the player username of a certain socket
+   * @param socket 
+   * @returns 
+   */
   public getSocketPlayer(socket: Socket<ClientEvents,ServerEvents>): string | undefined {
     return this.socketIdOnlinePlayerMap[socket.id];
   }
 
+  /**
+   * Checks if there is a certain socket
+   * @param socket 
+   * @returns 
+   */
   public containsSocket(socket: Socket<ClientEvents,ServerEvents>): boolean {
     return socket.id in this.socketIdOnlinePlayerMap;
   }
 
+  /**
+   * Cheks if a player is online
+   * @param username 
+   * @returns 
+   */
   public isOnline(username: string): boolean {
     return username in this.onlinePlayerSocketsMap
            && this.onlinePlayerSocketsMap[username].length > 0;
   }
 
+  /**
+   * Marks as in game a certain player
+   * @param username 
+   * @returns 
+   */
   public markInGame(username: string): void {
     if (this.isInGame(username)) {
       return;
@@ -95,14 +157,29 @@ export class TransientDataHandler {
     this.inGamePlayers.push(username);
   }
 
+  /**
+   * Marks as off game a certain player
+   * @param username 
+   * @returns 
+   */
   public markOffGame(username: string): void {
     this.inGamePlayers = this.inGamePlayers.filter(el => el !== username);
   }
 
+  /**
+   * Checks if is in game a certain player
+   * @param username 
+   * @returns 
+   */
   public isInGame(username: string): boolean {
     return !!this.inGamePlayers.find(el => el === username);
   }
 
+  /**
+   * Adds a frind match request (e.g. a match request between teo friends)
+   * @param fromUsername 
+   * @param toUsername 
+   */
   public addFriendMatchRequest(fromUsername: string, toUsername: string): void {
     if (!this.isOnline(fromUsername) || !this.isOnline(toUsername)) {
       throw new Error("At least one of the specified players isn't online");
@@ -123,8 +200,14 @@ export class TransientDataHandler {
     });
   }
 
-  // To call both for accept match requests and cancel match requests
-  // Returns true if something is deleted, false otherwise
+  /**
+   * Deletes a friend match request.
+   * I to call both to accept match requests and to cancel match requests.
+   * Returns true if something was deleted, false otherwise.
+   * @param fromUsername 
+   * @param toUsername 
+   * @returns 
+   */
   public deleteFriendMatchRequest(fromUsername: string, toUsername: string): boolean {
     const previousLength = this.friendsMatchRequests.length;
     this.friendsMatchRequests = this.friendsMatchRequests.filter(matchRequest => matchRequest.from !== fromUsername || matchRequest.to !== toUsername);
@@ -132,21 +215,40 @@ export class TransientDataHandler {
     return previousLength !== currentLength;
   }
 
-  // Delete all the match requests of a player (both from and to)
+  /**
+   * Deletes all the friend match requests of a player (both from and to)
+   * @param username 
+   */
   public deletePlayerFriendMatchRequests(username: string): void{
     this.friendsMatchRequests = this.friendsMatchRequests.filter(matchRequest => matchRequest.from !== username && matchRequest.to !== username);
   }
 
-  // Given a player, returns the list of players in a match request (either from or to) with the specified player 
+  /**
+   * Given a player, returns the list of players in a match request (either from or to) with the specified player 
+   * @param username 
+   * @returns 
+   */
   public getPlayerFriendMatchRequestsOpponents(username: string): string[]{
     return this.friendsMatchRequests.filter(matchRequest => matchRequest.from === username || matchRequest.to === username)
                              .map( matchRequest => matchRequest.to===username ? matchRequest.from : matchRequest.to );
   }
 
+  /**
+   * Cheks if there is a friend match request between these two players
+   * @param fromUsername 
+   * @param toUsername 
+   * @returns 
+   */
   public hasFriendMatchRequest(fromUsername: string, toUsername: string): boolean {
     return !!this.friendsMatchRequests.find(matchRequest => matchRequest.from === fromUsername && matchRequest.to === toUsername);
   }
 
+  /**
+   * Returns the friend match request between these two players
+   * @param fromUsername 
+   * @param toUsername 
+   * @returns 
+   */
   public getFriendMatchRequest(fromUsername: string, toUsername: string): FriendMatchRequest{
     const friendMatchRequests = this.friendsMatchRequests.filter(matchRequest => matchRequest.from === fromUsername 
                                                                 && matchRequest.to === toUsername);
@@ -200,8 +302,17 @@ export class TransientDataHandler {
     });
   }
 
-  public deleteRandomFriendMatchRequests(username: string): void{
+  /**
+   * Delete a random match request.
+   * Returns true if something was deleted, false otherwise.
+   * @param username 
+   */
+  public deleteRandomMatchRequests(username: string): boolean{
+    if(!this.hasRandomMatchReuqest(username)){
+      return false;
+    }
     this.randomMatchRequests = this.randomMatchRequests.filter(matchRequest => matchRequest.from !== username);
+    return true;
   }
 
   /**
@@ -223,13 +334,16 @@ export class TransientDataHandler {
   }
 }
 
+// RANDOM MATCH REQUESTS ARRANGEMENTS ALGHORITM
+
+
 // The max rating difference of two players in order to be arranged by the Server 
 const RATING_TOLERANCE = 100;
 // The max time that a player has to wait in order to be arranged by the Server
 const MAX_WAITING_MILLISECONDS = 1500;
 
 /**
- * Compute tha arrangements for the random matches. The input parameter randomMatchRequests is exptected to be sorted by datetime.
+ * Computes tha arrangements for the random matches. The input parameter randomMatchRequests is exptected to be sorted by datetime.
  * 
  * The logic of the arrangment alghoritm is the following.
  * The random match requests are iterated, sorted by datetime (from the oldest to the latest).

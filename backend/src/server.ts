@@ -75,6 +75,7 @@ import {
 } from './httpTypes/responses';
 import { arrangeRandomMatchRequests } from './arrangeRandomMatchRequests';
 
+
 // The time in which, periodically, the Server arranges new random match requests
 const ARRANGE_RANDOM_MATCH_REQUESTS_DELAY_TIME = 5000;
 
@@ -89,8 +90,10 @@ declare global {
   }
 }
 
-
+// Express application instance
 const app = express();
+
+// Handler of the non-persistent data
 const transientDataHandler = TransientDataHandler.getInstance();
 
 
@@ -122,6 +125,7 @@ passport.use(new passportHTTP.BasicStrategy((username, password, done) => {
   })
 }));
 
+
 app.use(cors());
 
 // middleware that extracts the entire body portion of an incoming request stream
@@ -138,10 +142,14 @@ app.use((req, res, next) => {
   next();
 });
 
+// Version of the application
 const version = process.env.npm_package_version;
+
 
 // Add API routes to express application
 
+
+// Root endpoint
 app.get(`/v${version}`, (_, res) => {
   const body: RootResponseBody = {
     error: false,
@@ -155,9 +163,6 @@ app.get(`/v${version}`, (_, res) => {
   res.status(200).json(body);
 });
 
-
-
-// TODO endpoints
 
 // Login endpoint
 app.get(`/v${version}/login`, passport.authenticate('basic', { session: false }), (req, res, next) => {
@@ -192,8 +197,8 @@ app.get(`/v${version}/login`, passport.authenticate('basic', { session: false })
 
 });
 
-// players endpoint
 
+// All the other endpoints
 app.use(`/v${version}/players`, playersRouter);
 app.use(`/v${version}/friends`, friendsRouter);
 app.use(`/v${version}/friend_requests`, friendRequestsRouter);
@@ -219,12 +224,12 @@ app.use((err: ErrorResponseBody | jwt.UnauthorizedError, req: express.Request, r
 // The very last middleware will report an error 404
 // (will be eventually reached if no error occurred and if
 //  the requested endpoint is not matched by any route)
-//
 app.use((req, res, next) => {
   console.warn('The client requested an invalid endpoint');
   const errorBody: ErrorResponseBody = { error: true, statusCode: 404, errorMessage: 'Invalid endpoint' };
   res.status(404).json(errorBody);
 });
+
 
 
 // Connect to mongodb and launch the HTTP server trough Express
@@ -247,10 +252,11 @@ mongoose.connect(`mongodb://${DB_HOST}:${DB_PORT}/${DB_NAME}`, {
 .then(() => {
   console.info('Connected to MongoDB');
 
+  // Search the main moderator
   return player.getModel().findOne({ username: MAIN_MODERATOR_USERNAME });
 })
 .then((playerDocument) => {
-  if (!playerDocument) {
+  if (!playerDocument) { // The main moderator does not exist yet
     console.info('Creating main moderator');
 
     return player.newModerator({
@@ -263,16 +269,21 @@ mongoose.connect(`mongodb://${DB_HOST}:${DB_PORT}/${DB_NAME}`, {
   }
 })
 .then((moderatorDocument) => {
-  if (moderatorDocument) {
+  if (moderatorDocument) { // Confirm the main moderator profile just created
     moderatorDocument.confirmModerator('John', 'Smith', 'TODO', MAIN_MODERATOR_PASSWORD);
     return moderatorDocument.save();
   }
 })
 .then(() => {
+  // Server instance
   const server = http.createServer(app);
 
+  // Initialize socketIO
   initializeSocketIO(server);
+  // socketIO instance
   const io = getSocketIO();
+
+  // For each socket that connects to the Server, register all the socketIO events.
   io.on('connection', (socket) => {
     console.info('Socket.io client connected');
 

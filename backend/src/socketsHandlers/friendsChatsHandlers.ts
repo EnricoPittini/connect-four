@@ -10,11 +10,21 @@ import chat = require('../models/Chat');
 import { NewChatParams } from '../models/Chat';
 
 
+/**
+ * Registers to the specified Client socket the handlers about the friends chats managment. (e.g. the chats between 
+ * two players: private chats).
+ * 
+ * IMPORTANT: These chats can be also between two players that aren't friend, if at least one of the player is a moderator 
+ * @param io 
+ * @param socket 
+ */
 export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<ClientEvents, ServerEvents>) {
+
   const transientDataHandler = TransientDataHandler.getInstance();
 
+  // Handler of the friendChat event
   socket.on('friendChat', (message) => {
-    console.info('Socket event: "chat"');
+    console.info('Socket event: "friendChat"');
 
     // Player that sent the message
     const fromUsername = transientDataHandler.getSocketPlayer(socket);
@@ -26,14 +36,14 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
     // Player receiver of the message
     const toUsername = message.to;
 
-    // I search the "to player"
+    // Search the "to player"
     player.getModel().findOne({ username: toUsername }).then(toPlayerDocument => {
       if (!toPlayerDocument) {
         throw new Error('A player sent a message to an inalid player; fromUsername: ' + fromUsername + ' ,toUsername: ' + toUsername);
       }
       return player.getModel().findOne({ username: fromUsername }, { friends: 1 });
     })
-    // I search the "from player"
+    // Search the "from player"
     .then(fromPlayerDocument => {
       if (!fromPlayerDocument) {
         throw new Error('An invalid player sent a message, username: ' + fromUsername);
@@ -41,7 +51,8 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
 
       const fromPlayerType = fromPlayerDocument.type;
 
-      if(fromPlayerType!==PlayerType.MODERATOR && (!fromPlayerDocument.friends.find( el => el===toUsername ))){
+      // Check if the "from player" can send a message to the "to player"
+      if(fromPlayerType!==PlayerType.MODERATOR && (!fromPlayerDocument.hasFriend(toUsername))){
         throw new Error('A  Standard player sent a message to another player that isn\'t his friend; fromUsername: '
                          + fromUsername + ' ,toUsername: ' + toUsername);
       }
@@ -64,12 +75,12 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
           playerA : fromUsername, // Convenction : playerA is the one that started the chat
           playerB : toUsername
         }
-        return chat.newChat(data); // TODO : salvare il documento o no?
+        return chat.newChat(data); // TODO : salvare qua il documento o no?
       }
       return chatDocument;
     })
     .then( chatDocument => {
-      // I add the message to the chat
+      // I add the message to the chat (either created now or alredy present)
       chatDocument.addMessage(fromUsername, message.text);
       return chatDocument.save();
     })

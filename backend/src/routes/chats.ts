@@ -1,3 +1,8 @@
+// CHATS ENDPOINTS
+
+// These are the Endpoints of the chats between two players (e.g. private chats).
+// There aren't the endpoints for the match chats
+
 import express from 'express';
 
 import auth from '../middlewares/auth'
@@ -16,8 +21,11 @@ const router = express.Router();
 export default router;
 
 
-// /chats
+/**
+ * Returns the list of chats of the Client
+ */
 router.get(`/`, auth, (req, res, next) => {
+
   const filter = { $or: [{ playerA: req.user?.username }, { playerB: req.user?.username }] };
   chat.getModel().find(filter, { _id: 0, __v: 0, messages: 0 }).then((chatDocuments) => {
     const body: GetChatsResponseBody = { error: false, statusCode: 200, chats: chatDocuments };
@@ -30,9 +38,17 @@ router.get(`/`, auth, (req, res, next) => {
 });
 
 
+/**
+ * Returns the chat between the Client and the specified player
+ */
 router.get(`/:username`, auth, (req, res, next) => {
+
+  // Username of the Client
   const myUsername = req.user?.username;
+  // Username of the specified player
   const otherUsername = req.params.username;
+
+  // Search for the chat
   const filter = {
     $or: [
       { playerA: myUsername, playerB: otherUsername },

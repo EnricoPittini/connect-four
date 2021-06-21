@@ -1,3 +1,5 @@
+// FRIEND_REQUESTS ENDPOINTS
+
 import express from 'express';
 
 import auth from '../middlewares/auth'
@@ -22,10 +24,13 @@ import {
 const router = express.Router();
 export default router;
 
+// Handler of the non-persistent data
 const transientDataHandler = TransientDataHandler.getInstance();
 
-// /friend_requests
 
+/**
+ * Returns all the friend requests of the Client
+ */
 router.get(`/`, auth, (req, res, next) => {
   const filter = {
     $or: [
@@ -45,18 +50,28 @@ router.get(`/`, auth, (req, res, next) => {
 });
 
 
+/**
+ * The Client notifies the Server about his availability to become a friend of the specified player. 
+ * That means that if a friend request made by the specified player to the Client alredy exists, then the two players 
+ * become friend. Otherwise, a new friend request from the Client to the specified friend is made.
+ * 
+ * That player is specified in the HTTP request body. 
+ */
 router.post(`/`, auth, async (req, res, next) => {
   try {
+    // Check if the body is correct
     if (!isNotifyAvailabilityFriendRequestRequestBody(req.body)) {
       console.warn('Wrong notify availability friend request body content ' + JSON.stringify(req.body, null, 2));
       const errorBody: ErrorResponseBody = { error: true, statusCode: 400, errorMessage: 'Wrong notify availability friend request body content' };
       throw errorBody;
     }
 
+    // Username of the Client
     const myUsername = req.user!.username;
+    // Username of the specified player
     const otherUsername = req.body.username;
 
-    // Check that the usernames (mine and his) are different
+    // Check that the usernames (of the Client and of the other player) are different
     if (myUsername === otherUsername) {
       console.warn('A player notified his availability for friend request to himself');
       const errorBody: ErrorResponseBody = {
@@ -67,6 +82,7 @@ router.post(`/`, auth, async (req, res, next) => {
       throw errorBody;
     }
 
+    // Search the document of the other player
     const otherPlayerDocument = await player.getModel().findOne({ username: otherUsername }).exec();
 
     // Check that the other username is valid
@@ -76,32 +92,33 @@ router.post(`/`, auth, async (req, res, next) => {
       throw errorBody;
     }
 
+    // Search the document of the Client
     const myPlayerDocument = await player.getModel().findOne({ username: myUsername }).exec();
 
-    // Check that my username is valid
+    // Check that the username of the Client is valid
     if (!myPlayerDocument) {
       console.error('An invalid username notified his availability for friend request: ' + JSON.stringify(req.user, null, 2));
       const errorBody: ErrorResponseBody = { error: true, statusCode: 500, errorMessage: 'Internal Server error' };
       throw errorBody;
     }
 
-    // Check that we aren't friends yet
+    // Check that they aren't friends yet
     if (myPlayerDocument.hasFriend(otherPlayerDocument.username) || otherPlayerDocument.hasFriend(myPlayerDocument.username)) {
       console.warn('A player notified his availability for friend request but the other player is already his friend, user: ' + JSON.stringify(req.user, null, 2));
       const errorBody: ErrorResponseBody = { error: true, statusCode: 403, errorMessage: 'The specified username is already your friend' };
       throw errorBody;
     }
 
-    // We are sure that the 2 usernames (mine and his) are different valid usernames and we are sure that we aren't friends yet
+    // We are sure that the 2 usernames (Client and other) are different valid usernames and we are sure that they aren't friends yet
 
     const friendRequestDocument = await friendRequest.getModel().findOne({ from: otherUsername, to: myUsername }).exec();
 
-    // Check if the other player has alredy made a friend request to me
+    // Check if the other player has alredy made a friend request to the Client
     if (!friendRequestDocument) {
-      // The other player has not made a friend request to me yet
+      // The other player has not made a friend request to the Client yet
       const myFriendRequestDocument = await friendRequest.getModel().findOne({ from: myUsername, to: otherUsername }).exec();
 
-      // Check that I haven't alredy made a friend request to him
+      // Check that the Client  haven't alredy made a friend request to him
       if (myFriendRequestDocument) {
         console.warn('A player notified his availability for friend request but he has alredy done that');
         const errorBody: ErrorResponseBody = {
@@ -112,7 +129,7 @@ router.post(`/`, auth, async (req, res, next) => {
         throw errorBody;
       }
 
-      // We are sure that there are not friend request between us
+      // We are sure that there are not friend request between the two players
 
       // Create new friend request
       await friendRequest.newFriendRequest({ from: myUsername, to: otherUsername }).save();
@@ -127,7 +144,8 @@ router.post(`/`, auth, async (req, res, next) => {
       return res.status(200).json(body);
     }
 
-    // The other player has alredy made a friend request to me : I accept the request
+    // The other player has alredy made a friend request to the Client.
+    // The request is accepted and the 2 players become friends
 
     myPlayerDocument.addFriend(otherPlayerDocument.username);
     otherPlayerDocument.addFriend(myPlayerDocument.username);
@@ -140,10 +158,15 @@ router.post(`/`, auth, async (req, res, next) => {
     // Deleting the friend request
     await friendRequest.getModel().deleteOne({ from: friendRequestDocument.from, to: friendRequestDocument.to });
 
-    // Notify the other player
+    // Notify the other player (all the sockets)
     const otherPlayerSockets = transientDataHandler.getPlayerSockets(otherUsername);
     for (let otherPlayerSocket of otherPlayerSockets) {
       otherPlayerSocket.emit('newFriend', myUsername);
+    }
+    // Notify the Client (all the sockets)
+    const myPlayerSockets = transientDataHandler.getPlayerSockets(myUsername);
+    for (let myPlayerSocket of myPlayerSockets) {
+      myPlayerSocket.emit('newFriend', otherUsername);
     }
 
     const body: NotifyAvailabilityFriendRequestResponseBody = { error: false, statusCode: 200, newFriend: true };
@@ -160,17 +183,28 @@ router.post(`/`, auth, async (req, res, next) => {
 });
 
 
+/**
+ * The Client notifies the Server about his unavailability to become friend of the specified friend.
+ * That means that if there is a friend request made by the specified player to the Client, then this request is rejected.
+ * Otherwise, if there is a friend request made by the Client to the specified player, then this request is canceled. 
+ * 
+ * That player is specified in the HTTP request body.
+ */
 router.delete(`/`, auth, async (req, res, next) => {
   try {
+    // Check if the body is correct
     if (!isNotifyUnavailabilityFriendRequestRequestBody(req.body)) {
       console.warn('Wrong notify unavailability friend request body content ' + JSON.stringify(req.body, null, 2));
       const errorBody: ErrorResponseBody = { error: true, statusCode: 400, errorMessage: 'Wrong notify unavailability friend request body content' };
       throw errorBody;
     }
 
+    // Username of the Client
     const myUsername = req.user!.username;
+    // Username of the specified player
     const otherUsername = req.body.username;
 
+    // Check if the usernames are equal
     if (myUsername === otherUsername) {
       console.warn('A player notified his unavailability for friend request to himself');
       const errorBody: ErrorResponseBody = {
@@ -181,21 +215,21 @@ router.delete(`/`, auth, async (req, res, next) => {
       throw errorBody;
     }
 
+    // Search the document of the other player
     const otherPlayerDocument = await player.getModel().findOne({ username: otherUsername }).exec();
-
     if (!otherPlayerDocument) {
       console.warn('A player notified his unavailability for friend request with an invalid username: ' + otherUsername);
       const errorBody: ErrorResponseBody = { error: true, statusCode: 400, errorMessage: 'The specified username doesn\'t exist' };
       throw errorBody;
     }
 
+    // Delete the (potential) friend request between the two.
     const filter = {
       $or: [
         { from: myUsername, to: otherUsername },
         { from: otherUsername, to: myUsername },
       ],
     };
-
     // deleteOne would be sufficient, but deleteMany is safer
     const deleteInfo = await friendRequest.getModel().deleteMany(filter).exec();
 

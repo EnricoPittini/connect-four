@@ -5,12 +5,18 @@ enum SenderPlayer {
   PLAYER_B = 'PLAYER_B',
 }
 
+/**
+ * Represents the messages
+ */
 export interface Message {
   sender: SenderPlayer,
   text: string,
   datetime: Date,
 }
 
+/**
+ * Represents the messages documents (e.g. the messages stored in the database)
+ */
 // TODO ricontrollare tipi per sub documents
 const messageSchema = new mongoose.Schema({
   sender: {
@@ -27,7 +33,14 @@ const messageSchema = new mongoose.Schema({
   },
 });
 
-
+/**
+ * Represents the chats (e.g. the list of messages between two players)
+ * 
+ * IMPORTANT : these chats are only the chats between two players (a private chat). They don't include the 
+ * chats of the matches.
+ * If the player is a standard player, he can have a private chat only with a friend of him. If the player 
+ * is a moderator, he can have a private chat with anyone.
+ */
 export interface Chat {
   playerA: string,
   playerB: string,
@@ -36,6 +49,9 @@ export interface Chat {
   playerBHasNewMessages: boolean,
 }
 
+/**
+ * Represents the chats documents (e.g. the chats stored in the database)
+ */
 export interface ChatDocument extends Chat, mongoose.Document {
   addMessage: (senderUsername: string, text: string) => void,
 }
@@ -66,6 +82,12 @@ const chatSchema = new mongoose.Schema<ChatDocument, ChatModel>({
   },
 });
 
+/**
+ * Adds a new message in the chat
+ * @param senderUsername 
+ * @param text 
+ * @returns 
+ */
 chatSchema.methods.addMessage = function (senderUsername: string, text: string): boolean {
   let sender: SenderPlayer;
 
@@ -111,6 +133,9 @@ export function getModel(): ChatModel { // Return Model as singleton
   return chatModel;
 }
 
+/**
+ * Represents the type of the input data needed to create a new chat document
+ */
 export interface NewChatParams extends Pick<Chat, 'playerA' | 'playerB'> {
 }
 

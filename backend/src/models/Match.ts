@@ -12,6 +12,9 @@ export enum MatchStatus {
   FORFAIT = 'FORFAIT',
 }
 
+/**
+ * Represents the matches
+ */
 export interface Match {
   player1: string,
   player2: string,
@@ -23,6 +26,9 @@ export interface Match {
   playerTurn: WhichPlayer,
 }
 
+/**
+ * Represents the matches documents (e.g. the matches stored in the database)
+ */
 export interface MatchDocument extends Match, mongoose.Document {
   addMove: (playerUsername: string, column: number) => void,
   forfait: (playerUsername: string) => void,
@@ -67,6 +73,12 @@ const matchSchema = new mongoose.Schema<MatchDocument, MatchModel>({
   },
 });
 
+/**
+ * Given a match and a username, returns the role of that player in that match
+ * @param match 
+ * @param playerUsername 
+ * @returns 
+ */
 // TODO eventualmente trasformarla in metodo o esportarla
 function getPlayerRole(match: Match, playerUsername: string): WhichPlayer {
   if (playerUsername === match.player1) {
@@ -76,7 +88,7 @@ function getPlayerRole(match: Match, playerUsername: string): WhichPlayer {
     return WhichPlayer.PLAYER_2;
   }
   else {
-    return WhichPlayer.EMPTY;
+    return WhichPlayer.EMPTY; // The specified player is not a player of the match
   }
 }
 
@@ -105,8 +117,7 @@ function updateAfterTermination(match: Match, status: MatchStatus, winner: Which
   return true;
 }
 
-///////////// FUNZIONI CHE TOCCANO LA BOARD
-// TODO rivedere semantica e funzionamento delle funzioni
+//////////////////// FUNCTIONS THAT WORK WITH THE BOARD
 const TOP_ROW = 5;
 const BOTTOM_ROW = 0;
 const LEFT_COLUMN = 0;
@@ -156,6 +167,7 @@ enum Direction {
 
 /**
  * Checks if the given line of 4 contiguous cells contains the same player.
+ * This line can be horizontal, vertical, oblique_up or ublique_down.
  *
  * @param board
  * @param startRow
@@ -189,6 +201,7 @@ function checkLine(board: WhichPlayer[][], startRow: number, startCol: number, d
       break;
   }
 
+  // Four iterations to check if all the 4 cells of the line have the same player
   let row = startRow;
   let col = startCol;
   let stillEqual = true;
@@ -210,6 +223,9 @@ function checkLine(board: WhichPlayer[][], startRow: number, startCol: number, d
  */
 function checkWinner(board: WhichPlayer[][]): boolean {
 
+  // Iterates through all the cells. For each of them, checks if there is a line of 4 contigous cells 
+  // that has the same player: this line of 4 contigous cells can be horizontal, vertical, oblique_down 
+  // or oblique_up
   for (let row = BOTTOM_ROW; row <= TOP_ROW; row++) {
     for (let col = LEFT_COLUMN; col <= RIGHT_COLUMN; col++) {
       let winFound = false;
@@ -228,7 +244,7 @@ function checkWinner(board: WhichPlayer[][]): boolean {
 }
 
 /**
- * Checks if there is a draw, specifically checks if the board is full.
+ * Checks if there is a draw. Specifically, checks if the board is full.
  *
  * @param board
  * @returns true if there is a draw, false otherwise.
@@ -241,8 +257,15 @@ function checkDraw(board: WhichPlayer[][]): boolean {
   }
   return true;          // draw
 }
-/////////////////////////
 
+///////////////////////////////////////////////
+
+
+/**
+ * Adds a move in the match
+ * @param playerUsername 
+ * @param column 
+ */
 matchSchema.methods.addMove = function (playerUsername: string, column: number): void {
   // check that the match is not terminated yet
   if (this.status !== MatchStatus.IN_PROGRESS || this.playerTurn === WhichPlayer.EMPTY) {
@@ -297,6 +320,10 @@ matchSchema.methods.addMove = function (playerUsername: string, column: number):
   //return true;
 }
 
+/**
+ * Terminates the match for forfait of the specified player
+ * @param playerUsername 
+ */
 matchSchema.methods.forfait = function (playerUsername: string): void {
   const role = getPlayerRole(this, playerUsername);
 
@@ -312,7 +339,11 @@ matchSchema.methods.forfait = function (playerUsername: string): void {
   }
 }
 
-
+/**
+ * Counts the moves made in the match by the specified player
+ * @param playerUsername 
+ * @returns 
+ */
 matchSchema.methods.countMoves = function (playerUsername: string): number {
   const role = getPlayerRole(this, playerUsername);
 
@@ -346,9 +377,17 @@ export function getModel(): MatchModel { // Return Model as singleton
   return matchModel;
 }
 
+/**
+ * Represents the type of the input data needed to create a new match document
+ */
 export interface NewMatchParams extends Pick<Match, 'player1' | 'player2'> {
 }
 
+/**
+ * Creates a new match document
+ * @param data 
+ * @returns 
+ */
 export function newMatch(data: NewMatchParams): MatchDocument {
   const _matchModel = getModel();
 

@@ -1,3 +1,5 @@
+// Interfaces for the HTTP requests
+
 export interface RequestBody {
 }
 
@@ -18,6 +20,7 @@ export interface ModeratorRegistrationRequestBody extends RegistrationRequestBod
   isModerator: true,
 }
 
+// Type guard function
 export function isStandardPlayerRegistrationRequestBody(arg: any): arg is StandardPlayerRegistrationRequestBody {
   return arg
     && arg.username
@@ -34,6 +37,7 @@ export function isStandardPlayerRegistrationRequestBody(arg: any): arg is Standa
     && typeof (arg.avatar) === 'string';
 }
 
+// Type guard function
 export function isModeratorRegistrationRequestBody(arg: any): arg is ModeratorRegistrationRequestBody {
   return arg
     && arg.username
@@ -51,6 +55,7 @@ export interface ConfirmModeratorRequestBody extends RequestBody {
   avatar: string, // TODO capire come gestire
 }
 
+// Type guard function
 export function isConfirmModeratorRequestBody(arg: any): arg is ConfirmModeratorRequestBody {
   return arg
     && arg.password
@@ -67,6 +72,7 @@ export interface NotifyAvailabilityFriendRequestRequestBody extends RequestBody 
   username: string,
 }
 
+// Type guard function
 export function isNotifyAvailabilityFriendRequestRequestBody(arg: any): arg is NotifyAvailabilityFriendRequestRequestBody {
   return arg
     && arg.username
@@ -77,6 +83,7 @@ export interface NotifyUnavailabilityFriendRequestRequestBody extends RequestBod
   username: string,
 }
 
+// Type guard function
 export function isNotifyUnavailabilityFriendRequestRequestBody(arg: any): arg is NotifyUnavailabilityFriendRequestRequestBody {
   return arg
     && arg.username
@@ -87,6 +94,7 @@ export interface AddMoveRequestBody extends RequestBody {
   column: number,
 }
 
+// Type guard function
 export function isAddMoveRequestBody(arg: any): arg is AddMoveRequestBody {
   return arg
     && arg.column !== undefined

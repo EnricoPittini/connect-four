@@ -3,14 +3,26 @@ import { Server, Socket } from 'socket.io';
 import ClientEvents from './socketsHandlers/eventTypes/ClientEvents';
 import ServerEvents from './socketsHandlers/eventTypes/ServerEvents';
 
+// socketIO instance
 let io : Server<ClientEvents, ServerEvents>;
 
-export function initializeSocketIO( server: http.Server){
+/**
+ * Initialize the socketIO instance
+ * @param server 
+ */
+// TODO .env
+export function initializeSocketIO(server: http.Server){
   if(!io){
-    io = new Server<ClientEvents, ServerEvents>(server);
+    io = new Server<ClientEvents, ServerEvents>(server, {
+      cors: {
+        origin: 'http://localhost:4200',
+        methods: ['GET', 'POST'],
+      },
+    });
   }
 }
 
+// Returns the socketIO instance
 export function getSocketIO() : Server<ClientEvents, ServerEvents>{
   if(!io){
     throw new Error('The SocketIO is not initialized yet');

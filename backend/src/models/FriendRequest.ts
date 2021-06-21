@@ -1,11 +1,17 @@
 import mongoose = require('mongoose');
 
+/**
+ * Represents the friend requests
+ */
 export interface FriendRequest {
   from: string,
   to: string,
   datetime: Date,
 }
 
+/**
+ * Represents the friend requests documents (e.g. the friend requests stored in the database)
+ */
 export interface FriendRequestDocument extends FriendRequest, mongoose.Document {
 }
 
@@ -41,9 +47,17 @@ export function getModel(): FriendRequestModel { // Return Model as singleton
   return friendRequestModel;
 }
 
+/**
+ * Represents the type of the input data needed to create a new friend request document
+ */
 interface NewFriendRequestParams extends Pick<FriendRequest, 'from' | 'to'> {
 }
 
+/**
+ * Creates a new friend request document
+ * @param data 
+ * @returns 
+ */
 export function newFriendRequest(data: NewFriendRequestParams): FriendRequestDocument {
   const _friendRequestModel = getModel();
 

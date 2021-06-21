@@ -53,7 +53,7 @@ const matchSchema = new mongoose.Schema<MatchDocument, MatchModel>({
   },
   datetimeEnd: {
     type: mongoose.SchemaTypes.Date,
-    required: true, // TODO bisogna mettere a false essendo che può essere null?
+    required: false, // TODO bisogna mettere a false essendo che può essere null?
   },
   board: {
     type: [[mongoose.SchemaTypes.String]],
@@ -75,9 +75,9 @@ const matchSchema = new mongoose.Schema<MatchDocument, MatchModel>({
 
 /**
  * Given a match and a username, returns the role of that player in that match
- * @param match 
- * @param playerUsername 
- * @returns 
+ * @param match
+ * @param playerUsername
+ * @returns
  */
 // TODO eventualmente trasformarla in metodo o esportarla
 function getPlayerRole(match: Match, playerUsername: string): WhichPlayer {
@@ -223,8 +223,8 @@ function checkLine(board: WhichPlayer[][], startRow: number, startCol: number, d
  */
 function checkWinner(board: WhichPlayer[][]): boolean {
 
-  // Iterates through all the cells. For each of them, checks if there is a line of 4 contigous cells 
-  // that has the same player: this line of 4 contigous cells can be horizontal, vertical, oblique_down 
+  // Iterates through all the cells. For each of them, checks if there is a line of 4 contigous cells
+  // that has the same player: this line of 4 contigous cells can be horizontal, vertical, oblique_down
   // or oblique_up
   for (let row = BOTTOM_ROW; row <= TOP_ROW; row++) {
     for (let col = LEFT_COLUMN; col <= RIGHT_COLUMN; col++) {
@@ -263,8 +263,8 @@ function checkDraw(board: WhichPlayer[][]): boolean {
 
 /**
  * Adds a move in the match
- * @param playerUsername 
- * @param column 
+ * @param playerUsername
+ * @param column
  */
 matchSchema.methods.addMove = function (playerUsername: string, column: number): void {
   // check that the match is not terminated yet
@@ -302,6 +302,8 @@ matchSchema.methods.addMove = function (playerUsername: string, column: number):
 
   // Put the move in the board
   setCellValue(this.board, firstEmptyRow, column, role);
+  // Mark board as modified: mandatory!
+  this.markModified('board');
 
   // Check if there is a winner
   if (checkWinner(this.board)) {
@@ -322,7 +324,7 @@ matchSchema.methods.addMove = function (playerUsername: string, column: number):
 
 /**
  * Terminates the match for forfait of the specified player
- * @param playerUsername 
+ * @param playerUsername
  */
 matchSchema.methods.forfait = function (playerUsername: string): void {
   const role = getPlayerRole(this, playerUsername);
@@ -341,8 +343,8 @@ matchSchema.methods.forfait = function (playerUsername: string): void {
 
 /**
  * Counts the moves made in the match by the specified player
- * @param playerUsername 
- * @returns 
+ * @param playerUsername
+ * @returns
  */
 matchSchema.methods.countMoves = function (playerUsername: string): number {
   const role = getPlayerRole(this, playerUsername);
@@ -385,8 +387,8 @@ export interface NewMatchParams extends Pick<Match, 'player1' | 'player2'> {
 
 /**
  * Creates a new match document
- * @param data 
- * @returns 
+ * @param data
+ * @returns
  */
 export function newMatch(data: NewMatchParams): MatchDocument {
   const _matchModel = getModel();

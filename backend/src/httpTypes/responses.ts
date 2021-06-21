@@ -5,6 +5,7 @@ import { Stats } from '../models/Stats';
 import { FriendRequest } from '../models/FriendRequest';
 import { Chat } from '../models/Chat';
 import { Match } from '../models/Match';
+import { FriendMatchRequest } from '../models/FriendMatchRequest';
 
 /**
  * Represents a generic response

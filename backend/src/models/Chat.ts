@@ -54,6 +54,7 @@ export interface Chat {
  */
 export interface ChatDocument extends Chat, mongoose.Document {
   addMessage: (senderUsername: string, text: string) => void,
+  getDatetimeLastMessage: () => Date, 
 }
 
 export interface ChatModel extends mongoose.Model<ChatDocument> {
@@ -118,6 +119,17 @@ chatSchema.methods.addMessage = function (senderUsername: string, text: string):
   }
 
   return true;
+}
+
+/**
+ * Returns the datetime of the last inserted message
+ * @returns 
+ */
+chatSchema.methods.addMessage = function (): Date {
+  if(this.messages.length<=0){
+    throw new Error('The chats doesn\'t have any messages');
+  }
+  return this.messages[this.messages.length-1].datetime;
 }
 
 export function getSchema() {

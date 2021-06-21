@@ -4,7 +4,8 @@
 export interface ToClientFriendMessage {
   from : string,
   to : string,
-  text: string
+  text: string,
+  datetime: Date,
 }
 
 /**
@@ -12,7 +13,8 @@ export interface ToClientFriendMessage {
  */
 export interface ToClientMatchMessage{
   from : string,
-  text: string
+  text: string,
+  // TODO : aggiungere datetime?
 }
 
 /**

@@ -84,14 +84,15 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
       chatDocument.addMessage(fromUsername, message.text);
       return chatDocument.save();
     })
-    .then( _ =>{
+    .then( chat =>{
       // Notify the "from player"
       const fromPlayerSockets = transientDataHandler.getPlayerSockets(fromUsername);
       for (let fromPlayerSocket of fromPlayerSockets) {
         fromPlayerSocket.emit('chat', {
           from: fromUsername,
           to: toUsername,
-          text: message.text
+          text: message.text,
+          datetime: chat.getDatetimeLastMessage(),
         });
       }
 
@@ -101,7 +102,8 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
         toPlayerSocket.emit('chat', {
           from: fromUsername,
           to: toUsername,
-          text: message.text
+          text: message.text,
+          datetime: chat.getDatetimeLastMessage(),
         });
       }
     })

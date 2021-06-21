@@ -76,4 +76,9 @@ export default interface ServerEvents {
    * Event used to answer the Client to his question about the existence of a random match request made by himself
    */
    'hasRandomMatchRequest': (flag: boolean) => void;
+
+   /**
+    * Event used to notify the Client about his profile deletion
+    */
+   'profileDeleted': ()=> void;
 }

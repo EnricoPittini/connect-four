@@ -1,3 +1,5 @@
+// PLAYERS ENDPOINTS
+
 import express from 'express';
 import jsonwebtoken = require('jsonwebtoken');    // JWT generation
 
@@ -6,8 +8,12 @@ import player = require('../models/Player');
 import { PlayerType } from '../models/Player';
 import stats = require('../models/Stats');
 import friendRequest = require('../models/FriendRequest');
+import match = require('../models/Match');
+import { MatchStatus , MatchDocument } from '../models/Match';
 
 import { TransientDataHandler } from "../TransientDataHandler";
+
+import { getSocketIO } from '../initializeSocketIO';
 
 import {
   RegistrationRequestBody,
@@ -34,6 +40,7 @@ import {
 const router = express.Router();
 export default router;
 
+// Handler of the non-persistent data
 const transientDataHandler = TransientDataHandler.getInstance();
 
 
@@ -51,17 +58,22 @@ function ensureNotFirstAccessModerator(user: Express.User | undefined, next: exp
 }
 
 
-// /players
-
-
-// players endpoint
+/**
+ * Creates a new player (either standard or moderator), given the data in the body of the HTTP request.
+ * In addition, returns the JWT token of the new player.
+ */
 router.post(`/`, (req, res, next) => {
+
+  // Checks if the body contains the standard player registration data
   if (isStandardPlayerRegistrationRequestBody(req.body)) {
     // The request body fields are non empty (This is ensured authomatically by the body parsing system)
+
+    // Creates a new standard player
     player.newStandardPlayer(req.body).then(newPlayer => {
       return newPlayer.save();
     })
     .then(newPlayer => {
+      // Creates the JWT
       const tokenData = {
         username: newPlayer.username,
         name: newPlayer.name,
@@ -86,22 +98,29 @@ router.post(`/`, (req, res, next) => {
       return next(errorBody);
     });
   }
+
+  // Checks if the body contains the moderator registration data
   else if (isModeratorRegistrationRequestBody(req.body)) {
-    return next();
+    return next(); // Calls the next middleware function (auth middleware)
   }
+
+  // Wrong body content
   else {
     console.warn('Wrong registration body content ' + JSON.stringify(req.body, null, 2));
     const errorBody: ErrorResponseBody = { error: true, statusCode: 400, errorMessage: 'Wrong registration body content' };
     return next(errorBody);
   }
 
+  // Next middleware functions (only if the body contains the moderator registration data)
 }, auth, (req, res, next) => {
+  //Cheks if the Client is a moderator
   if (req.user?.type !== PlayerType.MODERATOR) {
     console.warn('A non Moderator player asked to create a new Moderator, the player is ' + JSON.stringify(req.user, null, 2));
     const errorBody: ErrorResponseBody = { error: true, statusCode: 403, errorMessage: 'You must be a Moderator to create a new Moderator' };
     return next(errorBody);
   }
   // The request body fields are non empty (This is ensured authomatically by the body parsing system)
+  // Create a new moderator
   player.newModerator(req.body).then(newModerator => {
     return newModerator.save();
   })
@@ -123,13 +142,18 @@ router.post(`/`, (req, res, next) => {
   });
 });
 
+/**
+ * Returns all the players registered in the system
+ */
 //?username_filter=<partial_username>&skip=<skip>&limit=<limit>
 router.get(`/`, auth, (req, res, next) => {
+
+  // Object used to filter the database query
   const filter: any = {};
   if (req.query.username_filter) {
     filter.username = { $regex: req.query.username_filter, $options: 'i' };
   }
-
+  // Object used to select the attributes
   const fields = {
     _id: 0,
     username: 1,
@@ -137,19 +161,18 @@ router.get(`/`, auth, (req, res, next) => {
     surname: 1,
     avatar: 1, // TODO Se è URL
     type: 1,
-  };
-
-
+  };  
   console.info('Retrieving players, using filter: ' + JSON.stringify(filter, null, 2));
 
+  // Parsing skip and limit
   if ((req.query.skip && typeof (req.query.skip) !== 'string') || (req.query.limit && typeof (req.query.limit) !== 'string')) {
     const errorBody = { error: true, statusCode: 405, errorMessage: 'Invalid query section for the URL' };
     return next(errorBody);
   }
-
   const skip = parseInt(req.query.skip || '0') || 0;
   const limit = parseInt(req.query.limit || '20') || 20;
 
+  // Search the players
   player.getModel().find(filter, fields).sort({ timestamp: -1 }).skip(skip).limit(limit).then((documents) => {
     const body: GetPlayersResponseBody = { error: false, statusCode: 200, players: documents };
     return res.status(200).json(body);
@@ -161,7 +184,13 @@ router.get(`/`, auth, (req, res, next) => {
 });
 
 
+/**
+ * Used by a first access moderator to confirm his own profile, using the data in the body of the HTTP request.
+ * In addition returns the new JWT of the confirmed moderator.
+ */
 router.put(`/:username`, auth, (req, res, next) => {
+
+  // Cheks if the Client is a first access moderator
   if (req.user?.type !== PlayerType.MODERATOR_FIRST_ACCESS) {
     console.warn('A non first time Moderator player asked to confirm his account, the player is ' + JSON.stringify(req.user, null, 2));
     const errorBody: ErrorResponseBody = {
@@ -172,6 +201,7 @@ router.put(`/:username`, auth, (req, res, next) => {
     return next(errorBody);
   }
 
+  // Cheks if the usernames are the same
   if (req.params.username !== req.user.username) {
     console.warn('A first access Moderator asked to confirm another first access moderator profile' + JSON.stringify(req.user, null, 2));
     const errorBody: ErrorResponseBody = {
@@ -182,12 +212,14 @@ router.put(`/:username`, auth, (req, res, next) => {
     return next(errorBody);
   }
 
+  // Cheks if the body is correct
   if (!isConfirmModeratorRequestBody(req.body)) {
     console.warn('Wrong confirm Moderator body content ' + JSON.stringify(req.body, null, 2));
     const errorBody: ErrorResponseBody = { error: true, statusCode: 400, errorMessage: 'Wrong confirm Moderator body content' };
     return next(errorBody);
   }
 
+  // Search the moderator document
   player.getModel().findOne({ username: req.user.username }).then(moderator => {
     if (!moderator) {
       throw new Error('The first access Moderator was not found, but should have been found');
@@ -197,6 +229,7 @@ router.put(`/:username`, auth, (req, res, next) => {
       // return next(errorBody);
     }
 
+    // Confirm the first access moderator profile 
     moderator.confirmModerator(req.body.name, req.body.surname, req.body.avatar, req.body.password);
     return moderator.save();
   })
@@ -209,6 +242,8 @@ router.put(`/:username`, auth, (req, res, next) => {
       type: moderator!.type,
       // TODO avatar?
     };
+
+    // Create the JWT.
     const tokenSigned = jsonwebtoken.sign(tokenData, process.env.JWT_SECRET as string);
     const body: ConfirmModeratorResponseBody = { error: false, statusCode: 200, token: tokenSigned };
     return res.status(200).json(body);
@@ -222,7 +257,12 @@ router.put(`/:username`, auth, (req, res, next) => {
 });
 
 
+/**
+ * Returns the data of the player with the specified username
+ */
 router.get(`/:username`, auth, (req, res, next) => {
+
+  // Fields to select
   const fields = {
     _id: 0,
     username: 1,
@@ -231,15 +271,18 @@ router.get(`/:username`, auth, (req, res, next) => {
     avatar: 1, // TODO Se è URL
     type: 1,
   };
+
+  // Search the player document
   player.getModel().findOne({ username: req.params.username }, fields).then((document) => {
     if (!document) {
       const errorBody: ErrorResponseBody = { error: true, statusCode: 404, errorMessage: 'The selected player doesn\'t exist' };
       throw errorBody;
     }
 
+    // Add the information about online and ingame
     const player: any = document;
     player.online = transientDataHandler.isOnline(req.params.username);
-    player.playing = transientDataHandler.isInGame(req.params.username);
+    player.ingame = transientDataHandler.isInGame(req.params.username);
     const body: GetPlayerResponseBody = { error: false, statusCode: 200, player: player };
     return res.status(200).json(body);
   })
@@ -254,8 +297,13 @@ router.get(`/:username`, auth, (req, res, next) => {
   })
 });
 
-// Endpoint used by a Client to get match request informations with respect to the specified player
+/**
+ * Used by a Client to get match request informations with respect to the specified player.
+ * The client must be a friend of the specified player. (It' a friend match request)
+ */
 router.get(`/:username/match_request`, auth, (req, res, next) => {
+
+  // Search the document of the specified player 
   player.getModel().findOne({ username: req.params.username }).then((playerDocument) => {
     if (!playerDocument) {
       console.warn('A client asked for a non existing player: ' + req.params.username);
@@ -263,12 +311,14 @@ router.get(`/:username/match_request`, auth, (req, res, next) => {
       throw errorBody;
     }
 
+    // Checks if Client is a friend of the specified player.
     if(!playerDocument.hasFriend(req.user!.username)){
       console.warn('A client asked for match request informations for a player that isn\'t his friend');
       const errorBody: ErrorResponseBody = { error: true, statusCode: 400, errorMessage: 'The selected player isn\'t your friend' };
       throw errorBody;
     }
 
+    // Search a friend match request between the two players
     let friendMatchRequest : FriendMatchRequest;
     if(transientDataHandler.hasFriendMatchRequest(req.user!.username, req.params.username)){
       friendMatchRequest = transientDataHandler.getFriendMatchRequest(req.user!.username, req.params.username);
@@ -302,10 +352,20 @@ router.get(`/:username/match_request`, auth, (req, res, next) => {
 });
 
 
-router.delete(`/:username`, auth, (req, res, next) => {
+/**
+ * Deletes the specified player.
+ */
+router.delete(`/:username`, auth, async (req, res, next) => {
+
+  // The socketIO instance
+  const io = getSocketIO();
+
+  // Username of the Client
   const myUsername = req.user!.username;
+  // Specified username (player to delete)
   const otherUsername = req.params.username;
 
+  // The Client can delete the specified player only if this is his own profile or if he is a moderator
   if (otherUsername !== myUsername && req.user?.type !== PlayerType.MODERATOR) {
     console.warn('A non moderator is trying to delete another player profile, user: ' + JSON.stringify(req.user, null, 2));
     const errorBody: ErrorResponseBody = {
@@ -315,9 +375,12 @@ router.delete(`/:username`, auth, (req, res, next) => {
     };
     return next(errorBody);
   }
-  // you are deleting your own profile or you are a moderator
 
-  player.getModel().findOne({ username: otherUsername }).then(otherPlayerDocument => {
+  // The Client is deleting his own profile or he is a moderator
+
+  try{
+    // Search the document of the specified player
+    const otherPlayerDocument = await player.getModel().findOne({ username: otherUsername }).exec();
     if (!otherPlayerDocument) {
       console.warn('Client asked to delete a non existing player, user: ' + JSON.stringify(req.user, null, 2));
       const errorBody: ErrorResponseBody = { error: true, statusCode: 404, errorMessage: 'Player not found' };
@@ -329,19 +392,16 @@ router.delete(`/:username`, auth, (req, res, next) => {
       throw errorBody;
     }
 
-    // TODO sistemare eventualmente problema del parallellismo delle operazioni nel DB (fallimento di una operazione e non delle altre)
-    const promises: Promise<any>[] = [];
+    // Now several operations have to be done before the profile deletion
 
     // Delete all the friend requests related to the specified player
-    promises.push(friendRequest.getModel().deleteMany({ $or: [{ from: otherUsername }, { to: otherUsername }] }).exec());
+    await friendRequest.getModel().deleteMany({ $or: [{ from: otherUsername }, { to: otherUsername }] }).exec();
 
     // Delete the specified player from the friend list of his past friends
     for (let friend of otherPlayerDocument.friends) {
-      const promise = player.getModel().findOne({ username: friend }).then(friendDocument => {
-        friendDocument?.removeFriend(otherUsername);
-        return friendDocument?.save();
-      });
-      promises.push(promise);
+      const friendDocument =  await player.getModel().findOne({ username: friend }).exec();
+      friendDocument?.removeFriend(otherUsername);
+      await friendDocument?.save();
 
       // Notify the past friends
       const friendSockets = transientDataHandler.getPlayerSockets(friend);
@@ -350,25 +410,110 @@ router.delete(`/:username`, auth, (req, res, next) => {
       }
     }
 
-    promises.push(player.getModel().deleteOne({ username: otherUsername }).exec());
+    // Notify all the match requests opponents associated with that player (both senders and receivers)
+    const friendMatchRequestsOpponents = transientDataHandler.getPlayerFriendMatchRequestsOpponents(otherUsername);
+    for(let opponent of friendMatchRequestsOpponents){
+      const opponentSockets = transientDataHandler.getPlayerSockets(opponent);
+      for(let opponentSocket of opponentSockets){
+        opponentSocket.emit('deleteFriendMatchRequest', {
+          sender: otherUsername,
+          receiver: opponent
+        });
+      }
+    }
+    // Remove all the match requests associated with that player
+    transientDataHandler.deletePlayerFriendMatchRequests(otherUsername);
 
-    return Promise.all(promises);
-  })
-  .then(_ => {
+    // Authomatic forfait of the player in all the matches in which he is playing (In theory either one or zero) 
+    const filter = {
+      $or:[
+        {
+          player1: otherUsername,
+          status: MatchStatus.IN_PROGRESS
+        },
+        {
+          player2: otherUsername,
+          status: MatchStatus.IN_PROGRESS
+        }
+      ]
+    }
+    // The matches that the player was playing (In theory either one or zero). Authomatic forfait for all these matches
+    const matchDocuments = await match.getModel().find(filter).exec();
+    const promises : Promise<MatchDocument>[] = [];
+    for(let matchDocument of matchDocuments){
+      matchDocument.forfait(otherUsername);
+      promises.push(matchDocument.save());
+    }
+    await Promise.all(promises);
+
+    // Ending all these matches
+    for(let matchDocument of matchDocuments){
+      // Notify the opponent of the match (all his sockets)
+      const opponent = matchDocument.player1===otherUsername ? matchDocument.player2 : matchDocument.player1;
+      const opponentSockets = transientDataHandler.getPlayerSockets(opponent);
+      for(let opponentSocket of opponentSockets){
+        opponentSocket.emit('match', matchDocument._id.toString());
+      }
+
+      // Put the opponent of the match as out of game
+      transientDataHandler.markOffGame(opponent);
+
+      // Notify all the observers of the match
+      const roomName = 'observersRoom:' + matchDocument._id.toString();
+      io.to(roomName).emit('match', matchDocument._id.toString()); // TODO : cosa succede se la room non esiste? (Non dovrebbe fare nulla)
+
+      // All the observers of the match have to leave the match room
+      const observersSocketsId = io.sockets.adapter.rooms.get(roomName);
+      if(observersSocketsId){ // The match observers room exists
+        observersSocketsId.forEach( socketId => {
+          const observerSocket = io.sockets.sockets.get(socketId);
+          observerSocket?.leave(roomName);
+        } );
+      }
+
+      // Find the stats documents of the opponent of the match, in order to refresh it
+      const statsDocumentPlayer1 = await stats.getModel().findOne({player:matchDocument.player1}).exec();
+      const statsDocumentPlayer2 = await stats.getModel().findOne({player:matchDocument.player2}).exec();
+      if(!statsDocumentPlayer1 || !statsDocumentPlayer2){
+        console.warn('At least one of the player of the match doesn\'t have an associated stats document');
+        return;
+      }
+      await statsDocumentPlayer1.refresh(matchDocument);
+      await statsDocumentPlayer2.refresh(matchDocument);
+      await statsDocumentPlayer1.save();
+      await statsDocumentPlayer2.save();
+    }
+
+    // Put the player as out of the game
+    transientDataHandler.markOffGame(otherUsername);
+
+    // Notify all the sockets of the player
+    const otherPlayerSockets = transientDataHandler.getPlayerSockets(otherUsername);
+    for(let otherPlayerSocket of otherPlayerSockets){
+      otherPlayerSocket.emit('profileDeleted');
+    }
+
+    // Finally delete the player
+    await player.getModel().deleteOne({ username: otherUsername }).exec();
+
     console.info('Player profile deleted, ' + otherUsername);
     const body: SuccessResponseBody = { error: false, statusCode: 200 };
-    return res.status(200).json(body);
-  })
-  .catch(err => {
+    return res.status(200).json(body);    
+  }
+  catch(err){
     if (err.statusCode) {         // we assume this means it is an ErrorResponseBody
       return next(err);
     }
     console.error('Internal DB error ' + JSON.stringify(err, null, 2));
     const errorBody: ErrorResponseBody = { error: true, statusCode: 500, errorMessage: 'Internal Server error' };
     return next(errorBody);
-  });
+  }
 });
 
+
+/**
+ * Return the stats information about the specified player
+ */
 router.get(`/:username/stats`, auth, (req, res, next) => {
   ensureNotFirstAccessModerator(req.user, next);
 

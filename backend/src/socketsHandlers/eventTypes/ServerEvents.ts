@@ -59,7 +59,7 @@ export default interface ServerEvents {
    * The Server notifies the Clients (both sender and receiver) sockets about a friend match request deletion (both canceled and rejected)
    */
   // TODO il tipo si può isolare, con nome SocketNotificationBetweenClients
-  'deleteFriendMatchRequest': (message : {sender:string, receiver:string}) => void; 
+  'deleteFriendMatchRequest': (message : {sender:string, receiver:string}) => void;
 
   /**
    * The Server notifies the Clients (both sender and receiver) sockets about a new friend match request
@@ -73,27 +73,27 @@ export default interface ServerEvents {
   'newMatch': (matchId: string) => void;
 
   /**
-   * The Server notifies the Clients (the players and the observers of the match) sockets that something new happened 
+   * The Server notifies the Clients (the players and the observers of the match) sockets that something new happened
    * in that match
    */
   'match': (matchId: string) => void;
 
   /**
-   * The Server notifies the Clients (the players and, eventually, the observers of the match) sockets that something 
+   * The Server notifies the Clients (the players and, eventually, the observers of the match) sockets that something
    * about a new message in the chat
    */
   'matchChat': (message: ToClientMatchMessage)=> void;
 
   /**
    * The Server notifies the Client (the one that did the random match request) sockets that a random match request
-   *  has just been made. 
+   *  has just been made.
    * (This event it's used only to notify the other sockets of the same player that made the request)
    */
-   'randomMatchRequest': () => void;
+  'randomMatchRequest': () => void;
 
    /**
    * The Server notifies the Client (the one that did the random match request) sockets that a random match request
-   *  has just been canceled. 
+   *  has just been canceled.
    * (This event it's used only to notify the other sockets of the same player that made the request)
    */
    'cancelRandomMatchRequest': () => void;

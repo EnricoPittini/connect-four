@@ -14,6 +14,9 @@ import { FriendsSideBarComponent } from './components/friends-side-bar/friends-s
 import { StatsComponent } from './pages/stats/stats.component';
 import { LiveMatchesComponent } from './pages/live-matches/live-matches.component';
 import { ChatListComponent } from './pages/chat-list/chat-list.component';
+import { GameComponent } from './pages/game/game.component';
+import { CellComponent } from './components/cell/cell.component';
+import { BoardComponent } from './components/board/board.component';
 
 @NgModule({
   declarations: [
@@ -26,6 +29,9 @@ import { ChatListComponent } from './pages/chat-list/chat-list.component';
     StatsComponent,
     LiveMatchesComponent,
     ChatListComponent,
+    GameComponent,
+    CellComponent,
+    BoardComponent,
   ],
   imports: [
     BrowserModule,

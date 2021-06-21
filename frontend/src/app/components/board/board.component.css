@@ -1,0 +1,9 @@
+.column {
+  display: flex;
+  flex-direction: column;
+  background-color: blue;
+}
+
+.column:hover {
+  background-color: darkblue;
+}

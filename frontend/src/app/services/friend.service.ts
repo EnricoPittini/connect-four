@@ -103,6 +103,7 @@ export class FriendService {
     this.listenForFriendRequestListUpdate();
   }
 
+  // TODO questi 2 metodi potrebbero essere spostati insieme alle richieste match random (forse)
   /**
    * Notifies the availability of the authenticated user to play a match with
    * the user with the given username.

@@ -46,4 +46,9 @@ export default interface ClientEvents {
    * Cancel the availability to play a random match
    */
   'cancelRandomMatchRequest': ()=> void;
+
+  /**
+   * The Client ask if he has done a randome match request previously
+   */
+  'hasRandomMatchRequest': () => void;
 }

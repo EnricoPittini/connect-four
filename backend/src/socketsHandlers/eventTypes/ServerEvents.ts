@@ -71,4 +71,9 @@ export default interface ServerEvents {
      *  (This event it's used only to notify the other sockets of the same player that made the cancelation)
     */
    'cancelRandomMatchRequest': () => void;
+
+   /**
+   * Event used to answer the Client to his question about the existence of a random match request made by himself
+   */
+   'hasRandomMatchRequest': (flag: boolean) => void;
 }

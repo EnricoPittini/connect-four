@@ -18,7 +18,7 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
     // Player that sent the request
     const username = transientDataHandler.getSocketPlayer(socket);
     if(!username){
-      console.warn('An invalid player sent a random match request, username: ' + username);
+      console.warn('An invalid player sent a random match request');
       return;
     }
 
@@ -50,7 +50,7 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
     // Player that asked to cancel
     const username = transientDataHandler.getSocketPlayer(socket);
     if(!username){
-      console.warn('An invalid asked to cancel a random match request, username: ' + username);
+      console.warn('An invalid asked to cancel a random match request');
       return;
     }
 
@@ -60,6 +60,25 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
     const playerSockets = transientDataHandler.getPlayerSockets(username);
     for (let playerSocket of playerSockets) {
       playerSocket.emit('cancelRandomMatchRequest');
+    }
+  });
+
+  socket.on('hasRandomMatchRequest', () => {
+    console.info('Socket event: "hasRandomMatchRequest"');
+
+    // Player that asked if has a random match request
+    const username = transientDataHandler.getSocketPlayer(socket);
+    if(!username){
+      console.warn('An invalid asked if has a random match request');
+      return;
+    }
+
+    const flag = transientDataHandler.hasRandomMatchReuqest(username);
+
+    // Notify the player (all the sockets)
+    const playerSockets = transientDataHandler.getPlayerSockets(username);
+    for (let playerSocket of playerSockets) {
+      playerSocket.emit('hasRandomMatchRequest', flag);
     }
   });
 }

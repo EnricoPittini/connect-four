@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { WhichPlayer } from 'src/app/models/match.model';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Match, WhichPlayer } from 'src/app/models/match.model';
 
 @Component({
   selector: 'app-board',
@@ -7,21 +7,48 @@ import { WhichPlayer } from 'src/app/models/match.model';
   styleUrls: ['./board.component.css']
 })
 export class BoardComponent implements OnInit {
+
+  /**
+   * Pass to the html the valid values for the WhichPlayer enum.
+   */
   readonly PLAYER_1: WhichPlayer.PLAYER_1 = WhichPlayer.PLAYER_1;
   readonly PLAYER_2: WhichPlayer.PLAYER_2 = WhichPlayer.PLAYER_2;
   readonly EMPTY: WhichPlayer.EMPTY = WhichPlayer.EMPTY;
 
+  @Input() boardMatrix!: Match['board'];
 
-  matrix = Array(6).fill(Array(7).fill(null));
-
+  @Output() columnSelected = new EventEmitter<number>();
 
   constructor() { }
 
-  ngOnInit(): void {
+  ngOnInit() {
+    // Make sure that `value` has been provided
+    this.assertInputsProvided();
+
+    // TODO in alternativa posso settare qui la board ad una board vuota
+    // this.boardMatrix = Array(6).fill(Array(7).fill(this.EMPTY));
   }
 
   getTransposedMatrix(): any[][] {
-    return this.matrix[0].map((_: any, colIndex: number) => this.matrix.map(row => row[colIndex]));
+    return this.boardMatrix[0].map((_, colIndex) => this.boardMatrix.map(row => row[colIndex]));
   }
+
+  onColumnClicked(columnIndex: number): void {
+    console.info(`Column clicked ${columnIndex}`);
+    this.columnSelected.emit(columnIndex);
+  }
+
+  /**
+   * Make sure all the required inputs has been provided.
+   */
+  private assertInputsProvided(): void {
+    if (!this.boardMatrix) {
+      const errorMessage = 'The required input [boardMatrix] was not provided';
+      console.error(errorMessage);
+      throw new Error(errorMessage);
+    }
+  }
+
+
 
 }

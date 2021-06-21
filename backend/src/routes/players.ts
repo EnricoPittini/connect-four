@@ -11,6 +11,7 @@ import chats = require('../models/Chat');
 import friendRequest = require('../models/FriendRequest');
 import match = require('../models/Match');
 import { MatchStatus , MatchDocument } from '../models/Match';
+import { FriendMatchRequest } from '../models/FriendMatchRequest';
 
 import { TransientDataHandler } from "../TransientDataHandler";
 
@@ -162,7 +163,7 @@ router.get(`/`, auth, (req, res, next) => {
     surname: 1,
     avatar: 1, // TODO Se è URL
     type: 1,
-  };  
+  };
   console.info('Retrieving players, using filter: ' + JSON.stringify(filter, null, 2));
 
   // Parsing skip and limit
@@ -230,7 +231,7 @@ router.put(`/:username`, auth, (req, res, next) => {
       // return next(errorBody);
     }
 
-    // Confirm the first access moderator profile 
+    // Confirm the first access moderator profile
     moderator.confirmModerator(req.body.name, req.body.surname, req.body.avatar, req.body.password);
     return moderator.save();
   })
@@ -304,7 +305,7 @@ router.get(`/:username`, auth, (req, res, next) => {
  */
 router.get(`/:username/match_request`, auth, (req, res, next) => {
 
-  // Search the document of the specified player 
+  // Search the document of the specified player
   player.getModel().findOne({ username: req.params.username }).then((playerDocument) => {
     if (!playerDocument) {
       console.warn('A client asked for a non existing player: ' + req.params.username);
@@ -333,9 +334,9 @@ router.get(`/:username/match_request`, auth, (req, res, next) => {
       throw errorBody;
     }
 
-    const body: GetMatchRequestInformationResponseBody = { 
-      error: false, 
-      statusCode: 200, 
+    const body: GetMatchRequestInformationResponseBody = {
+      error: false,
+      statusCode: 200,
       from: friendMatchRequest.from,
       to: friendMatchRequest.to,
       datetime: friendMatchRequest.datetime,
@@ -430,7 +431,7 @@ router.delete(`/:username`, auth, async (req, res, next) => {
       transientDataHandler.deleteRandomMatchRequests(otherUsername);
     }
 
-    // Authomatic forfait of the player in all the matches in which he is playing (In theory either one or zero) 
+    // Authomatic forfait of the player in all the matches in which he is playing (In theory either one or zero)
     const filter = {
       $or:[
         {
@@ -510,7 +511,7 @@ router.delete(`/:username`, auth, async (req, res, next) => {
 
     console.info('Player profile deleted, ' + otherUsername);
     const body: SuccessResponseBody = { error: false, statusCode: 200 };
-    return res.status(200).json(body);    
+    return res.status(200).json(body);
   }
   catch(err){
     if (err.statusCode) {         // we assume this means it is an ErrorResponseBody

@@ -4,7 +4,7 @@ import match = require('./models/Match');
 import { NewMatchParams, MatchDocument } from './models/Match';
 
 /**
- * Function that arranges the random match requests till now made * 
+ * Function that arranges the random match requests till now made
  */
 export function arrangeRandomMatchRequests(): void{
   const transientDataHandler = TransientDataHandler.getInstance();

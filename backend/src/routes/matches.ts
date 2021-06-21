@@ -69,8 +69,8 @@ router.get(`/`, auth, async (req, res, next) => {
     filter.username = username;
   }
 
-  
-  if (!live) { 
+
+  if (!live) {
     // The Client asked for all the matches (both in progress and terminated)
     // In this case the matches are sorted by datetime (from the oldest to the latest)
 
@@ -95,8 +95,8 @@ router.get(`/`, auth, async (req, res, next) => {
       const matchDocuments = await match.getModel().find(filter, { __v: 0 });
 
       // Array of promise, where there is a promise for each match
-      // Each promise is a promise of 2 numbers (e.g. array of numbers). These two numbers are the two ratings of the 
-      // players a match. 
+      // Each promise is a promise of 2 numbers (e.g. array of numbers). These two numbers are the two ratings of the
+      // players a match.
       const matchPlayersRatingsPromises: Promise<number[]>[] = [];
       for (let matchDocument of matchDocuments) {
         const matchPlayersRatingsPromise = Promise.all([
@@ -139,7 +139,7 @@ router.get(`/`, auth, async (req, res, next) => {
  */
 router.get(`/:match_id`, auth, (req, res, next) => {
 
-  const matchId = new mongoose.SchemaTypes.ObjectId(req.params.match_id);
+  const matchId = new mongoose.Types.ObjectId(req.params.match_id);
 
   // Search the match document
   match.getModel().findOne({ _id: matchId }, { __v: 0 }).then((document) => {
@@ -179,7 +179,7 @@ router.post(`/:match_id`, auth, async (req, res, next) => {
   }
 
   try{
-    const matchId = new mongoose.SchemaTypes.ObjectId(req.params.match_id);
+    const matchId = new mongoose.Types.ObjectId(req.params.match_id);
 
     // Search for the match document
     const matchDocument = await match.getModel().findOne({ _id: matchId }, { __v: 0 }).exec();
@@ -197,7 +197,7 @@ router.post(`/:match_id`, auth, async (req, res, next) => {
       console.warn('Add move error: ' + err.message);
       const errorBody: ErrorResponseBody = { error: true, statusCode: 400, errorMessage: err.message };
       throw errorBody;
-    } 
+    }
     await matchDocument.save();
 
     // Notify the 2 players (all the sockets)
@@ -269,7 +269,7 @@ router.put(`/:match_id`, auth, async (req, res, next) => {
   const io = getSocketIO();
 
   try{
-    const matchId = new mongoose.SchemaTypes.ObjectId(req.params.match_id);
+    const matchId = new mongoose.Types.ObjectId(req.params.match_id);
 
     // Search for the match document
     const matchDocument = await match.getModel().findOne({ _id: matchId }, { __v: 0 }).exec();
@@ -291,7 +291,7 @@ router.put(`/:match_id`, auth, async (req, res, next) => {
     await matchDocument.save();
 
     // The match is endend: several operations to do
-    
+
     // Notify the 2 players (all the sockets)
     const player1Sockets = transientDataHandler.getPlayerSockets(matchDocument.player1);
     for(let player1Socket of player1Sockets){
@@ -352,7 +352,7 @@ router.put(`/:match_id`, auth, async (req, res, next) => {
  */
 router.post('/:match_id/observers', auth, (req, res, next) =>{
 
-  const matchId = new mongoose.SchemaTypes.ObjectId(req.params.match_id);
+  const matchId = new mongoose.Types.ObjectId(req.params.match_id);
 
   // Search for the match
   match.getModel().findOne({_id:matchId}).then( matchDocument => {
@@ -365,10 +365,10 @@ router.post('/:match_id/observers', auth, (req, res, next) =>{
     //Check if the Client is one of the two players of the match
     if(req.user!.username===matchDocument.player1 || req.user!.username===matchDocument.player2){
       console.warn('A client asked to be an observer for a match in which he is playing: ' + req.params.match_id);
-      const errorBody: ErrorResponseBody = { 
-        error: true, 
-        statusCode: 404, 
-        errorMessage: 'You can\'t become an observer of a match in which you are playing' 
+      const errorBody: ErrorResponseBody = {
+        error: true,
+        statusCode: 404,
+        errorMessage: 'You can\'t become an observer of a match in which you are playing'
       };
       throw errorBody;
     }
@@ -376,7 +376,7 @@ router.post('/:match_id/observers', auth, (req, res, next) =>{
     // Check if the Client is alredy an observer of another match
     const playerSockets = transientDataHandler.getPlayerSockets(req.user!.username);
     for(let playerSocket of playerSockets){ // At least one of the Client sockets is in alredy an abserver
-      if(playerSocket.rooms.size>0){ 
+      if(playerSocket.rooms.size>0){
         console.warn('A client asked to be an observer while he is alredy an observer, match_id: ' + req.params.match_id);
         const errorBody: ErrorResponseBody = { error: true, statusCode: 404, errorMessage: 'You are alredy an observer of another match' };
         throw errorBody;
@@ -403,11 +403,11 @@ router.post('/:match_id/observers', auth, (req, res, next) =>{
 
 
 /**
- * The Client asks to not be anymore an observer of a match 
+ * The Client asks to not be anymore an observer of a match
  */
 router.delete('/:match_id/observers', auth, (req, res, next) =>{
 
-  const matchId = new mongoose.SchemaTypes.ObjectId(req.params.match_id);
+  const matchId = new mongoose.Types.ObjectId(req.params.match_id);
 
   // Search for the match
   match.getModel().findOne({_id:matchId}).then( matchDocument => {
@@ -422,7 +422,7 @@ router.delete('/:match_id/observers', auth, (req, res, next) =>{
     // Check if the Client is not an observer of that match
     const playerSockets = transientDataHandler.getPlayerSockets(req.user!.username);
     for(let playerSocket of playerSockets){ // All the Client sockets must be in the match room
-      if(!playerSocket.rooms.has(roomName)){ 
+      if(!playerSocket.rooms.has(roomName)){
         console.warn('A client asked to not be anymore an observer of a match he wasn\'t observing, match_id: '
                      + req.params.match_id);
         const errorBody: ErrorResponseBody = { error: true, statusCode: 404, errorMessage: 'You are not an observer of that match' };

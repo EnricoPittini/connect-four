@@ -2,11 +2,14 @@
 <!-- Board -->
 <div style="display: flex; flex-direction: row;">
 
-  <!-- Column -->
-  <div *ngFor="let col of getTransposedMatrix()" class="column">
-    <!-- Cell -->
-    <!-- <div *ngFor="let cell of col" style="display: flex; flex-direction: column; padding: 5px;">Cella</div> -->
-    <app-cell *ngFor="let cell of col" [value]="PLAYER_1"></app-cell>
+  <!-- Columns -->
+  <div
+    *ngFor="let col of getTransposedMatrix(); let i = index"
+    class="column"
+    (click)="onColumnClicked(i)"
+  >
+    <!-- Cells -->
+    <app-cell *ngFor="let cell of col" [value]="cell"></app-cell>
   </div>
 
 </div>

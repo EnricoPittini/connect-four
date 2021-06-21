@@ -95,20 +95,20 @@ export default interface ServerEvents {
    */
   'randomMatchRequest': () => void;
 
-   /**
+  /**
    * The Server notifies the Client (the one that did the random match request) sockets that a random match request
    *  has just been canceled.
    * (This event it's used only to notify the other sockets of the same player that made the request)
    */
-   'cancelRandomMatchRequest': () => void;
+  'cancelRandomMatchRequest': () => void;
 
-   /**
+  /**
    * The Server answers the Client sockets to his question about the existence of a random match request made by himself
    */
-   'hasRandomMatchRequest': (flag: boolean) => void;
+  'hasRandomMatchRequest': (flag: boolean) => void;
 
-   /**
+  /**
    * The Server notifies the Client sockets about his profile deletion
    */
-   'profileDeleted': ()=> void;
+  'profileDeleted': ()=> void;
 }

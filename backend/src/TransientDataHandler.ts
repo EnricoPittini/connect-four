@@ -5,13 +5,15 @@ import ServerEvents from './socketsHandlers/eventTypes/ServerEvents';
 import { Player, PlayerDocument, PlayerType } from "./models/Player";
 import stats = require('./models/Stats');
 import { StatsDocument } from "./models/Stats";
+import { FriendMatchRequest } from './models/FriendMatchRequest';
+import randomMatchRequestsHandlers from './socketsHandlers/randomMatchRequestsHandlers';
 
 
 /**
  * Represents the random match requests
  */
 interface RandomMatchRequest extends Pick<FriendMatchRequest, 'from' | 'datetime'>{
-  playerRating: number, 
+  playerRating: number,
 }
 
 /**
@@ -38,7 +40,7 @@ type SocketIdPlayerMap = {
 export class TransientDataHandler {
 
   // Map usernames -> sockets
-  // A player is considered online if and only if his username is present in the keys of this map. In other words, he must have 
+  // A player is considered online if and only if his username is present in the keys of this map. In other words, he must have
   // at least one socket associated
   // A player can have multiple sockets associated (the same player is connected with multiple devices)
   private onlinePlayerSocketsMap: PlayerSocketsMap = {};
@@ -51,7 +53,7 @@ export class TransientDataHandler {
   // List of friend match requests
   private friendsMatchRequests: FriendMatchRequest[] = [];
 
-  // List of random match requests. 
+  // List of random match requests.
   // (Is kept ordered by datetime)
   private randomMatchRequests: RandomMatchRequest[] = [];
 
@@ -61,7 +63,7 @@ export class TransientDataHandler {
 
   /**
    * Returns the single TransientDataHandler instance
-   * @returns 
+   * @returns
    */
   public static getInstance() {
     if (!TransientDataHandler.instance) {
@@ -71,10 +73,10 @@ export class TransientDataHandler {
   }
 
   /**
-   * Adds a socket of a certain player 
-   * @param username 
-   * @param socket 
-   * @returns 
+   * Adds a socket of a certain player
+   * @param username
+   * @param socket
+   * @returns
    */
   public addPlayerSocket(username: string, socket: Socket<ClientEvents,ServerEvents>): void {
     if (this.containsSocket(socket)) {
@@ -93,8 +95,8 @@ export class TransientDataHandler {
 
   /**
    * Removes a socket of a certain player
-   * @param socket 
-   * @returns 
+   * @param socket
+   * @returns
    */
   public removePlayerSocket(socket: Socket<ClientEvents,ServerEvents>): void {
     const username = this.getSocketPlayer(socket);
@@ -110,8 +112,8 @@ export class TransientDataHandler {
 
   /**
    * Returns all the sockets of a certain player
-   * @param username 
-   * @returns 
+   * @param username
+   * @returns
    */
   public getPlayerSockets(username: string): Socket<ClientEvents,ServerEvents>[] {
     return this.onlinePlayerSocketsMap[username] || [];
@@ -119,8 +121,8 @@ export class TransientDataHandler {
 
   /**
    * Returns the player username of a certain socket
-   * @param socket 
-   * @returns 
+   * @param socket
+   * @returns
    */
   public getSocketPlayer(socket: Socket<ClientEvents,ServerEvents>): string | undefined {
     return this.socketIdOnlinePlayerMap[socket.id];
@@ -128,8 +130,8 @@ export class TransientDataHandler {
 
   /**
    * Checks if there is a certain socket
-   * @param socket 
-   * @returns 
+   * @param socket
+   * @returns
    */
   public containsSocket(socket: Socket<ClientEvents,ServerEvents>): boolean {
     return socket.id in this.socketIdOnlinePlayerMap;
@@ -137,8 +139,8 @@ export class TransientDataHandler {
 
   /**
    * Cheks if a player is online
-   * @param username 
-   * @returns 
+   * @param username
+   * @returns
    */
   public isOnline(username: string): boolean {
     return username in this.onlinePlayerSocketsMap
@@ -147,8 +149,8 @@ export class TransientDataHandler {
 
   /**
    * Marks as in game a certain player
-   * @param username 
-   * @returns 
+   * @param username
+   * @returns
    */
   public markInGame(username: string): void {
     if (this.isInGame(username)) {
@@ -159,8 +161,8 @@ export class TransientDataHandler {
 
   /**
    * Marks as off game a certain player
-   * @param username 
-   * @returns 
+   * @param username
+   * @returns
    */
   public markOffGame(username: string): void {
     this.inGamePlayers = this.inGamePlayers.filter(el => el !== username);
@@ -168,8 +170,8 @@ export class TransientDataHandler {
 
   /**
    * Checks if is in game a certain player
-   * @param username 
-   * @returns 
+   * @param username
+   * @returns
    */
   public isInGame(username: string): boolean {
     return !!this.inGamePlayers.find(el => el === username);
@@ -177,8 +179,8 @@ export class TransientDataHandler {
 
   /**
    * Adds a frind match request (e.g. a match request between teo friends)
-   * @param fromUsername 
-   * @param toUsername 
+   * @param fromUsername
+   * @param toUsername
    */
   public addFriendMatchRequest(fromUsername: string, toUsername: string): void {
     if (!this.isOnline(fromUsername) || !this.isOnline(toUsername)) {
@@ -204,9 +206,9 @@ export class TransientDataHandler {
    * Deletes a friend match request.
    * I to call both to accept match requests and to cancel match requests.
    * Returns true if something was deleted, false otherwise.
-   * @param fromUsername 
-   * @param toUsername 
-   * @returns 
+   * @param fromUsername
+   * @param toUsername
+   * @returns
    */
   public deleteFriendMatchRequest(fromUsername: string, toUsername: string): boolean {
     const previousLength = this.friendsMatchRequests.length;
@@ -217,16 +219,16 @@ export class TransientDataHandler {
 
   /**
    * Deletes all the friend match requests of a player (both from and to)
-   * @param username 
+   * @param username
    */
   public deletePlayerFriendMatchRequests(username: string): void{
     this.friendsMatchRequests = this.friendsMatchRequests.filter(matchRequest => matchRequest.from !== username && matchRequest.to !== username);
   }
 
   /**
-   * Given a player, returns the list of players in a match request (either from or to) with the specified player 
-   * @param username 
-   * @returns 
+   * Given a player, returns the list of players in a match request (either from or to) with the specified player
+   * @param username
+   * @returns
    */
   public getPlayerFriendMatchRequestsOpponents(username: string): string[]{
     return this.friendsMatchRequests.filter(matchRequest => matchRequest.from === username || matchRequest.to === username)
@@ -235,9 +237,9 @@ export class TransientDataHandler {
 
   /**
    * Cheks if there is a friend match request between these two players
-   * @param fromUsername 
-   * @param toUsername 
-   * @returns 
+   * @param fromUsername
+   * @param toUsername
+   * @returns
    */
   public hasFriendMatchRequest(fromUsername: string, toUsername: string): boolean {
     return !!this.friendsMatchRequests.find(matchRequest => matchRequest.from === fromUsername && matchRequest.to === toUsername);
@@ -245,12 +247,12 @@ export class TransientDataHandler {
 
   /**
    * Returns the friend match request between these two players
-   * @param fromUsername 
-   * @param toUsername 
-   * @returns 
+   * @param fromUsername
+   * @param toUsername
+   * @returns
    */
   public getFriendMatchRequest(fromUsername: string, toUsername: string): FriendMatchRequest{
-    const friendMatchRequests = this.friendsMatchRequests.filter(matchRequest => matchRequest.from === fromUsername 
+    const friendMatchRequests = this.friendsMatchRequests.filter(matchRequest => matchRequest.from === fromUsername
                                                                 && matchRequest.to === toUsername);
     if(friendMatchRequests.length<=0){
       throw new Error("There isn't a match request between these two players");
@@ -261,8 +263,8 @@ export class TransientDataHandler {
 
   /**
    * Decides if a random match request by that player alredy exists
-   * @param username 
-   * @returns 
+   * @param username
+   * @returns
    */
   public hasRandomMatchReuqest(username: string): boolean{
     return !!this.randomMatchRequests.find(matchRequest => matchRequest.from === username);
@@ -271,8 +273,8 @@ export class TransientDataHandler {
   /**
    * Adds a random match request.
    * Returns a promise
-   * @param username 
-   * @returns 
+   * @param username
+   * @returns
    */
   public addRandomMatchRequest(username: string): Promise<void>{
     if (!this.isOnline(username)) {
@@ -295,7 +297,7 @@ export class TransientDataHandler {
         from: username,
         datetime: new Date(),
         playerRating: statsDocument.rating,
-      });  
+      });
     })
     .catch( err=> {
       throw err;
@@ -305,7 +307,7 @@ export class TransientDataHandler {
   /**
    * Delete a random match request.
    * Returns true if something was deleted, false otherwise.
-   * @param username 
+   * @param username
    */
   public deleteRandomMatchRequests(username: string): boolean{
     if(!this.hasRandomMatchReuqest(username)){
@@ -337,32 +339,32 @@ export class TransientDataHandler {
 // RANDOM MATCH REQUESTS ARRANGEMENTS ALGHORITM
 
 
-// The max rating difference of two players in order to be arranged by the Server 
+// The max rating difference of two players in order to be arranged by the Server
 const RATING_TOLERANCE = 100;
 // The max time that a player has to wait in order to be arranged by the Server
 const MAX_WAITING_MILLISECONDS = 1500;
 
 /**
  * Computes tha arrangements for the random matches. The input parameter randomMatchRequests is exptected to be sorted by datetime.
- * 
+ *
  * The logic of the arrangment alghoritm is the following.
  * The random match requests are iterated, sorted by datetime (from the oldest to the latest).
  * For each match request is computed the waiting time.
  * In addition, for each match request is found the nearest match request, according to the player rating(e.g. is found the match
  * request that has the player with nearest rating).
- * So, for each match request is computed the rating difference with the nearest rating. 
- * Now, the match request is arranged to the nearest match request if and only if: 
+ * So, for each match request is computed the rating difference with the nearest rating.
+ * Now, the match request is arranged to the nearest match request if and only if:
  *      - The rating difference is less than RATING_TOLERANCE
  *      - Or if the match request waiting time is bigger than MAX_WAITING_MILLISECONDS
  * The second condition is used to prevent the match requests starvation.
- * 
+ *
  * Implementation detail.
  * Given a match request of the list, to found the nearest match request (according to the rating) it's not necessary to search also
  * the previous requests of the list, but it's sufficient to iterate only through the next requests of the list.
- * This is because if the previous match requests haven't been arranged with any other request, I'm sure that the next requests won't 
+ * This is because if the previous match requests haven't been arranged with any other request, I'm sure that the next requests won't
  * be arranged with that previous requests. (e.g. These previous requests dcan't be arranged)
- *  
- * @param randomMatchRequests 
+ *
+ * @param randomMatchRequests
  */
  function computeRandomMatchRequestsArrangements(randomMatchRequests : RandomMatchRequest[]): RandomMatchArrangement[]{
 
@@ -371,7 +373,7 @@ const MAX_WAITING_MILLISECONDS = 1500;
   // List of matches arranged : it's the list to return
   const randomMatchesArrangements : RandomMatchArrangement[] = [];
 
-  // List of the indexes of the arranged match requests 
+  // List of the indexes of the arranged match requests
   // (It's the list of indexes to skip while I iterate the list)
   const matchRequestsArrangedIndexes : number[] = [];
 

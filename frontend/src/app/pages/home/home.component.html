@@ -12,20 +12,20 @@
   <main>
 
     <!-- When not in matchmaking -->
-    <div>
+    <div *ngIf="!waitingMatch()">
       <!-- TODO ngIf status: not match making -->
       <img src="" alt="Avatar">
       <h1>Username</h1>
 
-      <button>Play</button>
+      <button (click)="playRandomMatch()">Play</button>
     </div>
 
     <!-- When in matchmaking -->
-    <div>
+    <div *ngIf="waitingMatch()">
       <!-- TODO ngIf status: match making -->
       <h1>Matchmaking...</h1>
 
-      <button>Cancel</button>
+      <button (click)="cancelRandomMatch()">Cancel</button>
     </div>
 
   </main>

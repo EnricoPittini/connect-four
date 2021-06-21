@@ -9,7 +9,7 @@
     <!-- My name container -->
     <div style="border-color: red; border-style: solid; border-width: 2px; padding: 50px;">{{ getMyUsername() }}</div>
     <!-- Time container -->
-    <div style="border-color: gray; border-style: solid; border-width: 2px; padding: 50px;">Time</div>
+    <div style="border-color: gray; border-style: solid; border-width: 2px; padding: 50px;">Time (TODO ?)</div>
     <!-- Other player name container -->
     <div style="border-color: yellow; border-style: solid; border-width: 2px; padding: 50px;">{{ getOtherUsername() }}</div>
   </div>
@@ -18,12 +18,18 @@
   <div class="middle-row">
 
     <!-- Board -->
-    <app-board style="margin-left: 20%;"></app-board>
+    <app-board
+      style="margin-left: 20%;"
+      [boardMatrix]="getBoard()"
+      (columnSelected)="makeMove($event)"
+    >
+    </app-board>
 
 
     <!-- Chat -->
     <div style="background-color: blueviolet; flex-grow: 1;">
-      Test
+      <!-- TODO -->
+      Chat
     </div>
 
   </div>
@@ -31,8 +37,20 @@
   <!-- Bottom container -->
   <div class="bottom-row">
     <!-- Forfait button -->
-    <div>Forfait</div>
-  </div>
+    <div *ngIf="!isGameEnded()">
+      <button
+        style="padding-inline: 100px; padding-block: 20px; background-color: red;"
+        (click)="forfait()"
+        [disabled]="isGameEnded()"
+      >
+        Forfait
+      </button>
+    </div>
 
+    <!-- Winner -->
+    <div *ngIf="isGameEnded()">
+      <p>The winner is: {{ getWinner() || '' }}</p>
+    </div>
+  </div>
 
 </div>

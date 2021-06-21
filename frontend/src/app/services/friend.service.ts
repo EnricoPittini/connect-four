@@ -6,6 +6,7 @@ import { map, mergeMap } from 'rxjs/operators';
 import { io, Socket } from 'socket.io-client';
 import ClientEvents from 'src/app/models/eventTypes/client-events.model';
 import ServerEvents from 'src/app/models/eventTypes/server-events.model';
+import getSocket from 'src/app/utils/initialize-socket-io';
 
 import { AuthService } from '../auth/services/auth.service';
 import { FriendRequest } from '../models/friend-request.model';
@@ -22,7 +23,7 @@ import {
 interface FriendInfo {
   username: string,
   online: boolean,
-  playing: boolean,
+  ingame: boolean,
   matchRequestSent: boolean,
   matchRequestReceived: boolean,
   // TODO forse unreadMessages: boolean,    // non serve in sidebar, ma in chat
@@ -90,7 +91,7 @@ export class FriendService {
     console.info('Friend service instantiated');
 
     // Connect to the server
-    this.socket = io(FriendService.BASE_SOCKET_URL);
+    this.socket = getSocket();
 
     // Friend list management
     this.friends = [];
@@ -194,7 +195,7 @@ export class FriendService {
           const friendInfo: FriendInfo = {
             username: friendInfoResponseBody.player.username,
             online: friendInfoResponseBody.player.online,
-            playing: friendInfoResponseBody.player.playing,
+            ingame: friendInfoResponseBody.player.ingame,
             // TODO matchRequestSent e matchRequestReceived andrebbero ricavate da un endpoint (non ancora esistente)
             matchRequestSent: false,
             matchRequestReceived: false,
@@ -212,6 +213,7 @@ export class FriendService {
    * @returns An Observable that yields the information about the given friend.
    */
   private getFriendInfo(friendUsername: string): Observable<GetPlayerResponseBody> {
+    // TODO posso usare getPlayer di PlayerService
     return this.http.get<GetPlayerResponseBody>(`${FriendService.BASE_URL}/players/${friendUsername}`);
   }
 
@@ -244,7 +246,7 @@ export class FriendService {
           // We set them to their correct value, even though it wouldn't
           // be necessary, cause they would be setted by the other socket
           // event handlers.
-          friendInfo.playing = false;
+          friendInfo.ingame = false;
           friendInfo.matchRequestSent = false;
           friendInfo.matchRequestReceived = false;
         }
@@ -327,7 +329,7 @@ export class FriendService {
         const friendInfo: FriendInfo = {
           username: friendInfoResponseBody.player.username,
           online: friendInfoResponseBody.player.online,
-          playing: friendInfoResponseBody.player.playing,
+          ingame: friendInfoResponseBody.player.ingame,
           // TODO matchRequestSent e matchRequestReceived andrebbero ricavate da un endpoint (non ancora esistente)
           matchRequestSent: false,
           matchRequestReceived: false,

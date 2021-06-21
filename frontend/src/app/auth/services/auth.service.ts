@@ -8,6 +8,7 @@ import jwt_decode from "jwt-decode";
 import { io, Socket } from 'socket.io-client';
 import ClientEvents from 'src/app/models/eventTypes/client-events.model';
 import ServerEvents from 'src/app/models/eventTypes/server-events.model';
+import getSocket from 'src/app/utils/initialize-socket-io';
 
 import { ErrorResponseBody, LoginResponseBody, RegistrationResponseBody } from 'src/app/models/httpTypes/responses.model';
 import { PlayerType } from 'src/app/models/player.model';
@@ -72,7 +73,7 @@ export class AuthService {
     console.info('Auth service instantiated');
 
     // Connect to the server
-    this.socket = io(AuthService.BASE_SOCKET_URL);
+    this.socket = getSocket();
     this.socket.on('disconnect', () => {
       // Auto reconnect
       this.socket.connect();

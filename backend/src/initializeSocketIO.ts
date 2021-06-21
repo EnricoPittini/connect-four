@@ -10,9 +10,15 @@ let io : Server<ClientEvents, ServerEvents>;
  * Initialize the socketIO instance
  * @param server 
  */
-export function initializeSocketIO( server: http.Server){
+// TODO .env
+export function initializeSocketIO(server: http.Server){
   if(!io){
-    io = new Server<ClientEvents, ServerEvents>(server);
+    io = new Server<ClientEvents, ServerEvents>(server, {
+      cors: {
+        origin: 'http://localhost:4200',
+        methods: ['GET', 'POST'],
+      },
+    });
   }
 }
 

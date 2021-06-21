@@ -35,7 +35,7 @@ export default interface ClientEvents {
   /**
    * Send a message to the specified match
    */
-  'matchChat': (text: FromClientChatMessage) => void;
+  'matchChat': (message: FromClientChatMessage) => void;
 
   /**
    * Notify the Server the availability to play a random match

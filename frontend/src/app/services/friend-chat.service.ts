@@ -20,6 +20,7 @@ import {
   GetChatResponseBody,
 } from '../models/httpTypes/responses.model';
 
+// TODO mettere queste interfacce in models?
 /**
  * Represents the messages as seen by the Client (e.g. as seen by the user)
  */
@@ -208,7 +209,7 @@ export class FriendChatService {
    private listenForChatsUpdate(): void {
     // chat: a new message has arrived
     this.socket.on('chat', (newMessage) => {
-      console.info(`New message: ` + JSON.stringify(newMessage,null,2));
+      console.info(`New friend chat message: ` + JSON.stringify(newMessage,null,2));
 
       // Username of the user
       const myUsername = this.auth.getUsername();

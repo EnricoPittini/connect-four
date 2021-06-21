@@ -303,11 +303,16 @@ export class TransientDataHandler {
   }
 
   /**
-   * Delete a random match request
+   * Delete a random match request.
+   * Returns true if something was deleted, false otherwise.
    * @param username 
    */
-  public deleteRandomFriendMatchRequests(username: string): void{
+  public deleteRandomMatchRequests(username: string): boolean{
+    if(!this.hasRandomMatchReuqest(username)){
+      return false;
+    }
     this.randomMatchRequests = this.randomMatchRequests.filter(matchRequest => matchRequest.from !== username);
+    return true;
   }
 
   /**

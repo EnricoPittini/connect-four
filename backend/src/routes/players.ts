@@ -427,7 +427,7 @@ router.delete(`/:username`, auth, async (req, res, next) => {
 
     // Remove the (potential) random match request
     if(transientDataHandler.hasRandomMatchReuqest(otherUsername)){
-      transientDataHandler.deleteRandomFriendMatchRequests(otherUsername);
+      transientDataHandler.deleteRandomMatchRequests(otherUsername);
     }
 
     // Authomatic forfait of the player in all the matches in which he is playing (In theory either one or zero) 

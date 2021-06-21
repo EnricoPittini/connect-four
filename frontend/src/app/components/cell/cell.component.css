@@ -1,0 +1,19 @@
+.general {
+  width: 80px;
+  height: 80px;
+  margin: 10px;
+  border-radius: 100%;
+}
+
+
+.white {
+  background-color: white;
+}
+
+.red {
+  background-color: red;
+}
+
+.yellow {
+  background-color: yellow;
+}

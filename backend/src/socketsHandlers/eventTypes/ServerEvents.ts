@@ -43,12 +43,13 @@ export default interface ServerEvents {
   /**
    * Event for notify the player about a new friend match request 
    */
+  // TODO il tipo si può isolare, con nome SocketNotificationBetweenClients
   'friendMatchRequest': (message : {sender:string, receiver:string})=> void;
 
   /**
    * Event for notify the player about a new game
    */
-  'newMatch': (otherUsername: string) => void;
+  'newMatch': (matchId: string) => void;
 
   /**
    * Event for notify the two players of that match that something new happened in that match

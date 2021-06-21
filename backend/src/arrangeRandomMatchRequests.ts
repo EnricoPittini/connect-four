@@ -39,13 +39,13 @@ export function arrangeRandomMatchRequests(): void{
       // Notify player1
       const player1Sockets = transientDataHandler.getPlayerSockets(player1);
       for (let player1Socket of player1Sockets) {
-        player1Socket.emit('newMatch', player2);
+        player1Socket.emit('newMatch', matchDocument._id.toString());
       }
 
       // Notify player2
       const player2Sockets = transientDataHandler.getPlayerSockets(player2);
       for (let player2Socket of player2Sockets) {
-        player2Socket.emit('newMatch', player1);
+        player2Socket.emit('newMatch', matchDocument._id.toString());
       }
 
       // Deleting all the (potential) friend match requests for both players

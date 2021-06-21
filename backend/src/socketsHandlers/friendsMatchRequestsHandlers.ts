@@ -91,8 +91,8 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
       };
       return match.newMatch( data ).save();
     })
-    .then( result => {      
-      if(result){ // The new match is created 
+    .then( matchDocument => {      
+      if(matchDocument){ // The new match is created 
 
         // Mark in game both the players
         transientDataHandler.markInGame(fromUsername);
@@ -101,13 +101,13 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
         // Notify the "from player"
         const fromPlayerSockets = transientDataHandler.getPlayerSockets(fromUsername);
         for (let fromPlayerSocket of fromPlayerSockets) {
-          fromPlayerSocket.emit('newMatch', toUsername);
+          fromPlayerSocket.emit('newMatch', matchDocument._id.toString());
         }
 
         // Notify the "to player"
         const toPlayerSockets = transientDataHandler.getPlayerSockets(toUsername);
         for (let toPlayerSocket of toPlayerSockets) {
-          toPlayerSocket.emit('newMatch', fromUsername);
+          toPlayerSocket.emit('newMatch', matchDocument._id.toString());
         }
 
         // Deleting all the match requests for both player

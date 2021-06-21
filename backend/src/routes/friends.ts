@@ -4,6 +4,8 @@ import express from 'express';
 
 import auth from '../middlewares/auth'
 import player = require('../models/Player');
+import {PlayerType} from '../models/Player';
+import chats = require('../models/Chat');
 
 import { TransientDataHandler } from "../TransientDataHandler";
 
@@ -101,7 +103,15 @@ router.delete(`/:username`, auth, (req, res, next) => {
       otherPlayerDocument.save(),
     ]);
   })
-  .then(_ => {
+  .then( ([myPlayerDocument, otherPlayerDocument]) =>{
+    // Delete the (potential) chat between the two players. Only if both of them aren't moderators
+    if(myPlayerDocument.type===PlayerType.MODERATOR || otherPlayerDocument.type===PlayerType.MODERATOR){
+      return;
+    }
+    const filter = {$or:[{playerA:myUsername,playerB:otherUsername},{playerA:otherUsername,playerB:myUsername}]};
+    return chats.getModel().deleteOne(filter);
+  })
+  .then( _ => {
     // Notify the other player
     const otherPlayerSockets = transientDataHandler.getPlayerSockets(otherUsername);
     for (let otherPlayerSocket of otherPlayerSockets) {

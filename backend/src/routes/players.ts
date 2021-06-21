@@ -7,6 +7,7 @@ import auth from '../middlewares/auth'
 import player = require('../models/Player');
 import { PlayerType } from '../models/Player';
 import stats = require('../models/Stats');
+import chats = require('../models/Chat');
 import friendRequest = require('../models/FriendRequest');
 import match = require('../models/Match');
 import { MatchStatus , MatchDocument } from '../models/Match';
@@ -491,6 +492,12 @@ router.delete(`/:username`, auth, async (req, res, next) => {
 
     // Put the player as out of the game
     transientDataHandler.markOffGame(otherUsername);
+
+    // Delete the stats document of the player
+    await stats.getModel().deleteOne({player:otherUsername}).exec();
+
+    // Delete all the chats of the player
+    await chats.getModel().deleteMany({$or: [{playerA:otherUsername},{playerB:otherUsername}]} ).exec();
 
     // Notify all the sockets of the player
     const otherPlayerSockets = transientDataHandler.getPlayerSockets(otherUsername);

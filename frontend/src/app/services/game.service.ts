@@ -107,7 +107,7 @@ export class GameService {
       return;
     }
 
-    this.http.put<SuccessResponseBody>(`${GameService.BASE_URL}/matches/${this.matchId}`, this.createHttpOptions())
+    this.http.put<SuccessResponseBody>(`${GameService.BASE_URL}/matches/${this.matchId}`, {}, this.createHttpOptions())
       .subscribe(
         response => console.info('Forfait given succesfully'),
         error => console.error('An error occurred while giving forfait')

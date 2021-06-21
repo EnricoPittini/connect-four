@@ -198,8 +198,8 @@ router.post(`/:match_id`, auth, async (req, res, next) => {
         const errorBody: ErrorResponseBody = { error: true, statusCode: 500, errorMessage: 'Internal Server error' };
         throw errorBody;
       }
-      statsDocumentPlayer1.refresh(matchDocument);
-      statsDocumentPlayer2.refresh(matchDocument);
+      await statsDocumentPlayer1.refresh(matchDocument);
+      await statsDocumentPlayer2.refresh(matchDocument);
       await statsDocumentPlayer1.save();
       await statsDocumentPlayer2.save();
     }
@@ -279,8 +279,8 @@ router.put(`/:match_id`, auth, async (req, res, next) => {
       const errorBody: ErrorResponseBody = { error: true, statusCode: 500, errorMessage: 'Internal Server error' };
       throw errorBody;
     }
-    statsDocumentPlayer1.refresh(matchDocument);
-    statsDocumentPlayer2.refresh(matchDocument);
+    await statsDocumentPlayer1.refresh(matchDocument);
+    await statsDocumentPlayer2.refresh(matchDocument);
     await statsDocumentPlayer1.save();
     await statsDocumentPlayer2.save();
 

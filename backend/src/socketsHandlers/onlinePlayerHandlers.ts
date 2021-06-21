@@ -150,8 +150,8 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
           console.warn('At least one of the player of the match doesn\'t have an associated stats document');
           return;
         }
-        statsDocumentPlayer1.refresh(matchDocument);
-        statsDocumentPlayer2.refresh(matchDocument);
+        await statsDocumentPlayer1.refresh(matchDocument);
+        await statsDocumentPlayer2.refresh(matchDocument);
         await statsDocumentPlayer1.save();
         await statsDocumentPlayer2.save();
       }

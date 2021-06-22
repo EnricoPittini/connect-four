@@ -17,6 +17,7 @@ import { ChatListComponent } from './pages/chat-list/chat-list.component';
 import { GameComponent } from './pages/game/game.component';
 import { CellComponent } from './components/cell/cell.component';
 import { BoardComponent } from './components/board/board.component';
+import { FriendCardComponent } from './components/friend-card/friend-card.component';
 
 @NgModule({
   declarations: [
@@ -32,6 +33,7 @@ import { BoardComponent } from './components/board/board.component';
     GameComponent,
     CellComponent,
     BoardComponent,
+    FriendCardComponent,
   ],
   imports: [
     BrowserModule,

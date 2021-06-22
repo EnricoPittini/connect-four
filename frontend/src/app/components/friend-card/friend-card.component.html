@@ -1,0 +1,23 @@
+
+
+<!--  Container -->
+<div class="container">
+
+  <!-- Username -->
+  <div class="username-container">
+    {{ getFriendUsername() }}
+  </div>
+
+  <!-- Button -->
+  <div [ngSwitch]="cardType()" class="button-container">
+    <button *ngSwitchCase="'ONLINE'" (click)="sendMatchRequest()">Send Request</button>
+    <button *ngSwitchCase="'IN_GAME'" (click)="watch()">Watch</button>
+    <div *ngSwitchCase="'MATCH_REQUEST_RECEIVED'" style="display: flex; flex-direction: row;">
+      <button (click)="acceptMatchRequest()">Play</button>
+      <button (click)="rejectMatchRequest()">Reject</button>
+    </div>
+    <button *ngSwitchCase="'MATCH_REQUEST_SENT'" (click)="cancelMatchRequest()">Cancel</button>
+    <button *ngSwitchCase="'OFFLINE'" disabled>Offline</button>
+  </div>
+
+</div>

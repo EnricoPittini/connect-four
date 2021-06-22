@@ -2,17 +2,28 @@
 <!-- Side navigation -->
 <div class="sidenav">
 
-  <h2>Play</h2>
+  <!-- Side bar content -->
+  <div class="content">
 
-  <!-- TODO attenzione dovrà essere una lista scrollabile -->
-  <!-- TODO probabilmente sarà diviso in 2/3 liste -->
-  <div *ngFor="let friend of friendService.friends" >
-    <!-- TODO gestire i vari elementi dinamicamente in base a online, playing, ... -->
-    <!-- TODO eventualmente creare un component a parte (FriendCard) -->
-    <a [routerLink]="['/']">{{ friend.username }}</a>
-    <button>Play</button>
+    <!-- Side bar title -->
+    <h2>Friend list</h2>
+
+    <!-- Friend list -->
+    <div class="list">
+
+      <div
+        *ngFor="let friendInfo of sortedFriendInfoList()"
+        class="list-item"
+      >
+        <app-friend-card
+          [friendInfo]="friendInfo"
+          (friendAction)="onFriendAction($event)"
+        >
+        </app-friend-card>
+      </div>
+
+    </div>
   </div>
-
 
 </div>
 

@@ -17,7 +17,7 @@ export class BoardComponent implements OnInit {
 
   @Input() boardMatrix!: Match['board'];
 
-  @Output() columnSelected = new EventEmitter<number>();
+  @Output() columnSelected: EventEmitter<number> = new EventEmitter<number>();
 
   constructor() { }
 

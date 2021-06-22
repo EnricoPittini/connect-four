@@ -106,7 +106,7 @@ export class FriendService {
   }
 
   hasFriend(username: string): boolean{
-    console.log('Friend list '+this.friends.toString());
+    console.log('Friend list '+this.friends);
     return !!this.friends.find( friend => friend.username===username);
   }
 
@@ -152,24 +152,51 @@ export class FriendService {
     return !!this.friendRequests.find( friendRequest => friendRequest.from===username && friendRequest.to===this.auth.getUsername());
   }
 
-  listenForNewFriendUpdates(username: string): Observable<string>{
+  /*
+  getFriend(username: string): Observable<FriendInfo>{
+    return this.http.get<GetPlayerResponseBody>(`${FriendService.BASE_URL}/players/${friendUsername}`, this.createHttpOptions())
+      .pipe( map( getPlayerResponseBody => {
+        // Create the FriendInfo object and push it into the `friends` field.
+        const friendInfo: FriendInfo = {
+          username: getPlayerResponseBody.player.username,
+          online: getPlayerResponseBody.player.online,
+          ingame: getPlayerResponseBody.player.ingame,
+          // TODO matchRequestSent e matchRequestReceived andrebbero ricavate da un endpoint (non ancora esistente)
+          matchRequestSent: false,
+          matchRequestReceived: false,
+        };
+        return friendInfo;
+      })
+      )
+  }*/
+
+  /**
+   * Returns an observable that generates friend-related updates abouts the given username
+   * @param username 
+   * @returns 
+   */
+  listenForFriendUpdates(username: string): Observable<string>{
     return new Observable<string>( (observer) => {
       this.socket.on('newFriend', otherUsername => {
+        console.log('Observable newFriend');
         if(otherUsername===username){
           observer.next('newFriend');
         }
       });
       this.socket.on('lostFriend', otherUsername => {
+        console.log('Observable lostFriend');
         if(otherUsername===username){
           observer.next('lostFriend');
         }
       });
       this.socket.on('newFriendRequest', otherUsername => {
+        console.log('Observable lostFriend');
         if(otherUsername===username){
           observer.next('newFriendRequest');
         }
       });
       this.socket.on('cancelFriendRequest', otherUsername => {
+        console.log('Observable lostFriend');
         if(otherUsername===username){
           observer.next('cancelFriendRequest');
         }
@@ -177,10 +204,14 @@ export class FriendService {
     });
   }
 
-  deleteFriend(username: string): void{
-    console.info('Deleting the friend ' + username);
+  /**
+   * Delets the friend with the specified username, if any 
+   * @param username 
+   */
+  deleteFriend(friendUsername: string): void{
+    console.info('Deleting the friend ' + friendUsername);
     this.http.delete<SuccessResponseBody>(
-      `${FriendService.BASE_URL}/friend_requests/${username}`,
+      `${FriendService.BASE_URL}/friends/${friendUsername}`,
       this.createHttpOptions()
     )
     .subscribe(
@@ -277,7 +308,7 @@ export class FriendService {
   //   return this.http.get<GetPlayerResponseBody>(`${FriendService.BASE_URL}/players/${friendUsername}`, this.createHttpOptions());
   // }
 
-  private getFriendInfo = (friendUsername: string) => {
+  private getFriendInfo = (friendUsername: string): Observable<GetPlayerResponseBody> => {
     // TODO posso usare getPlayer di PlayerService
     return this.http.get<GetPlayerResponseBody>(`${FriendService.BASE_URL}/players/${friendUsername}`, this.createHttpOptions());
   }

@@ -90,7 +90,8 @@ export class StatsComponent implements OnInit {
     this.getPlayer(playerUsername);
     this.getPlayerStats(playerUsername);
 
-
+    // Start listening for friend-related updates
+    this.listenForFriendUpdates(playerUsername);
   }
 
   /**
@@ -120,7 +121,9 @@ export class StatsComponent implements OnInit {
   }
 
   /**
-   * Sends a friend request to the player
+   * Sends a friend request from the user to the player.
+   * If alredy exists a friend request from the player to the user, that request is accepted 
+   * (e.g. the players become friends)
    */
   sendFriendRequest(): void{
     this.friendService.sendFriendRequest(this.player.username);
@@ -128,35 +131,47 @@ export class StatsComponent implements OnInit {
   }
 
   /**
-   * Cancels the friend request
+   * Cancels the friend request or made by the user to the player or made by the player to the user.
+   * (In general: cancels the friend requests between the players, if any)
    */
   cancelFriendRequest(): void{
     this.friendService.cancelFriendRequest(this.player.username);
     this.hasUserSentFriendRequestToPlayer=false;
+    this.hasPlayerSentFriendRequestToUser=false;
   }
 
-  listenForUpdates(playerUsername: string): void{
-    this.friendService.listenForNewFriendUpdates(playerUsername)
+  /**
+   * Deletes the player from the list of friends of the user
+   */
+   deleteFriend(): void{
+    this.friendService.deleteFriend(this.player.username);
+    this.areUserPlayerFriends=false;
+  }
+
+  /**
+   * Starts listen for friend-related updates about the given player
+   * @param playerUsername 
+   */
+  private listenForFriendUpdates(playerUsername: string): void{
+    this.friendService.listenForFriendUpdates(playerUsername)
         .subscribe( eventString => {
           switch(eventString){
             case 'newFriend': this.areUserPlayerFriends=true;
-                              console.log('StatsComponent newFriend');
+                              this.hasPlayerSentFriendRequestToUser=false;
+                              this.hasUserSentFriendRequestToPlayer=false;
+                              // console.log('StatsComponent newFriend');
             break;
             case 'lostFriend': this.areUserPlayerFriends=false;
-                               console.log('StatsComponent lostFriend');
+                               // console.log('StatsComponent lostFriend');
             break;
             case 'newFriendRequest': this.hasPlayerSentFriendRequestToUser=true;
-                                    console.log('StatsComponent newFriendRequest');
+                                   // console.log('StatsComponent newFriendRequest');
             break;
             case 'cancelFriendRequest': this.hasPlayerSentFriendRequestToUser=false;
-                                        console.log('StatsComponent cancelFriendRequest');
+                                       // console.log('StatsComponent cancelFriendRequest');
             break;
           }
-        })
-  }
-
-  deleteFriend(): void{
-    this.friendService.deleteFriend(this.player.username);
+        });
   }
 
   /**
@@ -165,7 +180,7 @@ export class StatsComponent implements OnInit {
    private getPlayer(playerUsername: string): void{
     this.playerService.getPlayer(playerUsername).subscribe( player => {
       this.player=player
-      console.log(player);
+      //console.log(player);
     });
   }
 

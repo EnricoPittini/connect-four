@@ -32,22 +32,26 @@
 
     <!-- Various buttons  [disabled]="hasUserSentFriendRequestToPlayer" --> 
     <div>
-      <button *ngIf="!areUserPlayerFriends && !isUser"             
+      <button *ngIf="!areUserPlayerFriends && !isUser && !hasPlayerSentFriendRequestToUser && !hasUserSentFriendRequestToPlayer"             
               (click)="sendFriendRequest()">
         Send friend request
+      </button>
+      <button *ngIf="hasUserSentFriendRequestToPlayer" 
+            (click)="cancelFriendRequest()">
+        Cancel friend request
       </button>
       <button *ngIf="hasPlayerSentFriendRequestToUser"             
               (click)="sendFriendRequest()">
         Accept friend request
       </button>
+      <button *ngIf="hasPlayerSentFriendRequestToUser"             
+              (click)="cancelFriendRequest()">
+        Reject friend request
+      </button>
       <button *ngIf="areUserPlayerFriends" 
             (click)="deleteFriend()">
-        Cancel friend request
-      </button> 
-      <button *ngIf="hasUserSentFriendRequestToPlayer" 
-            (click)="cancelFriendRequest()">
-        Cancel friend request
-      </button> 
+        Delete friend
+      </button>  
       <button *ngIf="!isUser && (isUserModerator || areUserPlayerFriends)">
         Chat
       </button>

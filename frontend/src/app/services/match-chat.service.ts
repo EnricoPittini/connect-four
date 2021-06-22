@@ -166,5 +166,6 @@ export class MatchChatService {
     this.matchId = null;
     this.messages = [];
     // TODO stop the socket listening?
+    this.socket.off('matchChat');
   }
 }

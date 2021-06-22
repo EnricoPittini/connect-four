@@ -145,11 +145,14 @@ export class FriendChatService {
    */
   enterChat(selectedChatOtherPlayerUsername: string): boolean{
     console.info('Entering the chat relate to the username: ' + selectedChatOtherPlayerUsername);
-    if(!this.chats.find( chat => chat.otherPlayerUsername===selectedChatOtherPlayerUsername)){
+    const chat = this.chats.find(chat => chat.otherPlayerUsername === selectedChatOtherPlayerUsername);
+    if(!chat){
       console.error('It does not exist a chat with the specified username');
       return false;
     }
     this.currentChatOtherPlayerUsername = selectedChatOtherPlayerUsername;
+    chat.newMessages = false;
+
     return true;
   }
 

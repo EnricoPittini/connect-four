@@ -79,6 +79,8 @@ export class FriendService {
    */
   friendRequests: FriendRequest[];
 
+  isListening: boolean = false;
+
   /**
    * Constructs the FriendService.
    *
@@ -175,7 +177,11 @@ export class FriendService {
    * @param username 
    * @returns 
    */
-  listenForFriendUpdates(username: string): Observable<string>{
+  listenForFriendUpdates(username: string): Observable<string> | undefined{
+    if(this.isListening){
+      return;
+    }
+    this.isListening = true;
     return new Observable<string>( (observer) => {
       this.socket.on('newFriend', otherUsername => {
         console.log('Observable newFriend');
@@ -190,13 +196,13 @@ export class FriendService {
         }
       });
       this.socket.on('newFriendRequest', otherUsername => {
-        console.log('Observable lostFriend');
+        console.log('Observable newFriendRequest');
         if(otherUsername===username){
           observer.next('newFriendRequest');
         }
       });
       this.socket.on('cancelFriendRequest', otherUsername => {
-        console.log('Observable lostFriend');
+        console.log('Observable cancelFriendRequest');
         if(otherUsername===username){
           observer.next('cancelFriendRequest');
         }

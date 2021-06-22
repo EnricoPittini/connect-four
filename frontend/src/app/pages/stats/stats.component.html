@@ -32,7 +32,8 @@
 
     <!-- Various buttons  [disabled]="hasUserSentFriendRequestToPlayer" --> 
     <div>
-      <button *ngIf="!areUserPlayerFriends && !isUser && !hasPlayerSentFriendRequestToUser && !hasUserSentFriendRequestToPlayer"             
+      <button *ngIf="!areUserPlayerFriends && !isUser"    
+              [disabled]="hasUserSentFriendRequestToPlayer || hasPlayerSentFriendRequestToUser"         
               (click)="sendFriendRequest()">
         Send friend request
       </button>

@@ -153,25 +153,34 @@ export class StatsComponent implements OnInit {
    * @param playerUsername 
    */
   private listenForFriendUpdates(playerUsername: string): void{
-    this.friendService.listenForFriendUpdates(playerUsername)
-        .subscribe( eventString => {
-          switch(eventString){
-            case 'newFriend': this.areUserPlayerFriends=true;
-                              this.hasPlayerSentFriendRequestToUser=false;
-                              this.hasUserSentFriendRequestToPlayer=false;
-                              // console.log('StatsComponent newFriend');
-            break;
-            case 'lostFriend': this.areUserPlayerFriends=false;
-                               // console.log('StatsComponent lostFriend');
-            break;
-            case 'newFriendRequest': this.hasPlayerSentFriendRequestToUser=true;
-                                   // console.log('StatsComponent newFriendRequest');
-            break;
-            case 'cancelFriendRequest': this.hasPlayerSentFriendRequestToUser=false;
-                                       // console.log('StatsComponent cancelFriendRequest');
-            break;
-          }
-        });
+    const observable = this.friendService.listenForFriendUpdates(playerUsername);
+    if(observable){
+      observable.subscribe( eventString => {
+        console.log('StatsComponent socketIO event ' + eventString)
+        switch(eventString){
+          case 'newFriend': this.areUserPlayerFriends=true;
+                            this.hasPlayerSentFriendRequestToUser=false;
+                            this.hasUserSentFriendRequestToPlayer=false;
+                            console.log('StatsComponent newFriend');
+                            break;
+          case 'lostFriend': this.areUserPlayerFriends=false;
+                             this.hasPlayerSentFriendRequestToUser=false;
+                             this.hasUserSentFriendRequestToPlayer=false;
+                             console.log('StatsComponent lostFriend');
+                             break;
+          case 'newFriendRequest': this.hasPlayerSentFriendRequestToUser=true;
+                                   console.log('StatsComponent newFriendRequest');
+                                   break;
+          case 'cancelFriendRequest': this.hasPlayerSentFriendRequestToUser=false;
+                                      this.hasUserSentFriendRequestToPlayer=false;
+                                      console.log('StatsComponent cancelFriendRequest');
+                                      break;
+        }
+        console.log('areUserPlayerFriends ' + this.areUserPlayerFriends);
+        console.log('hasUserSentFriendRequestToPlayer ' + this.hasUserSentFriendRequestToPlayer);
+        console.log('hasPlayerSentFriendRequestToUser ' + this.hasPlayerSentFriendRequestToUser);
+      });
+    }
   }
 
   /**

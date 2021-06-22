@@ -35,10 +35,10 @@ const messageSchema = new mongoose.Schema({
 
 /**
  * Represents the chats (e.g. the list of messages between two players)
- * 
- * IMPORTANT : these chats are only the chats between two players (a private chat). They don't include the 
+ *
+ * IMPORTANT : these chats are only the chats between two players (a private chat). They don't include the
  * chats of the matches.
- * If the player is a standard player, he can have a private chat only with a friend of him. If the player 
+ * If the player is a standard player, he can have a private chat only with a friend of him. If the player
  * is a moderator, he can have a private chat with anyone.
  */
 export interface Chat {
@@ -54,7 +54,7 @@ export interface Chat {
  */
 export interface ChatDocument extends Chat, mongoose.Document {
   addMessage: (senderUsername: string, text: string) => void,
-  getDatetimeLastMessage: () => Date, 
+  getDatetimeLastMessage: () => Date,
 }
 
 export interface ChatModel extends mongoose.Model<ChatDocument> {
@@ -85,9 +85,9 @@ const chatSchema = new mongoose.Schema<ChatDocument, ChatModel>({
 
 /**
  * Adds a new message in the chat
- * @param senderUsername 
- * @param text 
- * @returns 
+ * @param senderUsername
+ * @param text
+ * @returns
  */
 chatSchema.methods.addMessage = function (senderUsername: string, text: string): boolean {
   let sender: SenderPlayer;
@@ -123,11 +123,11 @@ chatSchema.methods.addMessage = function (senderUsername: string, text: string):
 
 /**
  * Returns the datetime of the last inserted message
- * @returns 
+ * @returns
  */
-chatSchema.methods.addMessage = function (): Date {
+chatSchema.methods.getDatetimeLastMessage = function (): Date {
   if(this.messages.length<=0){
-    throw new Error('The chats doesn\'t have any messages');
+    throw new Error('The chat doesn\'t have any messages');
   }
   return this.messages[this.messages.length-1].datetime;
 }

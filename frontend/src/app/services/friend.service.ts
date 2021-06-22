@@ -16,6 +16,7 @@ import {
   GetFriendsResponseBody,
   GetPlayerResponseBody,
   NotifyAvailabilityFriendRequestResponseBody,
+  SuccessResponseBody,
 } from '../models/httpTypes/responses.model';
 
 
@@ -105,6 +106,7 @@ export class FriendService {
   }
 
   hasFriend(username: string): boolean{
+    console.log('Friend list '+this.friends.toString());
     return !!this.friends.find( friend => friend.username===username);
   }
 
@@ -144,6 +146,47 @@ export class FriendService {
    */
   hasSentFriendRequest(username: string): boolean{
     return !!this.friendRequests.find( friendRequest => friendRequest.from===this.auth.getUsername() && friendRequest.to===username);
+  }
+
+  hasReceivedFriendRequest(username: string): boolean{
+    return !!this.friendRequests.find( friendRequest => friendRequest.from===username && friendRequest.to===this.auth.getUsername());
+  }
+
+  listenForNewFriendUpdates(username: string): Observable<string>{
+    return new Observable<string>( (observer) => {
+      this.socket.on('newFriend', otherUsername => {
+        if(otherUsername===username){
+          observer.next('newFriend');
+        }
+      });
+      this.socket.on('lostFriend', otherUsername => {
+        if(otherUsername===username){
+          observer.next('lostFriend');
+        }
+      });
+      this.socket.on('newFriendRequest', otherUsername => {
+        if(otherUsername===username){
+          observer.next('newFriendRequest');
+        }
+      });
+      this.socket.on('cancelFriendRequest', otherUsername => {
+        if(otherUsername===username){
+          observer.next('cancelFriendRequest');
+        }
+      });
+    });
+  }
+
+  deleteFriend(username: string): void{
+    console.info('Deleting the friend ' + username);
+    this.http.delete<SuccessResponseBody>(
+      `${FriendService.BASE_URL}/friend_requests/${username}`,
+      this.createHttpOptions()
+    )
+    .subscribe(
+      response => console.info('Friend deleted correctly'),
+      error => console.error('An error occurred while deleting the friend')
+    );
   }
 
   /**

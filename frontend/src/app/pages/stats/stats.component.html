@@ -21,7 +21,7 @@
       </div>
       <div *ngIf="!player.online">
         <p style="color:red">Offline</p>
-      <div *ngIf="isUserFriend">
+      <div *ngIf="areUserPlayerFriends">
         Friend
       </div>
       </div>
@@ -30,18 +30,25 @@
       </div>
     </div>
 
-    <!-- Various buttons -->
+    <!-- Various buttons  [disabled]="hasUserSentFriendRequestToPlayer" --> 
     <div>
-      <button *ngIf="!isUserFriend && !isUser" 
-              [disabled]="hasUserSentFriendRequest"
+      <button *ngIf="!areUserPlayerFriends && !isUser"             
               (click)="sendFriendRequest()">
         Send friend request
       </button>
-      <button *ngIf="hasUserSentFriendRequest" 
+      <button *ngIf="hasPlayerSentFriendRequestToUser"             
+              (click)="sendFriendRequest()">
+        Accept friend request
+      </button>
+      <button *ngIf="areUserPlayerFriends" 
+            (click)="deleteFriend()">
+        Cancel friend request
+      </button> 
+      <button *ngIf="hasUserSentFriendRequestToPlayer" 
             (click)="cancelFriendRequest()">
         Cancel friend request
       </button> 
-      <button *ngIf="!isUser && (isUserModerator || isUserFriend)">
+      <button *ngIf="!isUser && (isUserModerator || areUserPlayerFriends)">
         Chat
       </button>
       <button *ngIf="isUser || isUserModerator" 

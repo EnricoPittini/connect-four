@@ -44,12 +44,17 @@ export class StatsComponent implements OnInit {
   /**
    * Indicates if the user and the player are friends
    */
-  isUserFriend: boolean = false;
+  areUserPlayerFriends: boolean = false;
 
   /**
    * Indicates if the user has sent friend request to the player
    */
-  hasUserSentFriendRequest: boolean = false;
+  hasUserSentFriendRequestToPlayer: boolean = false;
+
+  /**
+   * Indicates if the user has sent friend request to the player
+   */
+   hasPlayerSentFriendRequestToUser: boolean = false;
 
   /**
    * Indicates if the user is a moderator
@@ -76,13 +81,16 @@ export class StatsComponent implements OnInit {
     }
 
     this.isUser = playerUsername===this.authService.getUsername();
-    this.isUserFriend = this.friendService.hasFriend(playerUsername);
-    this.hasUserSentFriendRequest = this.friendService.hasSentFriendRequest(playerUsername);
+    this.areUserPlayerFriends = this.friendService.hasFriend(playerUsername);
+    this.hasUserSentFriendRequestToPlayer = this.friendService.hasSentFriendRequest(playerUsername);
+    this.hasPlayerSentFriendRequestToUser = this.friendService.hasReceivedFriendRequest(playerUsername);
     this.isUserModerator = this.authService.getPlayerType()===PlayerType.MODERATOR;
    
     // Gets the player general data and stats
     this.getPlayer(playerUsername);
     this.getPlayerStats(playerUsername);
+
+
   }
 
   /**
@@ -116,7 +124,7 @@ export class StatsComponent implements OnInit {
    */
   sendFriendRequest(): void{
     this.friendService.sendFriendRequest(this.player.username);
-    this.hasUserSentFriendRequest=true;
+    this.hasUserSentFriendRequestToPlayer=true;
   }
 
   /**
@@ -124,7 +132,31 @@ export class StatsComponent implements OnInit {
    */
   cancelFriendRequest(): void{
     this.friendService.cancelFriendRequest(this.player.username);
-    this.hasUserSentFriendRequest=false;
+    this.hasUserSentFriendRequestToPlayer=false;
+  }
+
+  listenForUpdates(playerUsername: string): void{
+    this.friendService.listenForNewFriendUpdates(playerUsername)
+        .subscribe( eventString => {
+          switch(eventString){
+            case 'newFriend': this.areUserPlayerFriends=true;
+                              console.log('StatsComponent newFriend');
+            break;
+            case 'lostFriend': this.areUserPlayerFriends=false;
+                               console.log('StatsComponent lostFriend');
+            break;
+            case 'newFriendRequest': this.hasPlayerSentFriendRequestToUser=true;
+                                    console.log('StatsComponent newFriendRequest');
+            break;
+            case 'cancelFriendRequest': this.hasPlayerSentFriendRequestToUser=false;
+                                        console.log('StatsComponent cancelFriendRequest');
+            break;
+          }
+        })
+  }
+
+  deleteFriend(): void{
+    this.friendService.deleteFriend(this.player.username);
   }
 
   /**

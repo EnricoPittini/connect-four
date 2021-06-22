@@ -84,7 +84,7 @@ export class StatsComponent implements OnInit {
     private friendService: FriendService,
     private authService: AuthService,
     private location: Location,
-    private router: Router,
+    public router: Router,
   ) { }
 
   ngOnInit(): void {

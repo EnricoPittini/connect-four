@@ -21,23 +21,21 @@
       </div>
       <div *ngIf="!player.online">
         <p style="color:red">Offline</p>
+      </div>
       <div *ngIf="dynamicFlags.areUserPlayerFriends">
         Friend
-      </div>
       </div>
       <div *ngIf="player.ingame">
         In game
       </div>
     </div>
 
-    <!-- Various buttons  [disabled]="hasUserSentFriendRequestToPlayer" --> 
+    <!-- Various buttons  --> 
     <div>
+       <!-- TODO provare a eliminare -->
       {{dynamicFlags.areUserPlayerFriends ? "" : ""}}
       {{dynamicFlags.hasUserSentFriendRequestToPlayer ? "" : ""}}
       {{dynamicFlags.hasPlayerSentFriendRequestToUser ? "" : ""}}
-      <!-- areUserPlayerFriends {{dynamicFlags.areUserPlayerFriends}} <br/>
-      hasUserSentFriendRequestToPlayer {{dynamicFlags.hasUserSentFriendRequestToPlayer}} <br/>
-      hasPlayerSentFriendRequestToUser {{dynamicFlags.hasPlayerSentFriendRequestToUser}} <br/> -->
       <button *ngIf="!(dynamicFlags.areUserPlayerFriends) && !isUser"    
               [disabled]="dynamicFlags.hasUserSentFriendRequestToPlayer || dynamicFlags.hasPlayerSentFriendRequestToUser"         
               (click)="sendFriendRequest()">

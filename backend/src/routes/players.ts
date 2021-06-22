@@ -5,7 +5,7 @@ import jsonwebtoken = require('jsonwebtoken');    // JWT generation
 
 import auth from '../middlewares/auth'
 import player = require('../models/Player');
-import { PlayerType } from '../models/Player';
+import { PlayerType,ClientPlayer } from '../models/Player';
 import stats = require('../models/Stats');
 import chats = require('../models/Chat');
 import friendRequest = require('../models/FriendRequest');
@@ -279,9 +279,15 @@ router.get(`/:username`, auth, (req, res, next) => {
     }
 
     // Add the information about online and ingame
-    const player: any = document;
-    player.online = transientDataHandler.isOnline(req.params.username);
-    player.ingame = transientDataHandler.isInGame(req.params.username);
+    const player: ClientPlayer & {online: boolean, ingame: boolean} = {
+      username: document.username,
+      name: document.name,
+      surname: document.surname,
+      avatar: document.avatar,
+      type: document.type,
+      online: transientDataHandler.isOnline(req.params.username),
+      ingame: transientDataHandler.isInGame(req.params.username),
+    }; 
     const body: GetPlayerResponseBody = { error: false, statusCode: 200, player: player };
     return res.status(200).json(body);
   })

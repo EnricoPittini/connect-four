@@ -1,0 +1,34 @@
+.button {
+  padding-inline: 30px;
+  padding-block: 50px;
+  font-size: xx-large;
+  margin-top: 20%;
+}
+
+.play-button {
+  background-color: orange;
+}
+
+.cancel-button {
+ background-color: red;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 90vh;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.top-row {
+  display: flex;
+  flex-direction: row;
+}

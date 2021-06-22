@@ -41,6 +41,12 @@ export class StatsComponent implements OnInit {
    */
   isUser: boolean = false;
 
+  /**
+   * Wrapps several flags that have to be changed dynamically. 
+   * This object is used in order to detect the changes dynamically
+   * 
+   * TODO provare a togliere
+   */
   dynamicFlags: {
     areUserPlayerFriends: boolean,
     hasUserSentFriendRequestToPlayer: boolean,
@@ -112,6 +118,30 @@ export class StatsComponent implements OnInit {
    */
   getPrettyPlayerType(): string{
     return this.player.type.toString().replace(/_/g, " ");
+  }
+
+  getPrettyRating(): number | undefined{
+    if(!this.playerStats){
+      return;
+    }
+    return Math.round(this.playerStats.rating*1000)/1000;
+  }
+
+  getPrettyWinsRateo(): number | undefined{
+    if(!this.playerStats){
+      return;
+    }
+    if(this.playerStats.matchCount<=0){
+      return;
+    }
+    return Math.round((this.playerStats.winCount/this.playerStats.matchCount)*1000)/1000;
+  }
+
+  getPrettyMinutesPlayed(): number | undefined{
+    if(!this.playerStats){
+      return;
+    }
+    return Math.round(this.playerStats.secondsPlayed/60);
   }
 
   /**

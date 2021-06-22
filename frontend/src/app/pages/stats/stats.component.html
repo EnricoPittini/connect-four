@@ -77,14 +77,14 @@
     <div *ngIf="playerStats">
       <h2>Stats</h2>
       <ul>
-        <li>Rating {{playerStats.rating}}</li>
+        <li>Rating {{getPrettyRating()}}</li>
         <li>Total matches {{playerStats.matchCount}}</li>
         <li>Total wins {{playerStats.winCount}}</li>
         <li>Total losses {{playerStats.matchCount - playerStats.winCount}}</li>
-        <li>Wins rateo {{playerStats.matchCount>0 ? playerStats.winCount/playerStats.matchCount: '-'}}</li>
+        <li>Wins rateo {{getPrettyWinsRateo()}}</li>
         <li>Forfait wins {{playerStats.forfaitWinCount}}</li>
         <li>Forfait losses {{playerStats.forfaitLossCount}}</li>
-        <li>Total minutes played {{playerStats.secondsPlayed}}</li>
+        <li>Total minutes played {{getPrettyMinutesPlayed()}}</li>
         <li>Toal moves made {{playerStats.moveCount}}</li>
       </ul>
     </div>

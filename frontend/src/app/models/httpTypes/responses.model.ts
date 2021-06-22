@@ -45,7 +45,7 @@ export interface RegistrationResponseBody extends SuccessResponseBody {
 }
 
 export interface GetPlayersResponseBody extends SuccessResponseBody {
-  players: ClientPlayer[],
+  playersUsernames: string[],
 }
 
 export interface ConfirmModeratorResponseBody extends SuccessResponseBody {

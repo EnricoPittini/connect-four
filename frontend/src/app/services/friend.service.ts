@@ -154,9 +154,35 @@ export class FriendService {
     return !!this.friendRequests.find( friendRequest => friendRequest.from===username && friendRequest.to===this.auth.getUsername());
   }
 
-  /*
-  getFriend(username: string): Observable<FriendInfo>{
-    return this.http.get<GetPlayerResponseBody>(`${FriendService.BASE_URL}/players/${friendUsername}`, this.createHttpOptions())
+  hasFriendAsync(username: string): Observable<boolean>{
+    return this.http.get<GetFriendsResponseBody>(`${FriendService.BASE_URL}/friends`, this.createHttpOptions())
+      .pipe(
+        map(response =>  !!response.friends.find(friend => friend===username))       
+      );      
+  }
+
+  /**
+   * Checks if a friend request 
+   * @param username 
+   * @returns 
+   */
+   hasSentFriendRequestAsync(username: string): Observable<boolean>{
+    return this.http.get<GetFriendRequestsResponseBody>(`${FriendService.BASE_URL}/friend_requests`, this.createHttpOptions())
+    .pipe(
+      map(response => !!response.friendRequests.find( request => request.from===this.auth.getUsername() && request.to===username))        
+    );
+  }
+
+  hasReceivedFriendRequestAsync(username: string): Observable<boolean>{
+    return this.http.get<GetFriendRequestsResponseBody>(`${FriendService.BASE_URL}/friend_requests`, this.createHttpOptions())
+    .pipe(
+      map(response => !!response.friendRequests.find( request => request.from===username && request.to===this.auth.getUsername()))        
+    );
+  }
+
+  
+  /*getPlayerFriendInfo(username: string): Observable<FriendInfo>{
+    return this.http.get<GetPlayerResponseBody>(`${FriendService.BASE_URL}/players/${username}`, this.createHttpOptions())
       .pipe( map( getPlayerResponseBody => {
         // Create the FriendInfo object and push it into the `friends` field.
         const friendInfo: FriendInfo = {
@@ -178,9 +204,9 @@ export class FriendService {
    * @returns 
    */
   listenForFriendUpdates(username: string): Observable<string> | undefined{
-    if(this.isListening){
+    /*if(this.isListening){
       return;
-    }
+    }*/
     this.isListening = true;
     return new Observable<string>( (observer) => {
       this.socket.on('newFriend', otherUsername => {
@@ -224,6 +250,7 @@ export class FriendService {
       response => console.info('Friend deleted correctly'),
       error => console.error('An error occurred while deleting the friend')
     );
+    this.friends = this.friends.filter( friend => !(friend.username===friendUsername));
   }
 
   /**

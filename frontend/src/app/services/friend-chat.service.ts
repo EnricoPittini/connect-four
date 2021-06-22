@@ -84,6 +84,11 @@ export class FriendChatService {
   chats: ClientChat[];
 
   /**
+   * The username of the other player of the current chat (if any)
+   */
+  currentChatOtherPlayerUsername: string | null = null;
+
+  /**
    * Constructs the FriendChatService.
    *
    * @param http - The HttpClient
@@ -105,17 +110,43 @@ export class FriendChatService {
   }
 
   /**
-   * Sends a message to the specified player
-   * @param toUsername 
-   * @param text 
+   *  Enters in the chat relate to the specified username.
+   *  Returns true if a chat with that player exists, false otherwise (e.g. it does not exist the specified chat)
    */
-  sendMessage(toUsername: string, text: string): void{
-    console.info(`Sending a message to: ${toUsername} with text: ${text}`);
+  enterChat(selectedChatOtherPlayerUsername: string): boolean{
+    console.info('Entering the chat relate to the username: ' + selectedChatOtherPlayerUsername);
+    if(!this.chats.find( chat => chat.otherPlayerUsername===selectedChatOtherPlayerUsername)){
+      console.error('It does not exist a chat with the specified username');
+      return false;
+    }
+    this.currentChatOtherPlayerUsername = selectedChatOtherPlayerUsername;
+    return true;
+  }
+
+  /**
+   * Exits from the current chat (if any)
+   */
+  exitChat(): void{
+    this.currentChatOtherPlayerUsername = null;
+  }
+
+  /**
+   * Sends a message to the current chat.
+   * Returns true if there is a current chat, false otherwise (e.g. the message isn't correctly sent)
+   */
+  sendMessage(text: string): boolean{
+    console.info(`Sending a message to: ${this.currentChatOtherPlayerUsername} with text: ${text}`);
+
+    if(!this.currentChatOtherPlayerUsername){
+      console.error('There isn\'t a a valid current chat');
+      return false;
+    }
 
     this.socket.emit('friendChat', {
-      to: toUsername,
+      to: this.currentChatOtherPlayerUsername,
       text: text,
     });
+    return true;
   }
 
 
@@ -252,7 +283,9 @@ export class FriendChatService {
         datetime: newMessage.datetime,
       });
 
-      if(!sended){ // If the user is the receiver of the message, the flag 'newMessages' of the chat is updated
+      // If the user is the receiver of the message and if the other player is the player of the current chat, the flag 
+      // 'newMessages' of the chat is put as true
+      if(!sended && !(this.currentChatOtherPlayerUsername===otherPlayerUsername)){ 
         chat.newMessages = true;
       }
       

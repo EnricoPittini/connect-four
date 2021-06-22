@@ -41,6 +41,7 @@ https://github.com/bartosz-io/jwt-auth-angular/blob/master/src/app/auth/services
 ## StatsComponent
 - Rilevazione dinamica di amico/non amico
 - Rilevazione dinamica di online/nononline (solo se amico)
+- Errore se si clicca le proprie stats dalle stats di un altro giocatore
 
 ## Funzionalità Moderator
 - Aggiungere creazione nuovo moderator

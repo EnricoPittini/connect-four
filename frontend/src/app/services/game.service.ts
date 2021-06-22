@@ -14,6 +14,7 @@ import { PlayerService } from './player.service';
 import { Router } from '@angular/router';
 import { from, Observable } from 'rxjs';
 import { mergeMap, take } from 'rxjs/operators';
+import { FriendService } from './friend.service';
 
 
 /**
@@ -63,7 +64,8 @@ export class GameService {
     private http: HttpClient,
     private router: Router,
     private auth: AuthService,
-    private playerService: PlayerService
+    private playerService: PlayerService,
+    private friendService: FriendService
   ) {
     console.info('Friend service instantiated');
 
@@ -130,6 +132,10 @@ export class GameService {
           console.info('Match updated succesfully'),
           this.match = response.match;
           console.log(this.match);
+          // ! Trick to update friend list
+          if (this.isGameEnded()) {
+            this.friendService.populateFriendList();
+          }
         },
         error => console.error('An error occurred while updating the match')
       );

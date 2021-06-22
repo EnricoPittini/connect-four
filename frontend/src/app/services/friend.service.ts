@@ -182,7 +182,7 @@ export class FriendService {
    * Populate the `friends` field, by retrieving from the backend information
    * about each of the friends of the authenticated user.
    */
-  private populateFriendList(): void {
+  populateFriendList(): void {
     // Get information about the friends
     this.http.get<GetFriendsResponseBody>(`${FriendService.BASE_URL}/friends`, this.createHttpOptions())
       .pipe(
@@ -200,6 +200,8 @@ export class FriendService {
             matchRequestSent: false,
             matchRequestReceived: false,
           };
+          // Remove and push (fast trick)
+          this.friends = this.friends.filter(el => el.username !== friendInfo.username);
           this.friends.push(friendInfo);
         },
         error => console.error(error)

@@ -128,7 +128,7 @@ export class StatsComponent implements OnInit {
   }
 
   /**
-   *  Retrieves the player general data
+   *  Retreives the player general data
    */
    private getPlayer(playerUsername: string): void{
     this.playerService.getPlayer(playerUsername).subscribe( player => {
@@ -138,7 +138,7 @@ export class StatsComponent implements OnInit {
   }
 
   /**
-   * Retrieves the player stats from the PlayerService.
+   * Retreives the player stats from the PlayerService.
    */
   private getPlayerStats(playerUsername: string): void {
     this.playerService.getPlayerStats(playerUsername).subscribe(

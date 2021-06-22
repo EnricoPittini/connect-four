@@ -93,16 +93,16 @@ export class PlayerService {
    * @param limit 
    * @returns 
    */
-  getPlayers(partialUsername: string | null = null, skip: number | null = null, limit: number | null = null )
+  getPlayers(usernameFilter: string | null = null, skip: number | null = null, limit: number | null = null )
             : Observable<GetPlayersResponseBody['playersUsernames']> {
     const params : any= {};
-    if(!partialUsername){
-      params.partial_username = partialUsername;
+    if(usernameFilter){
+      params.username_filter = usernameFilter;
     }
-    if(!skip){
+    if(skip){
       params.skip = skip;
     }
-    if(!limit){
+    if(limit){
       params.limit = limit;
     }
     return this.http.get<GetPlayersResponseBody>(`${PlayerService.BASE_URL}/players`, this.createHttpOptions(params))

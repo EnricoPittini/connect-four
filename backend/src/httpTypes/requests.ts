@@ -23,7 +23,7 @@ export interface ModeratorRegistrationRequestBody extends RegistrationRequestBod
 // Type guard function
 export function isStandardPlayerRegistrationRequestBody(arg: any): arg is StandardPlayerRegistrationRequestBody {
   return arg
-    && arg.username
+    && arg.username // It can't be the empty string
     && typeof (arg.username) === 'string'
     && arg.password
     && typeof (arg.password) === 'string'

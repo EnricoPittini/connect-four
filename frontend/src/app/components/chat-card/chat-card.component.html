@@ -1,0 +1,24 @@
+
+<!-- Container -->
+<div class="container">
+
+  <!-- Avatar + Username -->
+  <div class="avatar-username">
+    <!-- Avatar -->
+    <div>
+      <!-- TODO -->
+      <img src="" alt="Avatar">
+    </div>
+
+    <!-- Username -->
+    <div class="username" (click)="onClick()">
+      {{ getOtherPlayerUsername() }}
+    </div>
+  </div>
+
+  <!-- Has new messages indicator -->
+  <div *ngIf="hasNewMessages()">
+    New messages!
+  </div>
+
+</div>

@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+import { ClientChat, FriendChatService } from 'src/app/services/friend-chat.service';
 
 // TODO da capire se va bene e forse metterla in un file a parte
 interface ChatInfo {
@@ -17,14 +19,19 @@ interface ChatInfo {
 })
 export class ChatListComponent implements OnInit {
 
-  /**
-   * List of chats.
-   */
-  chats: ChatInfo[] = [];
-
-  constructor() { }
+  constructor(
+    private router: Router,
+    private friendChatService: FriendChatService
+  ) { }
 
   ngOnInit(): void {
   }
 
+  getChats(): ClientChat[] {
+    return this.friendChatService.chats;
+  }
+
+  openChat(otherPlayerUsername: string): void {
+    this.router.navigate([`/chat/${otherPlayerUsername}`])
+  }
 }

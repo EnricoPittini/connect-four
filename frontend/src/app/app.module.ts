@@ -18,6 +18,9 @@ import { GameComponent } from './pages/game/game.component';
 import { CellComponent } from './components/cell/cell.component';
 import { BoardComponent } from './components/board/board.component';
 import { FriendCardComponent } from './components/friend-card/friend-card.component';
+import { ChatCardComponent } from './components/chat-card/chat-card.component';
+import { FriendChatComponent } from './pages/friend-chat/friend-chat.component';
+import { FriendChatMessageComponent } from './components/friend-chat-message/friend-chat-message.component';
 
 @NgModule({
   declarations: [
@@ -34,6 +37,9 @@ import { FriendCardComponent } from './components/friend-card/friend-card.compon
     CellComponent,
     BoardComponent,
     FriendCardComponent,
+    ChatCardComponent,
+    FriendChatComponent,
+    FriendChatMessageComponent,
   ],
   imports: [
     BrowserModule,

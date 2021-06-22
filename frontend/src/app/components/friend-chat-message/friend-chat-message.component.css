@@ -1,0 +1,14 @@
+
+.general {
+  border-radius: 10px;
+  padding-inline: 30px;
+  padding-block: 3px;
+}
+
+.green {
+  background-color: lightgreen;
+}
+
+.gray {
+  background-color: lightgray;
+}

@@ -26,7 +26,7 @@ import { Match } from '../models/match.model';
 /**
  * Represents the match messages as seen by the Client (e.g. as seen by the user)
  */
- interface ClientMatchMessage{
+export interface ClientMatchMessage {
   // TODO aggiungere flag sended ?
   from: string,
   text: string,
@@ -51,7 +51,7 @@ export class MatchChatService {
     * Base WebSocket server url.
     */
    private static readonly BASE_SOCKET_URL = 'http://localhost:8080';
- 
+
    /**
    * Http headers.
    */
@@ -64,19 +64,19 @@ export class MatchChatService {
        params: new HttpParams({ fromObject: params }),
      };
    };
- 
+
    /**
    * The socket to interact with the backend.
    */
    socket: Socket<ServerEvents, ClientEvents>;
 
    /**
-    * 
+    *
     */
-   matchId: string | null = null;
+   matchId: string | null;
 
    messages: ClientMatchMessage[];
- 
+
    /**
     * Constructs the FriendChatService.
     *
@@ -88,33 +88,37 @@ export class MatchChatService {
      private auth: AuthService,
    ) {
      console.info('MatchChat  service instantiated');
- 
-     // Connect to the server
-    this.socket = getSocket(); 
-     
-     // Match chat management
-     this.messages = [];
+
+    // Connect to the server
+    this.socket = getSocket();
+
+    // Match chat management
+    this.messages = [];
+    this.matchId = null;
      //this.listenForMessagesUpdate();
    }
 
-   /**
-    * Initiate the match chat to the specified match
-    * @param matchId 
-    * @returns true if the match chat is correctly initiated, false otherwise (e.g. the last match chat wasn't stopped )
-    */
-   initiate(matchId: string): boolean{
-     if(matchId || this.messages.length>0){
-       return false;
-     }
-     console.info("Initiate match chat, matchId: " + matchId)
-     this.matchId = matchId;
-     this.listenForMessagesUpdate();
-     return true;
-   }
+  /**
+   * Initiate the match chat to the specified match
+   * @param matchId
+   * @returns true if the match chat is correctly initiated, false otherwise (e.g. the last match chat wasn't stopped )
+   */
+  initiate(matchId: string): boolean{
+    console.log(`initiate:${matchId}` )
+    console.log(`initiate:${this.messages.length>0}` )
+
+    if(this.matchId || this.messages.length>0){
+      return false;
+    }
+    console.info("Initiate match chat, matchId: " + matchId)
+    this.matchId = matchId;
+    this.listenForMessagesUpdate();
+    return true;
+  }
 
    /**
     * Sends a message to the match
-    * @param text 
+    * @param text
     * @returns true if the message is correctly sent, false otherwise (e.g. the match it's not initiated yet)
     */
    sendMessage(text: string): boolean{
@@ -158,6 +162,7 @@ export class MatchChatService {
    * Stop the match chat of the previously specified match
    */
   stop(): void{
+    console.log("stopping !!!!!!!")
     this.matchId = null;
     this.messages = [];
     // TODO stop the socket listening?

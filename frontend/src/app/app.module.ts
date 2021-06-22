@@ -21,6 +21,8 @@ import { FriendCardComponent } from './components/friend-card/friend-card.compon
 import { ChatCardComponent } from './components/chat-card/chat-card.component';
 import { FriendChatComponent } from './pages/friend-chat/friend-chat.component';
 import { FriendChatMessageComponent } from './components/friend-chat-message/friend-chat-message.component';
+import { MatchChatComponent } from './components/match-chat/match-chat.component';
+import { MatchChatMessageComponent } from './components/match-chat-message/match-chat-message.component';
 
 @NgModule({
   declarations: [
@@ -40,6 +42,8 @@ import { FriendChatMessageComponent } from './components/friend-chat-message/fri
     ChatCardComponent,
     FriendChatComponent,
     FriendChatMessageComponent,
+    MatchChatComponent,
+    MatchChatMessageComponent,
   ],
   imports: [
     BrowserModule,

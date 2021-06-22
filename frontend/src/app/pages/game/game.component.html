@@ -42,9 +42,8 @@
 
 
     <!-- Chat -->
-    <div style="background-color: blueviolet; flex-grow: 1;">
-      <!-- TODO -->
-      Chat
+    <div style="flex-grow: 1; margin-inline: 5px; border: 1px solid; max-width: 350px;">
+      <app-match-chat [matchId]="getMatchId()"></app-match-chat>
     </div>
 
   </div>

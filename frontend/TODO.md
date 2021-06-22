@@ -3,6 +3,7 @@
 - Rimpiazzare 'Stats' con 'Profile' nella home
 - Aggiungere evento socketIO 'deletedChat' che permette al Server di notificare un Client quando una chat viene eliminata (o player eliminato o friend eliminato).
 - Cambiare 'friend chat' in 'private chat' (o solo chat) (sia lato Client che lato Server)
+- Aggiungere evento socketIO 'friendIngame' che notifica i Client di un loro amico in game
 
 
 ## AuthService
@@ -36,3 +37,7 @@ https://github.com/bartosz-io/jwt-auth-angular/blob/master/src/app/auth/services
 ## Game page
 - Il boardi dei riquadri dei giocatori sono sbagliati: ora il rosso è sempre a sinistra,
   ma potrebbe essere anche a destra.
+
+## StatsComponent
+- Rilevazione dinamica di amico/non amico
+- Rilevazione dinamica di online/nononline (solo se amico)

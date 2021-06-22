@@ -18,8 +18,14 @@ import { PlayerService } from 'src/app/services/player.service';
 })
 export class StatsComponent implements OnInit {
 
+  /**
+   * The stats data of the player
+   */
   playerStats: Stats | null = null;
 
+  /**
+   * The general data of the player
+   */
   player: ClientPlayer & { online: boolean; ingame: boolean; } = {
     username: "",
     name: "",
@@ -30,20 +36,31 @@ export class StatsComponent implements OnInit {
     ingame: false,
   }; 
 
-  // playerUsername: string = "";
-
+  /**
+   * Indicates if the player is the user
+   */
   isUser: boolean = false;
 
+  /**
+   * Indicates if the user and the player are friends
+   */
   isUserFriend: boolean = false;
 
+  /**
+   * Indicates if the user has sent friend request to the player
+   */
   hasUserSentFriendRequest: boolean = false;
 
- // userPlayerType: PlayerType = PlayerType.STANDARD_PLAYER;
+  /**
+   * Indicates if the user is a moderator
+   */
+  isUserModerator: boolean = false;
+
 
   constructor(
     private activatedRoute: ActivatedRoute,
     private playerService: PlayerService,
-    public friendService: FriendService,
+    private friendService: FriendService,
     private authService: AuthService,
     private location: Location,
     private router: Router,
@@ -51,24 +68,69 @@ export class StatsComponent implements OnInit {
 
   ngOnInit(): void {
     console.log('Entering StatsComponent');
+
+    // Username of the player
     let playerUsername = this.activatedRoute.snapshot.paramMap.get('username');
-    console.log(playerUsername);
     if(!playerUsername){
       playerUsername = "";
     }
-   //this.playerUsername = playerUsername;
+
     this.isUser = playerUsername===this.authService.getUsername();
     this.isUserFriend = this.friendService.hasFriend(playerUsername);
     this.hasUserSentFriendRequest = this.friendService.hasSentFriendRequest(playerUsername);
-   // this.userPlayerType = this.authService.getPlayerType();
+    this.isUserModerator = this.authService.getPlayerType()===PlayerType.MODERATOR;
+   
+    // Gets the player general data and stats
     this.getPlayer(playerUsername);
     this.getPlayerStats(playerUsername);
   }
 
   /**
-   *  
+   * 
+   * @returns The player type, in a pretty format 
    */
-  private getPlayer(playerUsername: string): void{
+  getPrettyPlayerType(): string{
+    return this.player.type.toString().replace(/_/g, " ");
+  }
+
+  /**
+   * Deletes the player
+   */
+  deletePlayer(): void{
+    this.playerService.deletePlayer(this.player.username).subscribe(
+      _ => {
+        alert('Player deleted correctly!');
+        if(this.isUser){
+          this.router.navigate(['\login']);
+        }
+        else{
+          this.location.back();
+        }
+      },
+      err => alert('An error occoured during the player deletion')
+    );
+  }
+
+  /**
+   * Sends a friend request to the player
+   */
+  sendFriendRequest(): void{
+    this.friendService.sendFriendRequest(this.player.username);
+    this.hasUserSentFriendRequest=true;
+  }
+
+  /**
+   * Cancels the friend request
+   */
+  cancelFriendRequest(): void{
+    this.friendService.cancelFriendRequest(this.player.username);
+    this.hasUserSentFriendRequest=false;
+  }
+
+  /**
+   *  Retrieves the player general data
+   */
+   private getPlayer(playerUsername: string): void{
     this.playerService.getPlayer(playerUsername).subscribe( player => {
       this.player=player
       console.log(player);
@@ -86,42 +148,5 @@ export class StatsComponent implements OnInit {
         },
         err => console.info('The selected player stats are not accessible by user ')
     );
-  }
-
-  isUserModerator(): boolean{
-    return this.authService.getPlayerType()===PlayerType.MODERATOR;
-  }
-
-  getPrettyPlayerType(): string{
-    return this.player.type.toString().replace(/_/g, " ");
-  }
-
-  /*sendFriendRequest(): void{
-    this.friendService.sendFriendRequest(this.player.username);
-  }*/
-
-  deletePlayer(): void{
-    this.playerService.deletePlayer(this.player.username).subscribe(
-      _ => {
-        alert('Player deleted correctly!');
-        if(this.isUser){
-          this.router.navigate(['\login']);
-        }
-        else{
-          this.location.back();
-        }
-      },
-      err => alert('An error occoured during the player deletion')
-    );
-  }
-
-  sendFriendRequest(): void{
-    this.friendService.sendFriendRequest(this.player.username);
-    this.hasUserSentFriendRequest=true;
-  }
-
-  cancelFriendRequest(): void{
-    this.friendService.cancelFriendRequest(this.player.username);
-    this.hasUserSentFriendRequest=false;
   }
 }

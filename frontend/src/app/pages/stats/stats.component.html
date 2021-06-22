@@ -21,7 +21,7 @@
       </div>
       <div *ngIf="!player.online">
         <p style="color:red">Offline</p>
-      <div *ngIf="friendService.hasFriend(player.username)">
+      <div *ngIf="isUserFriend">
         Friend
       </div>
       </div>
@@ -32,12 +32,6 @@
 
     <!-- Various buttons -->
     <div>
-      <!-- <button>Friend / Friend Request Sent / Add Friend</button>-->
-      <!-- <button *ngIf="!friendService.hasFriend(player.username) && !isUser" 
-              [disabled]="friendService.hasSentFriendRequest(player.username)"
-              (click)="friendService.sendFriendRequest(player.username)">
-        Send friend request
-      </button>-->
       <button *ngIf="!isUserFriend && !isUser" 
               [disabled]="hasUserSentFriendRequest"
               (click)="sendFriendRequest()">
@@ -47,10 +41,10 @@
             (click)="cancelFriendRequest()">
         Cancel friend request
       </button> 
-      <button *ngIf="!isUser && (isUserModerator() || isUserFriend)">
+      <button *ngIf="!isUser && (isUserModerator || isUserFriend)">
         Chat
       </button>
-      <button *ngIf="isUser || isUserModerator()" 
+      <button *ngIf="isUser || isUserModerator" 
               (click)="deletePlayer()">
         Delete
       </button>
@@ -71,7 +65,7 @@
         <li>Total matches {{playerStats.matchCount}}</li>
         <li>Total wins {{playerStats.winCount}}</li>
         <li>Total losses {{playerStats.matchCount - playerStats.winCount}}</li>
-        <li>Wins rateo {{playerStats.winCount/playerStats.matchCount}}</li>
+        <li>Wins rateo {{playerStats.matchCount>0 ? playerStats.winCount/playerStats.matchCount: '-'}}</li>
         <li>Forfait wins {{playerStats.forfaitWinCount}}</li>
         <li>Forfait losses {{playerStats.forfaitLossCount}}</li>
         <li>Total minutes played {{playerStats.secondsPlayed}}</li>

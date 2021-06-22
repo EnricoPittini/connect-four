@@ -6,6 +6,7 @@ import { map, mergeMap } from 'rxjs/operators';
 import { io, Socket } from 'socket.io-client';
 import ClientEvents from 'src/app/models/eventTypes/client-events.model';
 import ServerEvents, { ToClientFriendMessage } from 'src/app/models/eventTypes/server-events.model';
+import getSocket from 'src/app/utils/initialize-socket-io';
 
 import { AuthService } from '../auth/services/auth.service';
 import { Chat, SenderPlayer, Message } from '../models/chat.model';
@@ -86,10 +87,10 @@ export class MatchChatService {
      private http: HttpClient,
      private auth: AuthService,
    ) {
-     console.info('Friend service instantiated');
+     console.info('MatchChat  service instantiated');
  
      // Connect to the server
-     this.socket = io(MatchChatService.BASE_SOCKET_URL);  
+    this.socket = getSocket(); 
      
      // Match chat management
      this.messages = [];

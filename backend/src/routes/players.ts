@@ -171,7 +171,7 @@ router.get(`/`, auth, (req, res, next) => {
   const limit = parseInt(req.query.limit || '20') || 20;
 
   // Search the players
-  player.getModel().find(filter, fields).sort({ timestamp: -1 }).skip(skip).limit(limit).then((documents) => {
+  player.getModel().find(filter, fields).sort({ username: 1 }).skip(skip).limit(limit).then((documents) => {
     const playersUsernames = documents.map( document => document.username );
     const body: GetPlayersResponseBody = { error: false, statusCode: 200, playersUsernames: playersUsernames };
     return res.status(200).json(body);

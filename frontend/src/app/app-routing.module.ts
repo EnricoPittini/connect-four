@@ -6,6 +6,7 @@ import { GameComponent } from './pages/game/game.component';
 import { HomeComponent } from './pages/home/home.component';
 import { LiveMatchesComponent } from './pages/live-matches/live-matches.component';
 import { LoginComponent } from './pages/login/login.component';
+import { SearchPlayerComponent } from './pages/search-player/search-player.component';
 import { SignUpComponent } from './pages/sign-up/sign-up.component';
 import { StatsComponent } from './pages/stats/stats.component';
 
@@ -19,6 +20,7 @@ const routes: Routes = [
   { path: 'matches', component: LiveMatchesComponent, canActivate: [AuthGuard] },
   { path: 'chat', component: ChatListComponent, canActivate: [AuthGuard] },
   { path: 'game', component: GameComponent, canActivate: [AuthGuard] },
+  { path: 'searchPlayer', component: SearchPlayerComponent, canActivate: [AuthGuard]},
 
   // TODO eventualmente gestire path errati con 404 not found
   // {path: '404', component: NotFoundComponent},

@@ -1,0 +1,30 @@
+<!-- Side bar -->
+<app-friends-side-bar></app-friends-side-bar>
+
+
+<!-- Page content -->
+<div class="main">
+  <!-- Nav bar -->
+  <app-nav></app-nav>
+
+  <!-- The main content of the page -->
+  <main>
+
+    <!-- Player personal data -->
+    <div>
+      <input #search type="text" (keyup)="getPlayers(search.value)" placeholder="Search player">
+    </div>
+
+    <div>
+      <ul>
+        <li *ngFor="let playerUsername of playersUsernames">
+          <a [routerLink]="['/player/'+playerUsername]">{{playerUsername}}</a>
+        </li>
+      </ul>
+    </div>
+  
+
+  </main>
+
+</div>
+

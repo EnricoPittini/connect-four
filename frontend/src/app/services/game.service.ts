@@ -54,6 +54,7 @@ export class GameService {
 
   matchId: string | null;
   match: Match | null;
+  observing: boolean;
 
 
   constructor(
@@ -71,6 +72,8 @@ export class GameService {
     this.matchId = null;
     this.match = null;
     this.initializeMatch();
+
+    this.observing = false;
 
     this.listenForMatchUpdate();
   }
@@ -180,5 +183,58 @@ export class GameService {
   }
 
   // TODO come gestire invece gli osservatori ???
+
+
+  ///////////////////////////////////////////////
+  // TODO capire se funziona
+
+  // TODO eventualmente impedire agli osservatori di inviare mosse
+
+  startObservingMatch(matchId: string): void {
+    if (this.isObserving()) {
+      return;
+    }
+
+    this.observing = true;
+
+    this.http.post<SuccessResponseBody>(`${GameService.BASE_URL}/${matchId}/observers`, {}, this.createHttpOptions())
+      .subscribe(
+        response => {
+          this.router.navigate(['/game']);
+          this.matchId = matchId;
+          this.updateGame();
+        },
+        error => {
+          console.error('An error occurred while starting to observe a match')
+          this.observing = false;
+        }
+      )
+  }
+
+  stopObservingMatch(): void {
+    if (!this.isObserving()) {
+      return;
+    }
+
+    this.http.delete<SuccessResponseBody>(`${GameService.BASE_URL}/${this.matchId}/observers`, this.createHttpOptions())
+    .subscribe(
+      response => {
+        this.matchId = null;
+        this.match = null;
+        this.observing = false;
+      },
+      error => {
+        console.error('An error occurred while starting to observe a match');
+      }
+    )
+  }
+
+  isObserving(): boolean {
+    return this.observing;
+  }
+
+
+
+  // TODO forse metodo exitMatch / resetMatch per togliere matchId / match
 
 }

@@ -84,10 +84,10 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
   socket.on('hasRandomMatchRequest', () => {
     console.info('Socket event: "hasRandomMatchRequest"');
 
-    // Player that asked if has a random match request
+    // Player that asked if he has a random match request
     const username = transientDataHandler.getSocketPlayer(socket);
     if(!username){
-      console.warn('An invalid asked if has a random match request');
+      console.warn('An invalid player asked if he has a random match request');
       return;
     }
 

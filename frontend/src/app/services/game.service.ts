@@ -7,11 +7,13 @@ import ServerEvents from 'src/app/models/eventTypes/server-events.model';
 import getSocket from 'src/app/utils/initialize-socket-io';
 
 import { AuthService } from '../auth/services/auth.service';
-import { GetMatchResponseBody, SuccessResponseBody } from '../models/httpTypes/responses.model';
+import { GetMatchesResponseBody, GetMatchResponseBody, SuccessResponseBody } from '../models/httpTypes/responses.model';
 import { AddMoveRequestBody } from '../models/httpTypes/requests.model';
 import { Match, MatchStatus, WhichPlayer } from '../models/match.model';
 import { PlayerService } from './player.service';
 import { Router } from '@angular/router';
+import { from, Observable } from 'rxjs';
+import { mergeMap, take } from 'rxjs/operators';
 
 
 /**
@@ -54,6 +56,7 @@ export class GameService {
 
   matchId: string | null;
   match: Match | null;
+  observing: boolean;
 
 
   constructor(
@@ -71,6 +74,8 @@ export class GameService {
     this.matchId = null;
     this.match = null;
     this.initializeMatch();
+
+    this.observing = false;
 
     this.listenForMatchUpdate();
   }
@@ -180,5 +185,71 @@ export class GameService {
   }
 
   // TODO come gestire invece gli osservatori ???
+
+
+  ///////////////////////////////////////////////
+  // TODO capire se funziona
+
+  // TODO eventualmente impedire agli osservatori di inviare mosse
+
+  startObservingMatch(matchId: string): void {
+    if (this.isObserving()) {
+      return;
+    }
+
+    this.observing = true;
+
+    this.http.post<SuccessResponseBody>(`${GameService.BASE_URL}/${matchId}/observers`, {}, this.createHttpOptions())
+      .subscribe(
+        response => {
+          this.router.navigate(['/game']);
+          this.matchId = matchId;
+          this.updateGame();
+        },
+        error => {
+          console.error('An error occurred while starting to observe a match')
+          this.observing = false;
+        }
+      )
+  }
+
+  stopObservingMatch(): void {
+    if (!this.isObserving()) {
+      return;
+    }
+
+    this.http.delete<SuccessResponseBody>(`${GameService.BASE_URL}/${this.matchId}/observers`, this.createHttpOptions())
+    .subscribe(
+      response => {
+        this.matchId = null;
+        this.match = null;
+        this.observing = false;
+      },
+      error => {
+        console.error('An error occurred while starting to observe a match');
+      }
+    )
+  }
+
+  isObserving(): boolean {
+    return this.observing;
+  }
+
+
+  getMatchIdFromUsername(username: string): Observable<string> {
+    return this.http.get<GetMatchesResponseBody>(GameService.BASE_URL, this.createHttpOptions({
+      live: 'true',
+      username: username,
+    }))
+    .pipe(
+      mergeMap(response => from(response.matches)),
+      mergeMap(match => match._id),
+      take(1)
+    );
+  }
+
+
+
+  // TODO forse metodo exitMatch / resetMatch per togliere matchId / match
 
 }

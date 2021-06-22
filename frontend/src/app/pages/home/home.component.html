@@ -9,23 +9,26 @@
   <app-nav></app-nav>
 
   <!-- The main content of the page -->
-  <main>
+  <main class="container">
 
     <!-- When not in matchmaking -->
-    <div *ngIf="!waitingMatch()">
-      <!-- TODO ngIf status: not match making -->
-      <img src="" alt="Avatar">
-      <h1>Username</h1>
+    <div *ngIf="!waitingMatch()" class="content">
 
-      <button (click)="playRandomMatch()">Play</button>
+      <div class="top-row">
+        <img src="" alt="Avatar">
+        <h1>{{ getUsername() }}</h1>
+      </div>
+
+      <button class="button play-button" (click)="playRandomMatch()">Play</button>
     </div>
 
     <!-- When in matchmaking -->
-    <div *ngIf="waitingMatch()">
-      <!-- TODO ngIf status: match making -->
-      <h1>Matchmaking...</h1>
+    <div *ngIf="waitingMatch()" class="content">
+      <div class="top-row">
+        <h1>Matchmaking...</h1>
+      </div>
 
-      <button (click)="cancelRandomMatch()">Cancel</button>
+      <button class="button cancel-button" (click)="cancelRandomMatch()">Cancel</button>
     </div>
 
   </main>

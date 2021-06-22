@@ -18,6 +18,7 @@ import { GameComponent } from './pages/game/game.component';
 import { CellComponent } from './components/cell/cell.component';
 import { BoardComponent } from './components/board/board.component';
 import { SearchPlayerComponent } from './pages/search-player/search-player.component';
+import { FriendCardComponent } from './components/friend-card/friend-card.component';
 
 @NgModule({
   declarations: [
@@ -34,6 +35,7 @@ import { SearchPlayerComponent } from './pages/search-player/search-player.compo
     CellComponent,
     BoardComponent,
     SearchPlayerComponent,
+    FriendCardComponent,
   ],
   imports: [
     BrowserModule,

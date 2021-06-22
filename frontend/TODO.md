@@ -41,3 +41,7 @@ https://github.com/bartosz-io/jwt-auth-angular/blob/master/src/app/auth/services
 ## StatsComponent
 - Rilevazione dinamica di amico/non amico
 - Rilevazione dinamica di online/nononline (solo se amico)
+
+## Funzionalità Moderator
+- Aggiungere creazione nuovo moderator
+- Aggiungere conferma moderator

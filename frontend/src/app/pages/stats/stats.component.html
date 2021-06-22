@@ -57,13 +57,15 @@
             (click)="deleteFriend()">
         Delete friend
       </button>  
+      <br/>
       <button *ngIf="!isUser && (isUserModerator || dynamicFlags.areUserPlayerFriends)"
-              (click)="router.navigate(['/chat/'+player.username])"> Chat
-        <!-- <a [routerLink]="['/chat/'+player.username]">Chat</a> -->
+              (click)="router.navigate(['/chat/'+player.username])"> 
+              Chat        
       </button>
+      <br/>
       <button *ngIf="isUser || isUserModerator" 
               (click)="deletePlayer()">
-        Delete
+        Delete player
       </button>
       <button *ngIf="player.ingame">Watch</button>
     </div>

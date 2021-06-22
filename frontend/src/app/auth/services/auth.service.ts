@@ -221,9 +221,9 @@ export class AuthService {
     if (remember) {
       // the user asked to remember him, store token in localStorage
       localStorage.setItem(AuthService.JWT_TOKEN_STORAGE_KEY, token);
-      // Notify the backend that the user is online
-      this.notifyOnline();
     }
+    // Notify the backend that the user is online
+    this.notifyOnline();
   }
 
   /**

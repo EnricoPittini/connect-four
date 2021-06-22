@@ -9,36 +9,80 @@
   <app-nav></app-nav>
 
   <!-- The main content of the page -->
-  <main>
-
-    <!-- TODO gestire caso in cui username sia sbagliato -->
+  <main *ngIf="player.username; else notValidPlayer">
 
     <!-- Player personal data -->
     <div>
       <img src="" alt="Avatar">
-      <h1>Username</h1>
+      <h1>{{player.username}}</h1>
+      <p>{{getPrettyPlayerType()}}</p>
+      <div *ngIf="player.online">
+        <p style="color:green">Online</p>
+      </div>
+      <div *ngIf="!player.online">
+        <p style="color:red">Offline</p>
+      <div *ngIf="friendService.hasFriend(player.username)">
+        Friend
+      </div>
+      </div>
+      <div *ngIf="player.ingame">
+        In game
+      </div>
     </div>
 
     <!-- Various buttons -->
     <div>
-      <button>Friend / Friend Request Sent / Add Friend</button>
-      <button>Chat</button>
-      <button>Delete</button>
-      <button>Watch</button>
+      <!-- <button>Friend / Friend Request Sent / Add Friend</button>-->
+      <!-- <button *ngIf="!friendService.hasFriend(player.username) && !isUser" 
+              [disabled]="friendService.hasSentFriendRequest(player.username)"
+              (click)="friendService.sendFriendRequest(player.username)">
+        Send friend request
+      </button>-->
+      <button *ngIf="!isUserFriend && !isUser" 
+              [disabled]="hasUserSentFriendRequest"
+              (click)="sendFriendRequest()">
+        Send friend request
+      </button>
+      <button *ngIf="hasUserSentFriendRequest" 
+            (click)="cancelFriendRequest()">
+        Cancel friend request
+      </button> 
+      <button *ngIf="!isUser && (isUserModerator() || isUserFriend)">
+        Chat
+      </button>
+      <button *ngIf="isUser || isUserModerator()" 
+              (click)="deletePlayer()">
+        Delete
+      </button>
+      <button *ngIf="player.ingame">Watch</button>
     </div>
 
     <!-- 1v1 stats -->
-    <div>
+    <!-- <div>
       <h2>1v1 stats</h2>
       Table
-    </div>
+    </div> -->
 
     <!-- General stats -->
-    <div>
-      <h2>General stats</h2>
-      Table
+    <div *ngIf="playerStats">
+      <h2>Stats</h2>
+      <ul>
+        <li>Rating {{playerStats.rating}}</li>
+        <li>Total matches {{playerStats.matchCount}}</li>
+        <li>Total wins {{playerStats.winCount}}</li>
+        <li>Total losses {{playerStats.matchCount - playerStats.winCount}}</li>
+        <li>Wins rateo {{playerStats.winCount/playerStats.matchCount}}</li>
+        <li>Forfait wins {{playerStats.forfaitWinCount}}</li>
+        <li>Forfait losses {{playerStats.forfaitLossCount}}</li>
+        <li>Total minutes played {{playerStats.secondsPlayed}}</li>
+        <li>Toal moves made {{playerStats.moveCount}}</li>
+      </ul>
     </div>
 
   </main>
+
+  <ng-template #notValidPlayer>
+    <div><b>Invalid player</b></div>
+  </ng-template>
 
 </div>

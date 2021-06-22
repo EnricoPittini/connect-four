@@ -104,6 +104,10 @@ export class FriendService {
     this.listenForFriendRequestListUpdate();
   }
 
+  hasFriend(username: string): boolean{
+    return !!this.friends.find( friend => friend.username===username);
+  }
+
   // TODO questi 2 metodi potrebbero essere spostati insieme alle richieste match random (forse)
   /**
    * Notifies the availability of the authenticated user to play a match with
@@ -127,6 +131,19 @@ export class FriendService {
     console.info(`Cancelling the match request to: ${username}`);
 
     this.socket.emit('deleteFriendMatchRequest', username);
+  }
+
+  hasSentMatchRequest(username: string): boolean{
+    return !!this.friends.find( friend => friend.username===username && friend.matchRequestSent);
+  }
+
+  /**
+   * Checks if a friend request 
+   * @param username 
+   * @returns 
+   */
+  hasSentFriendRequest(username: string): boolean{
+    return !!this.friendRequests.find( friendRequest => friendRequest.from===this.auth.getUsername() && friendRequest.to===username);
   }
 
   /**
@@ -214,7 +231,7 @@ export class FriendService {
    */
   private getFriendInfo(friendUsername: string): Observable<GetPlayerResponseBody> {
     // TODO posso usare getPlayer di PlayerService
-    return this.http.get<GetPlayerResponseBody>(`${FriendService.BASE_URL}/players/${friendUsername}`);
+    return this.http.get<GetPlayerResponseBody>(`${FriendService.BASE_URL}/players/${friendUsername}`, this.createHttpOptions());
   }
 
   /**

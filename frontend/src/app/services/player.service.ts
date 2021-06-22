@@ -21,6 +21,7 @@ import {
   GetChatResponseBody,
   GetPlayersResponseBody,
   GetPlayerStatsResponseBody,
+  SuccessResponseBody,
 } from '../models/httpTypes/responses.model';
 
 
@@ -120,5 +121,18 @@ export class PlayerService {
       .pipe( 
         map(getPlayerStatsResponseBody => getPlayerStatsResponseBody.stats)
       );
+  }
+
+  /**
+   * Delets the specified player
+   * @param username 
+   * @returns 
+   */
+  deletePlayer(username: string): Observable<void>{
+    console.info("Deleting player " + username);
+    return this.http.delete<SuccessResponseBody>(`${PlayerService.BASE_URL}/players/${username}`, this.createHttpOptions())
+    .pipe( 
+      map(_ => console.info("Player deleted correctly"))
+    );
   }
 }

@@ -188,6 +188,22 @@ export class AuthService {
   }
 
   /**
+   * Gets the user player type
+   * 
+   * @returns The player type of the authenticated user. It the user
+   *          it's not authenticated, an error is raised
+   */
+  getPlayerType(): PlayerType{
+    if (!this.token) {
+      // The user is not authenticated, return empty string
+      throw new Error('The user is not authenticated yet');
+    }
+    // Decode the token and return the username field
+    const tokenData = jwt_decode<TokenData>(this.token);
+    return tokenData.type;
+  }
+
+  /**
    * Tries to load the JWT token from the local storage into the `token` field.
    * If the token is not found, `token` field === null.
    * If the token is found, the backend is notified, so it knows

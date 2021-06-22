@@ -3,6 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { AuthGuard } from './auth/guards/auth.guard';
 import { ChatListComponent } from './pages/chat-list/chat-list.component';
 import { FriendChatComponent } from './pages/friend-chat/friend-chat.component';
+import { FriendRequestComponent } from './pages/friend-request/friend-request.component';
 import { GameComponent } from './pages/game/game.component';
 import { HomeComponent } from './pages/home/home.component';
 import { LiveMatchesComponent } from './pages/live-matches/live-matches.component';
@@ -23,6 +24,7 @@ const routes: Routes = [
   { path: 'chat/:username', component: FriendChatComponent, canActivate: [AuthGuard] },
   { path: 'game', component: GameComponent, canActivate: [AuthGuard] },
   { path: 'searchPlayer', component: SearchPlayerComponent, canActivate: [AuthGuard]},
+  { path: 'friend_requests', component: FriendRequestComponent, canActivate: [AuthGuard]},
 
   // TODO eventualmente gestire path errati con 404 not found
   // {path: '404', component: NotFoundComponent},

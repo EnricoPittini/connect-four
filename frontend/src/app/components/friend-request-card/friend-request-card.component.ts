@@ -16,6 +16,8 @@ export class FriendRequestCardComponent implements OnInit {
   ngOnInit(): void {
   }
 
+  // TODO gestire evento friendRequestProcessed emit (in html) (passare output callback)
+
   accept(): void {
     this.friendRequestProcessed.emit(true);
   }

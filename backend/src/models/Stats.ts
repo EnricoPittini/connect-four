@@ -108,7 +108,7 @@ statsSchema.methods.refresh = function (match: MatchDocument): Promise<void> {
     // Update the rating, according to the ELO formula
     const otherPlayerRating = otherStatsDocument.rating;
     const expectedScore = 1 / (1 + Math.pow(10, (otherPlayerRating - this.rating) / 400));
-    const actualScore = (match.winner === this.player) ? 1 : (match.winner === WhichPlayer.EMPTY) ? 0.5 : 0;
+    const actualScore = (match.winner === whichPlayer) ? 1 : (match.winner === WhichPlayer.EMPTY) ? 0.5 : 0;
     const K = 50;
     this.rating += K * (actualScore - expectedScore);
 

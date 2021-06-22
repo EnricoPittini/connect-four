@@ -1,0 +1,32 @@
+
+<!-- Container -->
+<div style="display: flex; flex-direction: column; width: 100%; height: 100%; flex-grow: 1;">
+
+  <!-- Title -->
+  <div style="display: flex; flex-grow: 1; justify-content: center;">
+    Match chat {{ matchId }}
+  </div>
+
+  <!-- Messages -->
+  <div style="display: flex; flex-direction: column; flex-grow: 20;">
+    <!-- Message -->
+    <div *ngFor="let message of getMessages()">
+      <app-match-chat-message
+        [message]="message"
+      >
+      </app-match-chat-message>
+    </div>
+
+  </div>
+
+  <!-- Message composer -->
+  <div style="display: flex; flex-direction: row; flex-grow: 1;">
+    <!-- Input field -->
+    <textarea [formControl]="messageComposer" style="flex-grow: 8; resize: none;" required></textarea>
+
+    <!-- Send button -->
+    <button [disabled]="messageComposer.invalid" (click)="sendMessage()" style="flex-grow: 2;">Send</button>
+
+  </div>
+
+</div>

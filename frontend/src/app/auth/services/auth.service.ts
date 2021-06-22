@@ -42,11 +42,6 @@ export class AuthService {
   private static readonly BASE_URL = 'http://localhost:8080/v0.0.1';
 
   /**
-   * Base WebSocket server url.
-   */
-  private static readonly BASE_SOCKET_URL = 'http://localhost:8080';
-
-  /**
    * The local storage key where to store the JWT token.
    */
   private static readonly JWT_TOKEN_STORAGE_KEY = 'JWT_TOKEN';
@@ -54,7 +49,7 @@ export class AuthService {
   /**
    * The socket to interact with the backend.
    */
-  socket: Socket<ServerEvents, ClientEvents>;
+  private socket: Socket<ServerEvents, ClientEvents>;
 
   /**
    * The JWT token.
@@ -121,6 +116,7 @@ export class AuthService {
     // delete the token
     this.token = null;
     localStorage.removeItem(AuthService.JWT_TOKEN_STORAGE_KEY);
+    sessionStorage.removeItem(AuthService.JWT_TOKEN_STORAGE_KEY);
     // Notify the backend that the user is offline
     this.notifyOffline();
   }
@@ -211,14 +207,15 @@ export class AuthService {
    */
   private loadToken(): void {
     // load the JWT token from localStorage
-    this.token = localStorage.getItem(AuthService.JWT_TOKEN_STORAGE_KEY);
+    this.token = localStorage.getItem(AuthService.JWT_TOKEN_STORAGE_KEY)
+                 || sessionStorage.getItem(AuthService.JWT_TOKEN_STORAGE_KEY);
     if (!this.token) {
       // Token not found, the user is not authenticated
-      console.info('No token found in local storage');
+      console.info('No token found in storage');
     }
     else {
       // Token found, the user is authenticated
-      console.info('JWT token loaded from local storage');
+      console.info('JWT token loaded from storage');
       // Notify the backend that the user is online
       this.notifyOnline();
     }
@@ -237,6 +234,10 @@ export class AuthService {
     if (remember) {
       // the user asked to remember him, store token in localStorage
       localStorage.setItem(AuthService.JWT_TOKEN_STORAGE_KEY, token);
+    }
+    else {
+      // save the token only for this session
+      sessionStorage.setItem(AuthService.JWT_TOKEN_STORAGE_KEY, token);
     }
     // Notify the backend that the user is online
     this.notifyOnline();

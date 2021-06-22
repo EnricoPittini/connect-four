@@ -1,0 +1,54 @@
+
+
+<!-- Side bar -->
+<app-friends-side-bar></app-friends-side-bar>
+
+
+<!-- Page content -->
+<div class="main">
+  <!-- Nav bar -->
+  <app-nav></app-nav>
+
+
+  <!-- Chat container -->
+  <div style="display: flex; width: 100%; height: 90vh; justify-content: center; align-items: center;">
+
+    <!-- Chat inner container (border) -->
+    <div style="border: 1px solid; width: 45%; height: 80%; display: flex; flex-direction: column;">
+
+      <!-- Username -->
+      <div style="display: flex; justify-content: center; align-items: center; flex-grow: 1;">
+        <span style="font-size: large; font-weight: bold;">{{ otherPlayerUsername }}</span>
+      </div>
+
+      <!-- Past messages -->
+      <div style="flex-grow: 30; overflow-y: auto;">
+        <!-- Message -->
+        <div
+          *ngFor="let message of getMessages()"
+          class="message-container"
+          [ngClass]="{'right': message.sended, 'left': !message.sended}"
+        >
+          <app-friend-chat-message
+            [message]="message"
+          >
+          </app-friend-chat-message>
+        </div>
+      </div>
+
+
+      <!-- Message composer -->
+      <div style="display: flex; flex-direction: row; flex-grow: 1;">
+        <!-- Input field -->
+        <textarea [formControl]="messageComposer" style="flex-grow: 8; resize: none;" required></textarea>
+
+        <!-- Send button -->
+        <button [disabled]="messageComposer.invalid" (click)="sendMessage()" style="flex-grow: 2;">Send</button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

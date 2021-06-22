@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { AuthGuard } from './auth/guards/auth.guard';
 import { ChatListComponent } from './pages/chat-list/chat-list.component';
+import { FriendChatComponent } from './pages/friend-chat/friend-chat.component';
 import { GameComponent } from './pages/game/game.component';
 import { HomeComponent } from './pages/home/home.component';
 import { LiveMatchesComponent } from './pages/live-matches/live-matches.component';
@@ -19,6 +20,7 @@ const routes: Routes = [
   { path: 'player/:username', component: StatsComponent, canActivate: [AuthGuard] },
   { path: 'matches', component: LiveMatchesComponent, canActivate: [AuthGuard] },
   { path: 'chat', component: ChatListComponent, canActivate: [AuthGuard] },
+  { path: 'chat/:username', component: FriendChatComponent, canActivate: [AuthGuard] },
   { path: 'game', component: GameComponent, canActivate: [AuthGuard] },
   { path: 'searchPlayer', component: SearchPlayerComponent, canActivate: [AuthGuard]},
 

@@ -1,0 +1,19 @@
+
+.message-container {
+  border-radius: 10px;
+  margin-block: 5px;
+}
+
+.right {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  margin-right: 15px;
+}
+
+.left {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  margin-left: 15px;
+}

@@ -14,6 +14,8 @@ import { PlayerService } from './player.service';
 import { Router } from '@angular/router';
 import { from, Observable } from 'rxjs';
 import { mergeMap, take } from 'rxjs/operators';
+import { FriendService } from './friend.service';
+import { MatchChatService } from './match-chat.service';
 
 
 /**
@@ -63,7 +65,9 @@ export class GameService {
     private http: HttpClient,
     private router: Router,
     private auth: AuthService,
-    private playerService: PlayerService
+    private playerService: PlayerService,
+    private friendService: FriendService,
+    private matchChatService: MatchChatService
   ) {
     console.info('Friend service instantiated');
 
@@ -130,6 +134,10 @@ export class GameService {
           console.info('Match updated succesfully'),
           this.match = response.match;
           console.log(this.match);
+          // ! Trick to update friend list
+          if (this.isGameEnded()) {
+            this.friendService.populateFriendList();
+          }
         },
         error => console.error('An error occurred while updating the match')
       );
@@ -174,6 +182,8 @@ export class GameService {
       this.router.navigate(['/game']);
       this.matchId = matchId;
       this.updateGame();
+
+
     });
 
     this.socket.on('newMatch', (matchId) => {
@@ -181,6 +191,10 @@ export class GameService {
       this.router.navigate(['/game']);
       this.matchId = matchId;
       this.updateGame();
+
+
+      this.matchChatService.stop();
+      this.matchChatService.initiate(matchId);
     });
   }
 
@@ -205,6 +219,9 @@ export class GameService {
           this.router.navigate(['/game']);
           this.matchId = matchId;
           this.updateGame();
+
+          this.matchChatService.stop();
+          this.matchChatService.initiate(matchId);
         },
         error => {
           console.error('An error occurred while starting to observe a match')
@@ -224,6 +241,9 @@ export class GameService {
         this.matchId = null;
         this.match = null;
         this.observing = false;
+
+        this.matchChatService.stop();
+
       },
       error => {
         console.error('An error occurred while starting to observe a match');

@@ -1,0 +1,16 @@
+
+.container {
+  display: flex;
+  width: 50vw;
+  height: 30px;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding-inline: 10px;
+  padding-block: 20px;
+}
+
+
+.username {
+  margin-left: 20px;
+}

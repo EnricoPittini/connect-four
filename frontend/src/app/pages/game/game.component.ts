@@ -70,4 +70,8 @@ export class GameComponent implements OnInit {
     this.gameService.makeMove(column);
   }
 
+  getMatchId(): string | null {
+    return this.gameService.matchId;
+  }
+
 }

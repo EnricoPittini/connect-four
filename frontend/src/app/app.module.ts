@@ -19,6 +19,13 @@ import { CellComponent } from './components/cell/cell.component';
 import { BoardComponent } from './components/board/board.component';
 import { SearchPlayerComponent } from './pages/search-player/search-player.component';
 import { FriendCardComponent } from './components/friend-card/friend-card.component';
+import { ChatCardComponent } from './components/chat-card/chat-card.component';
+import { FriendChatComponent } from './pages/friend-chat/friend-chat.component';
+import { FriendChatMessageComponent } from './components/friend-chat-message/friend-chat-message.component';
+import { MatchChatComponent } from './components/match-chat/match-chat.component';
+import { MatchChatMessageComponent } from './components/match-chat-message/match-chat-message.component';
+import { FriendRequestComponent } from './pages/friend-request/friend-request.component';
+import { FriendRequestCardComponent } from './components/friend-request-card/friend-request-card.component';
 
 @NgModule({
   declarations: [
@@ -36,6 +43,13 @@ import { FriendCardComponent } from './components/friend-card/friend-card.compon
     BoardComponent,
     SearchPlayerComponent,
     FriendCardComponent,
+    ChatCardComponent,
+    FriendChatComponent,
+    FriendChatMessageComponent,
+    MatchChatComponent,
+    MatchChatMessageComponent,
+    FriendRequestComponent,
+    FriendRequestCardComponent,
   ],
   imports: [
     BrowserModule,

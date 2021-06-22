@@ -25,7 +25,7 @@ import {
 /**
  * Represents the messages as seen by the Client (e.g. as seen by the user)
  */
-interface ClientMessage{
+export interface ClientMessage{
   sended: boolean,
   text: string,
   datetime: Date,
@@ -34,7 +34,7 @@ interface ClientMessage{
 /**
  * Represents the chats as seen by the Client (e.g. as seen by the user)
  */
-interface ClientChat{
+export interface ClientChat{
   otherPlayerUsername: string,
   messages: ClientMessage[],
   newMessages: boolean,
@@ -48,7 +48,7 @@ interface ClientChat{
   providedIn: 'root'
 })
 export class FriendChatService {
-  
+
   // TODO .env per host, porta e versione ?
   /**
    * Base REST api server url.
@@ -111,6 +111,35 @@ export class FriendChatService {
   }
 
   /**
+   * Checks if there is a chat with the givem player.
+   *
+   * @param otherPlayerUsername - The username of the other player
+   * @returns true if there is a chat with the given player, false otherwise.
+   */
+  hasChatWith(otherPlayerUsername: string): boolean {
+    return !!this.chats.find(chat => chat.otherPlayerUsername === otherPlayerUsername);
+  }
+
+  /**
+   * Creates a new empty chat with that player.
+   *
+   * @param otherPlayerUsername - The username of the player with whom to chat.
+   */
+  createChat(otherPlayerUsername: string): void {
+    if (this.hasChatWith(otherPlayerUsername)) {
+      return;
+    }
+    const clientChat : ClientChat = {
+      otherPlayerUsername: otherPlayerUsername,
+      // TODO remove
+      messages: [],
+      newMessages: false,
+    };
+
+    this.chats.push(clientChat);
+  }
+
+  /**
    *  Enters in the chat relate to the specified username.
    *  Returns true if a chat with that player exists, false otherwise (e.g. it does not exist the specified chat)
    */
@@ -150,23 +179,38 @@ export class FriendChatService {
     return true;
   }
 
+  /**
+   * Gets the messages of the chat with the player with username `currentChatOtherPlayerUsername`.
+   * Before calling this method, you must call `enterChat(username)` method.
+   *
+   * @returns The messages of the chat with the player with username `currentChatOtherPlayerUsername`.
+   */
+  getMessages(): ClientMessage[] {
+    if (!this.currentChatOtherPlayerUsername) {
+      console.error('You must enter a chat before getting its messages');
+      return [];
+    }
+    const currentChat = this.chats.find(el => el.otherPlayerUsername === this.currentChatOtherPlayerUsername);
+    return currentChat?.messages || [];
+  }
+
 
   /**
    * Populates the `chats` field, by retrieving from the backend information
    * about each of the chats of the authenticated user.
    */
-   private populateChats(): void {
+  private populateChats(): void {
     // Get the chats info (e.g. the chats without the messages) of the player
     this.http.get<GetChatsResponseBody>(`${FriendChatService.BASE_URL}/chats`, this.createHttpOptions())
       .pipe(
-        mergeMap(response => from(response.chats)),       // flatten the object into an array of chats info 
+        mergeMap(response => from(response.chats)),       // flatten the object into an array of chats info
         mergeMap(this.getChat)  // For each chat info, retreive the fully chat entity (e.g. with the messages)
       )
       .subscribe(
         chatResponseBody => {
           // Create the client chat and push it into the list of chats
           const clientChat : ClientChat | undefined = this.transformChat(chatResponseBody.chat);
-          if(clientChat){ 
+          if(clientChat){
             this.chats.push(clientChat);
           }
         },
@@ -181,7 +225,8 @@ export class FriendChatService {
    * @param chatInfo - The chat info
    * @returns An Observable that yields the fully chat entity
    */
-   private getChat(chatInfo: ChatInfo): Observable<GetChatResponseBody> {
+  // private getChat(chatInfo: ChatInfo): Observable<GetChatResponseBody> {
+  private getChat = (chatInfo: ChatInfo): Observable<GetChatResponseBody> => {
     const otherPlayerUsername = chatInfo.playerA===this.auth.getUsername() ?  chatInfo.playerB : chatInfo.playerA;
     return this.http.get<GetChatResponseBody>(`${FriendChatService.BASE_URL}/chats/${otherPlayerUsername}`);
   }
@@ -189,8 +234,8 @@ export class FriendChatService {
   /**
    * Given a fully chat entity, returns the correspondent client chat for the user.
    * If the user isn't one of the players of that chat, it returns undefined.
-   * @param chat 
-   * @returns 
+   * @param chat
+   * @returns
    */
   private transformChat(chat: Chat): ClientChat | undefined{
     // Username of the user
@@ -222,7 +267,7 @@ export class FriendChatService {
     const messages : ClientMessage[] = chat.messages.map( message => ({
       sended: message.sender === whichPlayer ? true : false,
       text: message.text,
-      datetime: message.datetime, 
+      datetime: message.datetime,
     }));
 
     // Creates the client chat
@@ -232,7 +277,7 @@ export class FriendChatService {
       newMessages: newMessages,
     }
     return clientChat;
-  } 
+  }
 
 
   /**
@@ -284,12 +329,12 @@ export class FriendChatService {
         datetime: newMessage.datetime,
       });
 
-      // If the user is the receiver of the message and if the other player is the player of the current chat, the flag 
+      // If the user is the receiver of the message and if the other player is the player of the current chat, the flag
       // 'newMessages' of the chat is put as true
-      if(!sended && !(this.currentChatOtherPlayerUsername===otherPlayerUsername)){ 
+      if(!sended && !(this.currentChatOtherPlayerUsername===otherPlayerUsername)){
         chat.newMessages = true;
       }
-      
+
     });
    }
 

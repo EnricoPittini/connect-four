@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { from, Observable, of } from 'rxjs';
-import { map, mergeMap } from 'rxjs/operators';
+import { map, mergeMap, tap } from 'rxjs/operators';
 
 import { io, Socket } from 'socket.io-client';
 import ClientEvents from 'src/app/models/eventTypes/client-events.model';
@@ -20,7 +20,7 @@ import {
 
 
 // TODO da capire se va bene e forse metterla in un file a parte
-interface FriendInfo {
+export interface FriendInfo {
   username: string,
   online: boolean,
   ingame: boolean,
@@ -212,9 +212,14 @@ export class FriendService {
    * @param friendUsername - The username of the friend player
    * @returns An Observable that yields the information about the given friend.
    */
-  private getFriendInfo(friendUsername: string): Observable<GetPlayerResponseBody> {
+  // private getFriendInfo(friendUsername: string): Observable<GetPlayerResponseBody> {
+  //   // TODO posso usare getPlayer di PlayerService
+  //   return this.http.get<GetPlayerResponseBody>(`${FriendService.BASE_URL}/players/${friendUsername}`, this.createHttpOptions());
+  // }
+
+  private getFriendInfo = (friendUsername: string) => {
     // TODO posso usare getPlayer di PlayerService
-    return this.http.get<GetPlayerResponseBody>(`${FriendService.BASE_URL}/players/${friendUsername}`);
+    return this.http.get<GetPlayerResponseBody>(`${FriendService.BASE_URL}/players/${friendUsername}`, this.createHttpOptions());
   }
 
   /**

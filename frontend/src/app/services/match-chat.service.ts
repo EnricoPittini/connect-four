@@ -87,7 +87,7 @@ export class MatchChatService {
      private http: HttpClient,
      private auth: AuthService,
    ) {
-     console.info('Friend service instantiated');
+     console.info('MatchChat  service instantiated');
  
      // Connect to the server
     this.socket = getSocket(); 

@@ -51,15 +51,18 @@ export class GameComponent implements OnInit {
   }
 
   getWinner(): string | null {
-    if (!this.gameService.match || this.gameService.match.winner === WhichPlayer.EMPTY) {
+    if (!this.gameService.match || !this.gameService.isGameEnded) {
       return null;
     }
 
     if (this.gameService.match.winner === WhichPlayer.PLAYER_1) {
       return this.gameService.getPlayer1Username();
     }
-    else {
+    else if (this.gameService.match.winner === WhichPlayer.PLAYER_2) {
       return this.gameService.getPlayer2Username();
+    }
+    else {
+      return 'Draw';
     }
   }
 

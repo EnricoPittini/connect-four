@@ -7,11 +7,26 @@
   <!-- Top container -->
   <div class="top-row">
     <!-- My name container -->
-    <div style="border-color: red; border-style: solid; border-width: 2px; padding: 50px;">{{ getMyUsername() }}</div>
+    <div
+      class="name-rectangle"
+      [ngClass]="{'red': gameService.whichPlayer() === 'PLAYER_1', 'yellow': gameService.whichPlayer() === 'PLAYER_2'}"
+    >
+      {{ getMyUsername() }}
+    </div>
+
     <!-- Time container -->
-    <div style="border-color: gray; border-style: solid; border-width: 2px; padding: 50px;">Time (TODO ?)</div>
+    <div style="border-color: gray; border-style: solid; border-width: 2px; padding: 50px;"
+    >
+      Time (TODO ?)
+    </div>
+
     <!-- Other player name container -->
-    <div style="border-color: yellow; border-style: solid; border-width: 2px; padding: 50px;">{{ getOtherUsername() }}</div>
+    <div
+    class="name-rectangle"
+    [ngClass]="{'red': gameService.whichPlayerOpponent() === 'PLAYER_1', 'yellow': gameService.whichPlayerOpponent() === 'PLAYER_2'}"
+    >
+      {{ getOtherUsername() }}
+    </div>
   </div>
 
   <!-- Middle container -->

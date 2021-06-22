@@ -108,6 +108,10 @@ export class RandomMatchService {
     this.socket.on('cancelRandomMatchRequest', () => {
       this.waitingMatch = false;
     });
+
+    this.socket.on('newMatch', (_) => {
+      this.waitingMatch = false;
+    });
   }
 
 }

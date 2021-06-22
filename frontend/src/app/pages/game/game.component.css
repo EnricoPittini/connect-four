@@ -31,3 +31,19 @@
   align-items: center;
   padding-top: 20px;
 }
+
+
+/* Yop row rectangles */
+.name-rectangle {
+  border-style: solid;
+  border-width: 2px;
+  padding: 50px;
+}
+
+.red {
+  border-color: red;
+}
+
+.yellow {
+  border-color: yellow;
+}

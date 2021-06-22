@@ -9,7 +9,7 @@ import getSocket from 'src/app/utils/initialize-socket-io';
 import { AuthService } from '../auth/services/auth.service';
 import { GetMatchResponseBody, SuccessResponseBody } from '../models/httpTypes/responses.model';
 import { AddMoveRequestBody } from '../models/httpTypes/requests.model';
-import { Match, MatchStatus } from '../models/match.model';
+import { Match, MatchStatus, WhichPlayer } from '../models/match.model';
 import { PlayerService } from './player.service';
 import { Router } from '@angular/router';
 
@@ -86,7 +86,7 @@ export class GameService {
     }
 
     // Check that the column is valid
-    if (column < 0 || column >= this.match.board.length) {
+    if (column < 0 || column >= this.match.board[0].length) {
       return;
     }
 
@@ -137,6 +137,18 @@ export class GameService {
 
   getPlayer2Username(): string | null {
     return this.match?.player2 || null;
+  }
+
+  whichPlayer(): WhichPlayer {
+    return this.getPlayer1Username() === this.auth.getUsername()
+           ? WhichPlayer.PLAYER_1
+           : WhichPlayer.PLAYER_2;
+  }
+
+  whichPlayerOpponent(): WhichPlayer {
+    return this.getPlayer1Username() === this.auth.getUsername()
+           ? WhichPlayer.PLAYER_2
+           : WhichPlayer.PLAYER_1;
   }
 
   isGameEnded(): boolean {

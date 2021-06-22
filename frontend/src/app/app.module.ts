@@ -23,6 +23,8 @@ import { FriendChatComponent } from './pages/friend-chat/friend-chat.component';
 import { FriendChatMessageComponent } from './components/friend-chat-message/friend-chat-message.component';
 import { MatchChatComponent } from './components/match-chat/match-chat.component';
 import { MatchChatMessageComponent } from './components/match-chat-message/match-chat-message.component';
+import { FriendRequestComponent } from './pages/friend-request/friend-request.component';
+import { FriendRequestCardComponent } from './components/friend-request-card/friend-request-card.component';
 
 @NgModule({
   declarations: [
@@ -44,6 +46,8 @@ import { MatchChatMessageComponent } from './components/match-chat-message/match
     FriendChatMessageComponent,
     MatchChatComponent,
     MatchChatMessageComponent,
+    FriendRequestComponent,
+    FriendRequestCardComponent,
   ],
   imports: [
     BrowserModule,

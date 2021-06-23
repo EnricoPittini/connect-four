@@ -67,4 +67,12 @@
     </div>
   </div>
 
+  <!-- Exit -->
+  <div *ngIf="isGameEnded() || !isUserAMatchPlayer()" >
+    <button style="padding-inline: 100px; padding-block: 20px;"
+            (click)="exitGame()">
+      {{isGameEnded() ? 'Exit game' : 'Stop observing'}}
+    </button>
+  </div>
+
 </div>

@@ -124,9 +124,9 @@ export class PlayerService {
 
   /**
    * Creates a new moderator, using the specified data
-   * @param username 
-   * @param password 
-   * @returns 
+   * @param username
+   * @param password
+   * @returns
    */
   createModerator(username: string, password: string): Observable<boolean> {
     const body: ModeratorRegistrationRequestBody = {
@@ -143,18 +143,16 @@ export class PlayerService {
 
   /**
    * Confirms the user first access moderator profile, using the specified data
-   * @param password 
-   * @param name 
-   * @param surname 
-   * @param avatar 
-   * @returns 
+   * @param password
+   * @param name
+   * @param surname
+   * @returns
    */
-  confirmModerator(password: string, name: string, surname: string, avatar: string): Observable<boolean> {
+  confirmModerator(password: string, name: string, surname: string): Observable<boolean> {
     const body: ConfirmModeratorRequestBody = {
       password: password,
       name: name,
       surname: surname,
-      avatar: avatar,
     };
     return this.http.put<ConfirmModeratorResponseBody>(`${PlayerService.BASE_URL}/players/${this.auth.getUsername()}`, body, this.createHttpOptions())
       .pipe(

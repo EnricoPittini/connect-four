@@ -23,7 +23,6 @@ export class SignUpComponent implements OnInit {
     confirmPassword: ['', Validators.required],
     name: ['', Validators.required],
     surname: ['', Validators.required],
-    avatar: ['', Validators.required],   // TODO capire come fare
     remember: [false],
   }, { validators: SignUpComponent.passwordConfirming });
 
@@ -60,7 +59,6 @@ export class SignUpComponent implements OnInit {
       password: this.signUpForm.value.password,
       name: this.signUpForm.value.name,
       surname: this.signUpForm.value.surname,
-      avatar: this.signUpForm.value.avatar,
     };
     // Sign up and handle success / failure
     this.authService.signup(newPlayer, this.signUpForm.value.remember).subscribe(

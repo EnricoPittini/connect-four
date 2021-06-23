@@ -31,4 +31,10 @@
 .top-row {
   display: flex;
   flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.top-row > img {
+  margin-right: 10px;
 }

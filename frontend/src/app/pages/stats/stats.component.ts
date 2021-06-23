@@ -1,9 +1,11 @@
 import { Location } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
+import { SafeUrl } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from 'src/app/auth/services/auth.service';
 import { ClientPlayer, Player, PlayerType } from 'src/app/models/player.model';
 import { Stats } from 'src/app/models/stats.model';
+import { AvatarLinkGeneratorService } from 'src/app/services/avatar-link-generator.service';
 import { FriendService } from 'src/app/services/friend.service';
 import { GameService } from 'src/app/services/game.service';
 import { PlayerService } from 'src/app/services/player.service';
@@ -32,7 +34,6 @@ export class StatsComponent implements OnInit {
     name: "",
     surname: "",
     type: PlayerType.STANDARD_PLAYER,
-    avatar: "",
     online: false,
     ingame: false,
   };
@@ -78,6 +79,7 @@ export class StatsComponent implements OnInit {
     private location: Location,
     public router: Router,
     public gameService: GameService,
+    private avatarLinkGenerator: AvatarLinkGeneratorService
   ) { }
 
   ngOnInit(): void {
@@ -215,9 +217,13 @@ export class StatsComponent implements OnInit {
     this.getPlayerStats(playerUsername);
   }
 
+  avatarLink(username: string): SafeUrl {
+    return this.avatarLinkGenerator.avatarLink(username);
+  }
+
   /**
    * Gets the player's data about the friendship with the user
-   * @param playerUsername 
+   * @param playerUsername
    */
   private getPlayerFriendData(playerUsername: string): void{
     this.friendService.hasFriendAsync(playerUsername).subscribe( flag => this.dynamicFlags.areUserPlayerFriends=flag);
@@ -258,7 +264,7 @@ export class StatsComponent implements OnInit {
             this.dynamicFlags.hasUserSentFriendRequestToPlayer=false;
             console.log('StatsComponent cancelFriendRequest');
             break;
-          case 'friendOnline': 
+          case 'friendOnline':
             this.player.online=true;
             console.log('StatsComponent friendOnline');
             break;
@@ -267,14 +273,14 @@ export class StatsComponent implements OnInit {
             this.player.ingame=false;
             console.log('StatsComponent friendOffline');
             break;
-           case 'friendIngame': 
+           case 'friendIngame':
             this.player.ingame=true;
             console.log('StatsComponent friendIngame');
             break;
           case 'friendOffgame':
             this.player.ingame=false;
             console.log('StatsComponent friendOffgame');
-            break;                            
+            break;
         }
       });
     }

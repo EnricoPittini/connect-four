@@ -1,4 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { SafeUrl } from '@angular/platform-browser';
+import { AvatarLinkGeneratorService } from 'src/app/services/avatar-link-generator.service';
 import { ClientChat } from 'src/app/services/friend-chat.service';
 
 @Component({
@@ -11,7 +13,9 @@ export class ChatCardComponent implements OnInit {
   @Input() chat!: ClientChat;
   @Output() chatOpened: EventEmitter<string> = new EventEmitter<string>();
 
-  constructor() { }
+  constructor(
+    private avatarLinkGenerator: AvatarLinkGeneratorService
+  ) { }
 
   ngOnInit(): void {
   }
@@ -26,6 +30,10 @@ export class ChatCardComponent implements OnInit {
 
   onClick(): void {
     this.chatOpened.emit(this.getOtherPlayerUsername());
+  }
+
+  avatarLink(): SafeUrl {
+    return this.avatarLinkGenerator.avatarLink(this.getOtherPlayerUsername());
   }
 
 }

@@ -9,9 +9,6 @@
 
   <h1>Upload avatar</h1>
 
-  <form method="post" enctype="multipart/form-data" [action]="'/v0.0.1/players/'+auth.getUsername()+'/avatar'">
-    <input type="file" name="file">
-    <input type="submit" value="Submit">
-  </form>
+  <app-image-upload></app-image-upload>
 
 </div>

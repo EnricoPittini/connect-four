@@ -8,18 +8,19 @@ export interface ClientPlayer {
   username: string,
   name: string,
   surname: string,
-  avatar: string,     // TODO da capire come gestire
   type: PlayerType,
 }
 
 export interface Player extends ClientPlayer {
+  avatar: string,     // TODO da capire come gestire
   friends: string[],
   digest: string,     // this is the hashed password (digest of the password)
   salt: string,       // salt is a random string that will be mixed with the actual password before hashing
   stats: string,
 }
 
-export interface NewStandardPlayerParams extends Pick<Player, 'username' | 'name' | 'surname' | 'avatar'> {
+// TODO capire se servono
+export interface NewStandardPlayerParams extends Pick<Player, 'username' | 'name' | 'surname'> {
   password: string,
 }
 

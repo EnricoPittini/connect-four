@@ -13,7 +13,6 @@ export interface StandardPlayerRegistrationRequestBody extends RegistrationReque
   isModerator: false,
   name: string,
   surname: string,
-  avatar: string, // TODO capire come gestire
 }
 
 export interface ModeratorRegistrationRequestBody extends RegistrationRequestBody {
@@ -32,9 +31,7 @@ export function isStandardPlayerRegistrationRequestBody(arg: any): arg is Standa
     && arg.name
     && typeof (arg.name) === 'string'
     && arg.surname
-    && typeof (arg.surname) === 'string'
-    && arg.avatar
-    && typeof (arg.avatar) === 'string';
+    && typeof (arg.surname) === 'string';
 }
 
 // Type guard function
@@ -52,7 +49,6 @@ export interface ConfirmModeratorRequestBody extends RequestBody {
   password: string,
   name: string,
   surname: string,
-  avatar: string, // TODO capire come gestire
 }
 
 // Type guard function
@@ -63,9 +59,7 @@ export function isConfirmModeratorRequestBody(arg: any): arg is ConfirmModerator
     && arg.name
     && typeof (arg.name) === 'string'
     && arg.surname
-    && typeof (arg.surname) === 'string'
-    && arg.avatar
-    && typeof (arg.avatar) === 'string';
+    && typeof (arg.surname) === 'string';
 }
 
 export interface NotifyAvailabilityFriendRequestRequestBody extends RequestBody {

@@ -13,21 +13,21 @@
 
     <!-- Player personal data -->
     <div>
-      <img src="" alt="Avatar">
+      <img [src]="avatarLink(player.username)" alt="Avatar">
       <h1>{{player.username}}
-         <button *ngIf="isUser || isUserModerator" 
+         <button *ngIf="isUser || isUserModerator"
                  (click)="deletePlayer()">
             {{ isUser ? 'Delete profile' : 'Delete player' }}
         </button>
       </h1>
       <p>Type: <i>{{getPrettyPlayerType()}}</i></p>
       <button *ngIf="!isUser && (isUserModerator || dynamicFlags.areUserPlayerFriends)"
-              (click)="router.navigate(['/chat/'+player.username])"> 
-              Chat        
+              (click)="router.navigate(['/chat/'+player.username])">
+              Chat
       </button>
     </div>
-     
-    <div style="padding-top: 50px;"> 
+
+    <div style="padding-top: 50px;">
       <div [style]="player.online ? 'color:green' : 'color:red'">
         {{player.online ? 'Online' : 'Offline' }}
       </div>
@@ -46,27 +46,27 @@
       </div>
       <!-- Several buttons -->
       <div style="padding-top: 5px;">
-       <button *ngIf="!(dynamicFlags.areUserPlayerFriends) && !isUser"    
-               [disabled]="dynamicFlags.hasUserSentFriendRequestToPlayer || dynamicFlags.hasPlayerSentFriendRequestToUser"         
+       <button *ngIf="!(dynamicFlags.areUserPlayerFriends) && !isUser"
+               [disabled]="dynamicFlags.hasUserSentFriendRequestToPlayer || dynamicFlags.hasPlayerSentFriendRequestToUser"
                (click)="sendFriendRequest()">
-         Send friend request 
+         Send friend request
        </button>
-       <button *ngIf="dynamicFlags.hasUserSentFriendRequestToPlayer" 
+       <button *ngIf="dynamicFlags.hasUserSentFriendRequestToPlayer"
              (click)="cancelFriendRequest()">
-         Cancel friend request 
+         Cancel friend request
        </button>
-       <button *ngIf="dynamicFlags.hasPlayerSentFriendRequestToUser"             
+       <button *ngIf="dynamicFlags.hasPlayerSentFriendRequestToUser"
                (click)="sendFriendRequest()">
-         Accept friend request 
+         Accept friend request
        </button>
-       <button *ngIf="dynamicFlags.hasPlayerSentFriendRequestToUser"             
+       <button *ngIf="dynamicFlags.hasPlayerSentFriendRequestToUser"
                (click)="cancelFriendRequest()">
          Reject friend request
        </button>
-       <button *ngIf="dynamicFlags.areUserPlayerFriends" 
+       <button *ngIf="dynamicFlags.areUserPlayerFriends"
              (click)="deleteFriend()">
          Delete friend
-       </button>  
+       </button>
      </div>
     </div>
 

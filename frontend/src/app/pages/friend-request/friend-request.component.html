@@ -7,6 +7,16 @@
   <!-- Nav bar -->
   <app-nav></app-nav>
 
-
+  <!-- Friend requets container -->
+  <div>
+    <!-- Friend request list -->
+    <div *ngFor="let friendRequest of getFriendRequests()">
+      <!-- Friend request -->
+      <app-friend-request-card
+      [friendRequest]="friendRequest"
+      >
+      </app-friend-request-card>
+    </div>
+  </div>
 
 </div>

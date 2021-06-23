@@ -9,6 +9,9 @@ import { PlayerService } from 'src/app/services/player.service';
 })
 export class SearchPlayerComponent implements OnInit {
 
+  /**
+   * List of players
+   */
   playersUsernames: string[] = [];
 
   constructor(
@@ -21,6 +24,10 @@ export class SearchPlayerComponent implements OnInit {
     this.playerService.getPlayers().subscribe( players => this.playersUsernames=players );
   }
 
+  /**
+   * Returns all the players with that partial username
+   * @param partial_username 
+   */
   getPlayers(partial_username: string): void{
     console.info('Searching players');
     console.info(partial_username);

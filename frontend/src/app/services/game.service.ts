@@ -83,10 +83,19 @@ export class GameService {
     this.listenForMatchUpdate();
   }
 
+  /**
+   * Checks if the user is in a game
+   * @returns 
+   */
   isInGame(): boolean {
     return !!this.match;
   }
 
+  /**
+   * Makes a move, in the specified column
+   * @param column 
+   * @returns 
+   */
   makeMove(column: number): void {
     // Check that there is a match in progress
     if (this.match?.status !== MatchStatus.IN_PROGRESS) {
@@ -108,6 +117,10 @@ export class GameService {
       );
   }
 
+  /**
+   * Does forfait
+   * @returns 
+   */
   forfait(): void {
     if (!this.matchId) {
       return;
@@ -120,6 +133,10 @@ export class GameService {
       );
   }
 
+  /**
+   * Updates the match 
+   * @returns 
+   */
   private updateGame(): void {
     if (!this.matchId) {
       return;
@@ -141,15 +158,22 @@ export class GameService {
 
   }
 
+  /**
+   * 
+   * @returns The player 1 username
+   */
   getPlayer1Username(): string | null {
     return this.match?.player1 || null;
   }
 
+  /**
+   * 
+   * @returns The player 2 username
+   */
   getPlayer2Username(): string | null {
     return this.match?.player2 || null;
   }
 
-  // Osservatore?
   whichPlayer(): WhichPlayer {
     return this.getPlayer1Username() === this.auth.getUsername()
            ? WhichPlayer.PLAYER_1
@@ -162,6 +186,10 @@ export class GameService {
            : WhichPlayer.PLAYER_1;
   }
 
+  /**
+   * Checks if the game is ended
+   * @returns 
+   */
   isGameEnded(): boolean {
     return this.match?.status !== MatchStatus.IN_PROGRESS;
   }
@@ -174,6 +202,9 @@ export class GameService {
     // this.playerService.getPlayer(this.auth.getUsername())
   }
 
+  /**
+   * Listen to the socketIO events in order to update the match
+   */
   private listenForMatchUpdate(): void {
     console.info('From now on I\'m listening for match updates')
     // attende mossa
@@ -199,6 +230,11 @@ export class GameService {
   }
 
 
+  /**
+   * Starts observing the specified match
+   * @param matchId 
+   * @returns 
+   */
   startObservingMatch(matchId: string): void {
     if (this.isObserving()) {
       return;
@@ -223,6 +259,10 @@ export class GameService {
       )
   }
 
+  /**
+   * Stops observing the match
+   * @returns 
+   */
   stopObservingMatch(): void {
     if (!this.isObserving()) {
       return;
@@ -244,11 +284,20 @@ export class GameService {
     )
   }
 
+  /**
+   * Checks if the user is observing a match
+   * @returns 
+   */
   isObserving(): boolean {
     return this.observing;
   }
 
 
+  /**
+   * Returns the matchId of the match in which is playing the specified player
+   * @param username 
+   * @returns 
+   */
   getMatchIdFromUsername(username: string): Observable<string> {
     return this.http.get<GetMatchesResponseBody>(`${GameService.BASE_URL}/matches`, this.createHttpOptions({
       live: 'true',
@@ -256,14 +305,19 @@ export class GameService {
     }))
     .pipe(
       map(response => response.matches[0]._id)
-     /* mergeMap(response => from(response.matches)),
-      mergeMap(match => match._id),
-      take(1)*/
     );
   }
 
 
 
+  /**
+   * Returns all the matches, possibly filtered. 
+   * @param live 
+   * @param username 
+   * @param skip 
+   * @param limit 
+   * @returns 
+   */
   getMatches(live: boolean = true, username: string | null = null, skip: number | null = null,
              limit: number | null = null)
             : Observable<GetMatchesResponseBody['matches']> {

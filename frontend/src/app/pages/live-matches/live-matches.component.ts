@@ -18,8 +18,10 @@ interface LiveMatchInfo {
 })
 export class LiveMatchesComponent implements OnInit {
 
+  // Current username used to filter the matches
   currentSearchUsername: string | null = null; 
 
+  // Interval used to refresh the matches list
   refreshInterval: number = 30000;
 
   /**
@@ -42,9 +44,14 @@ export class LiveMatchesComponent implements OnInit {
           console.log('Global matches ' + this.globalLiveMatches);
         });
 
+    // Refresh periodically the live matches list    
     setInterval( () => this.searchLiveMatchesByUsername(this.currentSearchUsername), this.refreshInterval);
   }
 
+  /**
+   * Searches the live matches, filtered by players username
+   * @param username 
+   */
   searchLiveMatchesByUsername(username: string | null): void{
     this.currentSearchUsername = username;
     this.gameService.getMatches(true, username)
@@ -57,6 +64,10 @@ export class LiveMatchesComponent implements OnInit {
         });
   }
 
+  /**
+   * Starts to observe the specified match
+   * @param match 
+   */
   observeMatch(match: LiveMatchInfo): void{
     this.gameService.getMatchIdFromUsername(match.player1)
         .subscribe( matchId => {

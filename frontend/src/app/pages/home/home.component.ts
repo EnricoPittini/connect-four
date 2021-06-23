@@ -24,18 +24,32 @@ export class HomeComponent implements OnInit {
   ngOnInit(): void {
   }
 
+  /**
+   * Returns the user username
+   * @returns 
+   */
   getUsername(): string {
     return this.auth.getUsername();
   }
 
+  /**
+   * Checks if the user is waiting for a random match
+   * @returns 
+   */
   waitingMatch(): boolean {
     return this.randomMatchService.waitingMatch;
   }
 
+  /**
+   * The user asks to play a random match
+   */
   playRandomMatch(): void {
     this.randomMatchService.sendRandomMatchRequest();
   }
 
+  /**
+   * The user cancels his random match request
+   */
   cancelRandomMatch(): void {
     this.randomMatchService.cancelRandomMatchRequest();
   }

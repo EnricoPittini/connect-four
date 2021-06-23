@@ -9,13 +9,8 @@ import ServerEvents, { ToClientFriendMessage } from 'src/app/models/eventTypes/s
 import getSocket from 'src/app/utils/initialize-socket-io';
 
 import { AuthService } from '../auth/services/auth.service';
-import { Chat, SenderPlayer, Message } from '../models/chat.model';
-import { NotifyAvailabilityFriendRequestRequestBody, NotifyUnavailabilityFriendRequestRequestBody } from '../models/httpTypes/requests.model';
+import { Chat, SenderPlayer } from '../models/chat.model';
 import {
-  GetFriendRequestsResponseBody,
-  GetFriendsResponseBody,
-  GetPlayerResponseBody,
-  NotifyAvailabilityFriendRequestResponseBody,
   GetChatsResponseBody,
   ChatInfo,
   GetChatResponseBody,

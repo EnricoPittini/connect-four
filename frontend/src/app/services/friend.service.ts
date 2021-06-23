@@ -137,11 +137,6 @@ export class FriendService {
     this.socket.off('cancelFriendRequest');
   }
 
-  hasFriend(username: string): boolean{
-    console.log('Friend list '+this.friends);
-    return !!this.friends.find( friend => friend.username===username);
-  }
-
   /**
    * Notifies the availability of the authenticated user to play a match with
    * the user with the given username.
@@ -166,12 +161,27 @@ export class FriendService {
     this.socket.emit('deleteFriendMatchRequest', username);
   }
 
+  /**
+   * Checks if the user and the specified player are friends
+   * @param username 
+   * @returns 
+   */
+  hasFriend(username: string): boolean{
+    console.log('Friend list '+this.friends);
+    return !!this.friends.find( friend => friend.username===username);
+  }
+
+  /**
+   * Checks if the user has sent a match request to the specified player
+   * @param username
+   * @returns
+   */
   hasSentMatchRequest(username: string): boolean{
     return !!this.friends.find( friend => friend.username===username && friend.matchRequestSent);
   }
 
   /**
-   * Checks if a friend request
+   * Checks if the user has sent a friend request to the specified player
    * @param username
    * @returns
    */
@@ -179,10 +189,20 @@ export class FriendService {
     return !!this.friendRequests.find( friendRequest => friendRequest.from===this.auth.getUsername() && friendRequest.to===username);
   }
 
+  /**
+   * Checks if the spacified player has sent a friend request to the user
+   * @param username
+   * @returns
+   */
   hasReceivedFriendRequest(username: string): boolean{
     return !!this.friendRequests.find( friendRequest => friendRequest.from===username && friendRequest.to===this.auth.getUsername());
   }
 
+  /**
+   * Checks, in an async way, if the user and the specified player are friends
+   * @param username 
+   * @returns 
+   */
   hasFriendAsync(username: string): Observable<boolean>{
     return this.http.get<GetFriendsResponseBody>(`${FriendService.BASE_URL}/friends`, this.createHttpOptions())
       .pipe(
@@ -191,7 +211,7 @@ export class FriendService {
   }
 
   /**
-   * Checks if a friend request
+   * Checks, in an async way, if the user has sent a friend request to the specified player
    * @param username
    * @returns
    */
@@ -202,6 +222,11 @@ export class FriendService {
     );
   }
 
+  /**
+   * Checks, in an async way, if the specified player and the user are friends
+   * @param username 
+   * @returns 
+   */
   hasReceivedFriendRequestAsync(username: string): Observable<boolean>{
     return this.http.get<GetFriendRequestsResponseBody>(`${FriendService.BASE_URL}/friend_requests`, this.createHttpOptions())
     .pipe(
@@ -216,9 +241,6 @@ export class FriendService {
    * @returns
    */
   listenForFriendUpdates(username: string): Observable<string> | undefined{
-    /*if(this.isListening){
-      return;
-    }*/
     this.isListening = true;
     return new Observable<string>( (observer) => {
       this.socket.on('newFriend', otherUsername => {

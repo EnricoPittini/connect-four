@@ -3,22 +3,10 @@ import { Injectable } from '@angular/core';
 import { from, Observable, of } from 'rxjs';
 import { catchError, map, mapTo, mergeMap, tap } from 'rxjs/operators';
 
-import { io, Socket } from 'socket.io-client';
-import ClientEvents from 'src/app/models/eventTypes/client-events.model';
-import ServerEvents, { ToClientFriendMessage } from 'src/app/models/eventTypes/server-events.model';
-import getSocket from 'src/app/utils/initialize-socket-io';
-
 import { AuthService } from '../auth/services/auth.service';
-import { Chat, SenderPlayer, Message } from '../models/chat.model';
 import { ConfirmModeratorRequestBody, ModeratorRegistrationRequestBody, NotifyAvailabilityFriendRequestRequestBody, NotifyUnavailabilityFriendRequestRequestBody } from '../models/httpTypes/requests.model';
 import {
-  GetFriendRequestsResponseBody,
-  GetFriendsResponseBody,
   GetPlayerResponseBody,
-  NotifyAvailabilityFriendRequestResponseBody,
-  GetChatsResponseBody,
-  ChatInfo,
-  GetChatResponseBody,
   GetPlayersResponseBody,
   GetPlayerStatsResponseBody,
   SuccessResponseBody,
@@ -134,6 +122,12 @@ export class PlayerService {
     );
   }
 
+  /**
+   * Creates a new moderator, using the specified data
+   * @param username 
+   * @param password 
+   * @returns 
+   */
   createModerator(username: string, password: string): Observable<boolean> {
     const body: ModeratorRegistrationRequestBody = {
       username: username,
@@ -147,6 +141,14 @@ export class PlayerService {
       );
   }
 
+  /**
+   * Confirms the user first access moderator profile, using the specified data
+   * @param password 
+   * @param name 
+   * @param surname 
+   * @param avatar 
+   * @returns 
+   */
   confirmModerator(password: string, name: string, surname: string, avatar: string): Observable<boolean> {
     const body: ConfirmModeratorRequestBody = {
       password: password,

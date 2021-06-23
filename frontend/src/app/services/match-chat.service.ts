@@ -1,7 +1,5 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { from, Observable, of } from 'rxjs';
-import { map, mergeMap } from 'rxjs/operators';
 
 import { io, Socket } from 'socket.io-client';
 import ClientEvents from 'src/app/models/eventTypes/client-events.model';
@@ -9,18 +7,7 @@ import ServerEvents, { ToClientFriendMessage } from 'src/app/models/eventTypes/s
 import getSocket from 'src/app/utils/initialize-socket-io';
 
 import { AuthService } from '../auth/services/auth.service';
-import { Chat, SenderPlayer, Message } from '../models/chat.model';
-import { NotifyAvailabilityFriendRequestRequestBody, NotifyUnavailabilityFriendRequestRequestBody } from '../models/httpTypes/requests.model';
-import {
-  GetFriendRequestsResponseBody,
-  GetFriendsResponseBody,
-  GetPlayerResponseBody,
-  NotifyAvailabilityFriendRequestResponseBody,
-  GetChatsResponseBody,
-  ChatInfo,
-  GetChatResponseBody,
-} from '../models/httpTypes/responses.model';
-import { Match } from '../models/match.model';
+
 
 
 /**

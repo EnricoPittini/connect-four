@@ -43,7 +43,10 @@ export class StatsComponent implements OnInit {
   isUser: boolean = false;
 
   /**
-   * Wrapps several flags that change dynamically..
+   * Wrapps several flags that change dynamically.
+   *      - areUserPlayerFriends : indicates if the user and the player are friends;
+   *      - hasUserSentFriendRequestToPlayer: indicates if the user has sent friend request to the player
+   *      - hasPlayerSentFriendRequestToUser: indicates if the user has sent friend request to the player
    * This object is used in order to help angular to detect the template changes dynamically
    */
   dynamicFlags: {
@@ -57,25 +60,13 @@ export class StatsComponent implements OnInit {
   }
 
   /**
-   * Indicates if the user and the player are friends
-   */
-  //areUserPlayerFriends: boolean = false;
-
-  /**
-   * Indicates if the user has sent friend request to the player
-   */
-  //hasUserSentFriendRequestToPlayer: boolean = false;
-
-  /**
-   * Indicates if the user has sent friend request to the player
-   */
-   //hasPlayerSentFriendRequestToUser: boolean = false;
-
-  /**
    * Indicates if the user is a moderator
    */
   isUserModerator: boolean = false;
 
+  /**
+   * Interval used to refresh the player's data
+   */
   refreshInterval: number = 30000;
 
 
@@ -101,22 +92,15 @@ export class StatsComponent implements OnInit {
         }
 
         this.isUser = playerUsername===this.authService.getUsername();
-        /*this.dynamicFlags.areUserPlayerFriends = this.friendService.hasFriend(playerUsername);
-        this.dynamicFlags.hasUserSentFriendRequestToPlayer = this.friendService.hasSentFriendRequest(playerUsername);
-        this.dynamicFlags.hasPlayerSentFriendRequestToUser = this.friendService.hasReceivedFriendRequest(playerUsername);*/
         this.isUserModerator = this.authService.getPlayerType()===PlayerType.MODERATOR;
 
-        /*this.getPlayerFriendData(playerUsername);
-
-        // Gets the player general data and stats
-        this.getPlayer(playerUsername);
-        this.getPlayerStats(playerUsername);*/
-
+        // First loading of the data
         this.refresh(playerUsername);
 
-        // Start listening for friend-related updates
+        // Start listening for friend-related updates about the player
         this.listenForFriendUpdates(playerUsername);
 
+        // Periodically refresh the player's data
         setInterval( () => this.refresh(this.player.username), this.refreshInterval);
       }
     );
@@ -132,6 +116,9 @@ export class StatsComponent implements OnInit {
     return this.player.type.toString().replace(/_/g, " ").toLowerCase();
   }
 
+  /**
+   * Returns the player's rating in a pretty format
+   */
   getPrettyRating(): number | undefined{
     if(!this.playerStats){
       return;
@@ -139,6 +126,9 @@ export class StatsComponent implements OnInit {
     return Math.round(this.playerStats.rating*1000)/1000;
   }
 
+  /**
+   * Returns the player's wins rateo in a pretty format
+   */
   getPrettyWinsRateo(): number | undefined{
     if(!this.playerStats){
       return;
@@ -149,6 +139,9 @@ export class StatsComponent implements OnInit {
     return Math.round((this.playerStats.winCount/this.playerStats.matchCount)*1000)/1000;
   }
 
+  /**
+   * Returns the player's minutes played in a pretty format
+   */
   getPrettyMinutesPlayed(): number | undefined{
     if(!this.playerStats){
       return;
@@ -202,6 +195,9 @@ export class StatsComponent implements OnInit {
     this.dynamicFlags.areUserPlayerFriends=false;
   }
 
+  /**
+   * Starts observing the match in which the player is playing
+   */
   observe(): void{
     this.gameService.getMatchIdFromUsername(this.player.username)
         .subscribe( matchId => {
@@ -210,12 +206,19 @@ export class StatsComponent implements OnInit {
         });
   }
 
+  /**
+   * Refresh the player's data
+   */
   private refresh(playerUsername: string): void{
     this.getPlayerFriendData(playerUsername);
     this.getPlayer(playerUsername);
     this.getPlayerStats(playerUsername);
   }
 
+  /**
+   * Gets the player's data about the friendship with the user
+   * @param playerUsername 
+   */
   private getPlayerFriendData(playerUsername: string): void{
     this.friendService.hasFriendAsync(playerUsername).subscribe( flag => this.dynamicFlags.areUserPlayerFriends=flag);
     this.friendService.hasReceivedFriendRequestAsync(playerUsername)
@@ -273,9 +276,6 @@ export class StatsComponent implements OnInit {
             console.log('StatsComponent friendOffgame');
             break;                            
         }
-        /*console.log('areUserPlayerFriends ' + this.dynamicFlags.areUserPlayerFriends);
-        console.log('hasUserSentFriendRequestToPlayer ' + this.dynamicFlags.hasUserSentFriendRequestToPlayer);
-        console.log('hasPlayerSentFriendRequestToUser ' + this.dynamicFlags.hasPlayerSentFriendRequestToUser);*/
       });
     }
   }

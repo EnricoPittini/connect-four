@@ -32,6 +32,10 @@ export class GameComponent implements OnInit {
     return (!this.isUserAMatchPlayer() ||  this.getMyUsername()===this.gameService.getPlayer1Username());
   }
 
+  /**
+   * Returns the user username
+   * @returns 
+   */
   getMyUsername(): string {
     return this.auth.getUsername();
   }
@@ -45,20 +49,35 @@ export class GameComponent implements OnInit {
     }
   }
 
+  /**
+   * Returns the board of the match
+   * @returns 
+   */
   getBoard(): Match['board'] {
     return this.gameService.match?.board
            || Array(GameComponent.ROWS).fill(Array(GameComponent.COLS).fill(WhichPlayer.EMPTY));
   }
 
+  /**
+   * Does forfait
+   */
   forfait(): void {
     console.info('Forfait button clicked');
     this.gameService.forfait();
   }
 
+  /**
+   * Checks if the game is ended
+   * @returns 
+   */
   isGameEnded(): boolean {
     return this.gameService.isGameEnded();
   }
 
+  /**
+   * Returns the username of the winner, if any
+   * @returns 
+   */
   getWinner(): string | null {
     if (!this.gameService.match || !this.gameService.isGameEnded) {
       return null;
@@ -75,14 +94,26 @@ export class GameComponent implements OnInit {
     }
   }
 
+  /**
+   * Makes a move in the match
+   * @param column 
+   */
   makeMove(column: number): void {
     this.gameService.makeMove(column);
   }
 
+  /**
+   * Returns the match id of the current match
+   * @returns 
+   */
   getMatchId(): string | null {
     return this.gameService.matchId;
   }
 
+  /**
+   * Returns the username of the player that has the turn
+   * @returns 
+   */
   getTurnUsername(): string {
     const turn = this.gameService.getTurn();
     if (!turn || turn === WhichPlayer.EMPTY) {
@@ -92,11 +123,18 @@ export class GameComponent implements OnInit {
     return this.gameService.whichPlayer() === turn ? this.getMyUsername() : this.getOtherUsername();
   }
 
+  /**
+   * Checks if the user is one of the two players of the match (e.g. is not an observer of the match)
+   * @returns 
+   */
   isUserAMatchPlayer(): boolean{
     return this.auth.getUsername()===this.gameService.getPlayer1Username()
            || this.auth.getUsername()===this.gameService.getPlayer2Username();
   }
 
+  /**
+   * Exits from the match
+   */
   exitGame(): void{
     if(!this.isUserAMatchPlayer()){
       this.gameService.stopObservingMatch();

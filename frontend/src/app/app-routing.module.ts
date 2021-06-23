@@ -4,6 +4,7 @@ import { AuthGuard } from './auth/guards/auth.guard';
 import { RoleGuard } from './auth/guards/role.guard';
 import { PlayerType } from './models/player.model';
 import { ChatListComponent } from './pages/chat-list/chat-list.component';
+import { ConfirmModeratorComponent } from './pages/confirm-moderator/confirm-moderator.component';
 import { CreateModeratorComponent } from './pages/create-moderator/create-moderator.component';
 import { FriendChatComponent } from './pages/friend-chat/friend-chat.component';
 import { FriendRequestComponent } from './pages/friend-request/friend-request.component';
@@ -100,7 +101,7 @@ const routes: Routes = [
   },
   {
     path: 'confirm_moderator',
-    component: CreateModeratorComponent,
+    component: ConfirmModeratorComponent,
     canActivate: [AuthGuard, RoleGuard],
     data: {
       expectedRoles: [PlayerType.MODERATOR_FIRST_ACCESS],

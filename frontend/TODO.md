@@ -4,7 +4,7 @@
 - Aggiungere evento socketIO 'deletedChat' che permette al Server di notificare un Client quando una chat viene eliminata (o player eliminato o friend eliminato).
 - Cambiare 'friend chat' in 'private chat' (o solo chat) (sia lato Client che lato Server)
 - Aggiungere evento socketIO 'friendIngame' che notifica i Client di un loro amico in game
-
+- Logout button
 
 ## AuthService
 - Add `isAutheticated` method

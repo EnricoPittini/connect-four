@@ -10,7 +10,7 @@ import getSocket from 'src/app/utils/initialize-socket-io';
 
 import { AuthService } from '../auth/services/auth.service';
 import { Chat, SenderPlayer, Message } from '../models/chat.model';
-import { ModeratorRegistrationRequestBody, NotifyAvailabilityFriendRequestRequestBody, NotifyUnavailabilityFriendRequestRequestBody } from '../models/httpTypes/requests.model';
+import { ConfirmModeratorRequestBody, ModeratorRegistrationRequestBody, NotifyAvailabilityFriendRequestRequestBody, NotifyUnavailabilityFriendRequestRequestBody } from '../models/httpTypes/requests.model';
 import {
   GetFriendRequestsResponseBody,
   GetFriendsResponseBody,
@@ -22,6 +22,7 @@ import {
   GetPlayersResponseBody,
   GetPlayerStatsResponseBody,
   SuccessResponseBody,
+  ConfirmModeratorResponseBody,
 } from '../models/httpTypes/responses.model';
 
 
@@ -141,8 +142,22 @@ export class PlayerService {
       username: username,
       password: password,
       isModerator: true,
-    }
+    };
     return this.http.post<SuccessResponseBody>(`${PlayerService.BASE_URL}/players`, body, this.createHttpOptions())
+      .pipe(
+        mapTo(true),
+        catchError(error => of(false))
+      );
+  }
+
+  confirmModerator(password: string, name: string, surname: string, avatar: string): Observable<boolean> {
+    const body: ConfirmModeratorRequestBody = {
+      password: password,
+      name: name,
+      surname: surname,
+      avatar: avatar,
+    };
+    return this.http.put<ConfirmModeratorResponseBody>(`${PlayerService.BASE_URL}/players/${this.auth.getUsername()}`, body, this.createHttpOptions())
       .pipe(
         mapTo(true),
         catchError(error => of(false))

@@ -33,6 +33,8 @@ https://github.com/bartosz-io/jwt-auth-angular/blob/master/src/app/auth/services
 
 ## Socket.io
 - Verificare di aver gestito tutti gli eventi in client-events e server-events
+- Eventi ingame per i friends
+- Controllare eventi cancel friend match request
 - Eventi online e ingame potrebbero essere mandati a tutti i player (così c'è aggiornamento dinamico di online e ingame in stats)
 
 

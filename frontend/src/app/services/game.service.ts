@@ -152,6 +152,7 @@ export class GameService {
     return this.match?.player2 || null;
   }
 
+  // Osservatore?
   whichPlayer(): WhichPlayer {
     return this.getPlayer1Username() === this.auth.getUsername()
            ? WhichPlayer.PLAYER_1
@@ -262,10 +263,7 @@ export class GameService {
       username: username, 
     }))
     .pipe(
-      map(response => {
-        console.log('Response ' + JSON.stringify(response,null,2));
-        return response.matches[0]._id;
-      })
+      map(response => response.matches[0]._id)
      /* mergeMap(response => from(response.matches)),
       mergeMap(match => match._id),
       take(1)*/
@@ -276,4 +274,28 @@ export class GameService {
 
   // TODO forse metodo exitMatch / resetMatch per togliere matchId / match
 
+
+  // TODO spostare in altro service?
+  
+  getMatches(live: boolean = true, username: string | null = null, skip: number | null = null,
+             limit: number | null = null)
+            : Observable<GetMatchesResponseBody['matches']> {
+    const params : any= {};
+    if(live){
+      params.live = 'true';
+    }
+    if(username){
+      params.username = username;
+    }
+    if(skip){
+      params.skip = skip;
+    }
+    if(limit){
+      params.limit = limit;
+    }
+    return this.http.get<GetMatchesResponseBody>(`${GameService.BASE_URL}/matches`, this.createHttpOptions(params))
+      .pipe( 
+        map(getMatchesResponseBody => getMatchesResponseBody.matches)
+      );
+  }
 }

@@ -168,6 +168,10 @@ export class GameService {
     return this.match?.status !== MatchStatus.IN_PROGRESS;
   }
 
+  getTurn(): WhichPlayer | null {
+    return this.match?.playerTurn || null;
+  }
+
   private initializeMatch(): void {
     // this.playerService.getPlayer(this.auth.getUsername())
     // TODO come inizializzo i campi match e matchId ???

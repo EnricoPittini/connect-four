@@ -74,4 +74,13 @@ export class GameComponent implements OnInit {
     return this.gameService.matchId;
   }
 
+  getTurnUsername(): string {
+    const turn = this.gameService.getTurn();
+    if (!turn || turn === WhichPlayer.EMPTY) {
+      return '';
+    }
+
+    return this.gameService.whichPlayer() === turn ? this.getMyUsername() : this.getOtherUsername();
+  }
+
 }

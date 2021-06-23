@@ -107,11 +107,10 @@ export class FriendService {
     // this.listenForFriendRequestListUpdate();
 
     this.auth.authEvents.subscribe(
-      newState => {
-        console.log('new state', newState)
-        newState ? this.start() : this.stop()
+      authenticated => {
+        authenticated ? this.start() : this.stop();
       }
-    )
+    );
   }
 
   start(): void {
@@ -130,15 +129,15 @@ export class FriendService {
   }
 
   stop(): void {
-    this.socket.off('friendOnline')
-    this.socket.off('friendOffline')
-    this.socket.off('friendMatchRequest')
-    this.socket.off('deleteFriendMatchRequest')
-    this.socket.off('newFriend')
-    this.socket.off('lostFriend')
+    this.socket.off('friendOnline');
+    this.socket.off('friendOffline');
+    this.socket.off('friendMatchRequest');
+    this.socket.off('deleteFriendMatchRequest');
+    this.socket.off('newFriend');
+    this.socket.off('lostFriend');
 
-    this.socket.off('newFriendRequest')
-    this.socket.off('cancelFriendRequest')
+    this.socket.off('newFriendRequest');
+    this.socket.off('cancelFriendRequest');
   }
 
   hasFriend(username: string): boolean{

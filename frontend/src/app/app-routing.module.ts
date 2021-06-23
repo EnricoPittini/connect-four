@@ -18,17 +18,94 @@ import { StatsComponent } from './pages/stats/stats.component';
 
 const routes: Routes = [
   // { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
-  { path: 'login', component: LoginComponent },
-  { path: 'signup', component: SignUpComponent },
-  { path: '', component: HomeComponent, canActivate: [AuthGuard] },
-  { path: 'player/:username', component: StatsComponent, canActivate: [AuthGuard] },
-  { path: 'matches', component: LiveMatchesComponent, canActivate: [AuthGuard] },
-  { path: 'chat', component: ChatListComponent, canActivate: [AuthGuard] },
-  { path: 'chat/:username', component: FriendChatComponent, canActivate: [AuthGuard] },
-  { path: 'game', component: GameComponent, canActivate: [AuthGuard] },
-  { path: 'searchPlayer', component: SearchPlayerComponent, canActivate: [AuthGuard]},
-  { path: 'friend_requests', component: FriendRequestComponent, canActivate: [AuthGuard]},
-  { path: 'create_moderator', component: CreateModeratorComponent, canActivate: [AuthGuard, RoleGuard], data: { expectedRole: PlayerType.MODERATOR } },
+  {
+    path: 'login',
+    component: LoginComponent,
+  },
+  {
+    path: 'signup',
+    component: SignUpComponent,
+  },
+  {
+    path: '',
+    component: HomeComponent,
+    canActivate: [AuthGuard, RoleGuard],
+    data: {
+      expectedRoles: [PlayerType.STANDARD_PLAYER, PlayerType.MODERATOR],
+    },
+  },
+  {
+    path: 'player/:username',
+    component: StatsComponent,
+    canActivate: [AuthGuard, RoleGuard],
+    data: {
+      expectedRoles: [PlayerType.STANDARD_PLAYER, PlayerType.MODERATOR],
+    },
+  },
+  {
+    path: 'matches',
+    component: LiveMatchesComponent,
+    canActivate: [AuthGuard, RoleGuard],
+    data: {
+      expectedRoles: [PlayerType.STANDARD_PLAYER, PlayerType.MODERATOR],
+    },
+  },
+  {
+    path: 'chat',
+    component: ChatListComponent,
+    canActivate: [AuthGuard, RoleGuard],
+    data: {
+      expectedRoles: [PlayerType.STANDARD_PLAYER, PlayerType.MODERATOR],
+    },
+  },
+  {
+    path: 'chat/:username',
+    component: FriendChatComponent,
+    canActivate: [AuthGuard, RoleGuard],
+    data: {
+      expectedRoles: [PlayerType.STANDARD_PLAYER, PlayerType.MODERATOR],
+    },
+  },
+  {
+    path: 'game',
+    component: GameComponent,
+    canActivate: [AuthGuard, RoleGuard],
+    data: {
+      expectedRoles: [PlayerType.STANDARD_PLAYER, PlayerType.MODERATOR],
+    },
+  },
+  {
+    path: 'searchPlayer',
+    component: SearchPlayerComponent,
+    canActivate: [AuthGuard, RoleGuard],
+    data: {
+      expectedRoles: [PlayerType.STANDARD_PLAYER, PlayerType.MODERATOR],
+    },
+  },
+  {
+    path: 'friend_requests',
+    component: FriendRequestComponent,
+    canActivate: [AuthGuard, RoleGuard],
+    data: {
+      expectedRoles: [PlayerType.STANDARD_PLAYER, PlayerType.MODERATOR],
+    },
+  },
+  {
+    path: 'create_moderator',
+    component: CreateModeratorComponent,
+    canActivate: [AuthGuard, RoleGuard],
+    data: {
+      expectedRoles: [PlayerType.MODERATOR],
+    },
+  },
+  {
+    path: 'confirm_moderator',
+    component: CreateModeratorComponent,
+    canActivate: [AuthGuard, RoleGuard],
+    data: {
+      expectedRoles: [PlayerType.MODERATOR_FIRST_ACCESS],
+    },
+  },
 
   // TODO eventualmente gestire path errati con 404 not found
   // {path: '404', component: NotFoundComponent},

@@ -46,8 +46,8 @@ router.get(`/`, auth, async (req, res, next) => {
   // Parse the 'live' query parameter
   let live = false;
   if (req.query.live) {
-    if (req.query.live.toLowerCase() !== "true" || req.query.live.toLowerCase() !== "false") {
-      live = req.query.live.toLowerCase() !== "true" ? true : false;
+    if (req.query.live.toLowerCase() === "true" || req.query.live.toLowerCase() === "false") {
+      live = req.query.live.toLowerCase() === "true" ? true : false;
     }
     else {
       const errorBody = { error: true, statusCode: 405, errorMessage: 'Invalid query section for the URL' };
@@ -61,14 +61,38 @@ router.get(`/`, auth, async (req, res, next) => {
   const username = req.query.username;
 
   // Object used to filter the query
-  const filter: any = {};
-  if (live) {
+  let filter: any = {};
+  if (username && live) { // username and live
+    filter = {
+      $or: [
+        {
+          player1: username,
+          status: MatchStatus.IN_PROGRESS,
+        },
+        {
+          player2: username,
+          status: MatchStatus.IN_PROGRESS,
+        }
+      ]
+    };
+  }
+  else if(username){ // username and not live
+    filter = {
+      $or: [
+        {
+          player1: username,
+        },
+        {
+          player2: username,
+        }
+      ]
+    };
+  }
+  else if(live){ // live and not username
     filter.status = MatchStatus.IN_PROGRESS;
   }
-  if (username) {
-    filter.username = username;
-  }
 
+  console.info('Searching for matches, with filter ' + JSON.stringify(filter,null,2));
 
   if (!live) {
     // The Client asked for all the matches (both in progress and terminated)
@@ -114,12 +138,14 @@ router.get(`/`, auth, async (req, res, next) => {
       // Array that contains, for each match, the associated rating.
       const matchRatings: number[] = matchPlayersRatings.map(matchRatings => (matchRatings[0] + matchRatings[1]) / 2);
 
+      console.log('matchDocuments ' + matchDocuments);
       // Matches sorted by rating
       const sortedMatchDocuments = matchDocuments
         .map((matchDocument, index) => ({ rating: matchRatings[index], document: matchDocument }))
         .sort((a, b) => b.rating - a.rating)
         .map(matchObject => matchObject.document);
 
+      console.log('sortedMatchDocuments : ' + sortedMatchDocuments);
       const filteredMatchDocuments = sortedMatchDocuments.slice(skip, skip+limit);
       const body: GetMatchesResponseBody = { error: false, statusCode: 200, matches: filteredMatchDocuments as any };
       return res.status(200).json(body);
@@ -367,7 +393,7 @@ router.post('/:match_id/observers', auth, (req, res, next) =>{
       console.warn('A client asked to be an observer for a match in which he is playing: ' + req.params.match_id);
       const errorBody: ErrorResponseBody = {
         error: true,
-        statusCode: 404,
+        statusCode: 403,
         errorMessage: 'You can\'t become an observer of a match in which you are playing'
       };
       throw errorBody;
@@ -376,9 +402,10 @@ router.post('/:match_id/observers', auth, (req, res, next) =>{
     // Check if the Client is alredy an observer of another match
     const playerSockets = transientDataHandler.getPlayerSockets(req.user!.username);
     for(let playerSocket of playerSockets){ // At least one of the Client sockets is in alredy an abserver
-      if(playerSocket.rooms.size>0){
+      console.log('Client rooms ' + JSON.stringify(playerSocket.rooms));
+      if(playerSocket.rooms.size>1){
         console.warn('A client asked to be an observer while he is alredy an observer, match_id: ' + req.params.match_id);
-        const errorBody: ErrorResponseBody = { error: true, statusCode: 404, errorMessage: 'You are alredy an observer of another match' };
+        const errorBody: ErrorResponseBody = { error: true, statusCode: 400, errorMessage: 'You are alredy an observer of another match' };
         throw errorBody;
       }
     }
@@ -425,7 +452,7 @@ router.delete('/:match_id/observers', auth, (req, res, next) =>{
       if(!playerSocket.rooms.has(roomName)){
         console.warn('A client asked to not be anymore an observer of a match he wasn\'t observing, match_id: '
                      + req.params.match_id);
-        const errorBody: ErrorResponseBody = { error: true, statusCode: 404, errorMessage: 'You are not an observer of that match' };
+        const errorBody: ErrorResponseBody = { error: true, statusCode: 400, errorMessage: 'You are not an observer of that match' };
         throw errorBody;
       }
     }

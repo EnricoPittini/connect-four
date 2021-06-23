@@ -10,10 +10,11 @@
   <!-- Friend requets container -->
   <div>
     <!-- Friend request list -->
-    <div *ngFor="let friendRequest of getFriendRequests()">
+    <div *ngFor="let friendRequest of getReceivedFriendRequests()">
       <!-- Friend request -->
       <app-friend-request-card
-      [friendRequest]="friendRequest"
+        [friendRequest]="friendRequest"
+        (friendRequestProcessed)="onFriendRequestProcessed($event)"
       >
       </app-friend-request-card>
     </div>

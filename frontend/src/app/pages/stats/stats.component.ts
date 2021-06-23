@@ -34,7 +34,7 @@ export class StatsComponent implements OnInit {
     avatar: "",
     online: false,
     ingame: false,
-  }; 
+  };
 
   /**
    * Indicates if the player is the user
@@ -42,9 +42,9 @@ export class StatsComponent implements OnInit {
   isUser: boolean = false;
 
   /**
-   * Wrapps several flags that have to be changed dynamically. 
+   * Wrapps several flags that have to be changed dynamically.
    * This object is used in order to detect the changes dynamically
-   * 
+   *
    * TODO provare a togliere
    */
   dynamicFlags: {
@@ -91,30 +91,36 @@ export class StatsComponent implements OnInit {
     console.log('Entering StatsComponent');
 
     // Username of the player
-    let playerUsername = this.activatedRoute.snapshot.paramMap.get('username');
-    if(!playerUsername){
-      playerUsername = "";
-    }
+    this.activatedRoute.paramMap.subscribe(
+      params => {
+        let playerUsername = params.get('username');
+        if(!playerUsername){
+          playerUsername = "";
+        }
 
-    this.isUser = playerUsername===this.authService.getUsername();
-    /*this.dynamicFlags.areUserPlayerFriends = this.friendService.hasFriend(playerUsername);
-    this.dynamicFlags.hasUserSentFriendRequestToPlayer = this.friendService.hasSentFriendRequest(playerUsername);
-    this.dynamicFlags.hasPlayerSentFriendRequestToUser = this.friendService.hasReceivedFriendRequest(playerUsername);*/
-    this.isUserModerator = this.authService.getPlayerType()===PlayerType.MODERATOR;
+        this.isUser = playerUsername===this.authService.getUsername();
+        /*this.dynamicFlags.areUserPlayerFriends = this.friendService.hasFriend(playerUsername);
+        this.dynamicFlags.hasUserSentFriendRequestToPlayer = this.friendService.hasSentFriendRequest(playerUsername);
+        this.dynamicFlags.hasPlayerSentFriendRequestToUser = this.friendService.hasReceivedFriendRequest(playerUsername);*/
+        this.isUserModerator = this.authService.getPlayerType()===PlayerType.MODERATOR;
 
-    this.getPlayerFriendData(playerUsername);
-   
-    // Gets the player general data and stats
-    this.getPlayer(playerUsername);
-    this.getPlayerStats(playerUsername);
+        this.getPlayerFriendData(playerUsername);
 
-    // Start listening for friend-related updates
-    this.listenForFriendUpdates(playerUsername);
+        // Gets the player general data and stats
+        this.getPlayer(playerUsername);
+        this.getPlayerStats(playerUsername);
+
+        // Start listening for friend-related updates
+        this.listenForFriendUpdates(playerUsername);
+      }
+    );
   }
 
+
+
   /**
-   * 
-   * @returns The player type, in a pretty format 
+   *
+   * @returns The player type, in a pretty format
    */
   getPrettyPlayerType(): string{
     return this.player.type.toString().replace(/_/g, " ");
@@ -164,7 +170,7 @@ export class StatsComponent implements OnInit {
 
   /**
    * Sends a friend request from the user to the player.
-   * If alredy exists a friend request from the player to the user, that request is accepted 
+   * If alredy exists a friend request from the player to the user, that request is accepted
    * (e.g. the players become friends)
    */
   sendFriendRequest(): void{
@@ -201,7 +207,7 @@ export class StatsComponent implements OnInit {
 
   /**
    * Starts listen for friend-related updates about the given player
-   * @param playerUsername 
+   * @param playerUsername
    */
   private listenForFriendUpdates(playerUsername: string): void{
     const observable = this.friendService.listenForFriendUpdates(playerUsername);

@@ -1,6 +1,11 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FriendRequest } from 'src/app/models/friend-request.model';
 
+export interface ProcessedFriendRequest {
+  otherUsername: string,
+  accepted: boolean,
+}
+
 @Component({
   selector: 'app-friend-request-card',
   templateUrl: './friend-request-card.component.html',
@@ -9,7 +14,7 @@ import { FriendRequest } from 'src/app/models/friend-request.model';
 export class FriendRequestCardComponent implements OnInit {
 
   @Input() friendRequest!: FriendRequest;
-  @Output() friendRequestProcessed: EventEmitter<boolean> = new EventEmitter<boolean>();
+  @Output() friendRequestProcessed: EventEmitter<ProcessedFriendRequest> = new EventEmitter<ProcessedFriendRequest>();
 
   constructor() { }
 
@@ -19,11 +24,17 @@ export class FriendRequestCardComponent implements OnInit {
   // TODO gestire evento friendRequestProcessed emit (in html) (passare output callback)
 
   accept(): void {
-    this.friendRequestProcessed.emit(true);
+    this.friendRequestProcessed.emit({
+      otherUsername: this.friendRequest.from,
+      accepted: true,
+    });
   }
 
   reject(): void {
-    this.friendRequestProcessed.emit(false);
+    this.friendRequestProcessed.emit({
+      otherUsername: this.friendRequest.from,
+      accepted: false,
+    });
   }
 
   getFromUsername(): string {

@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { AuthService } from 'src/app/auth/services/auth.service';
+import { ProcessedFriendRequest } from 'src/app/components/friend-request-card/friend-request-card.component';
 import { FriendRequest } from 'src/app/models/friend-request.model';
 import { FriendService } from 'src/app/services/friend.service';
 
@@ -11,14 +13,23 @@ export class FriendRequestComponent implements OnInit {
 
 
   constructor(
-    private friendService: FriendService
+    private friendService: FriendService,
+    private auth: AuthService
   ) { }
 
   ngOnInit(): void {
   }
 
+  getReceivedFriendRequests(): FriendRequest[] {
+    return this.friendService.friendRequests.filter(friendRequest => friendRequest.to === this.auth.getUsername())
+  }
 
-  getFriendRequests(): FriendRequest[] {
-    return this.friendService.friendRequests;
+  onFriendRequestProcessed(processedFriendRequest: ProcessedFriendRequest): void {
+    if (processedFriendRequest.accepted) {
+      this.friendService.sendFriendRequest(processedFriendRequest.otherUsername);
+    }
+    else {
+      this.friendService.cancelFriendRequest(processedFriendRequest.otherUsername);
+    }
   }
 }

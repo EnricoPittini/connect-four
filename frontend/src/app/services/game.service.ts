@@ -13,7 +13,7 @@ import { Match, MatchStatus, WhichPlayer } from '../models/match.model';
 import { PlayerService } from './player.service';
 import { Router } from '@angular/router';
 import { from, Observable } from 'rxjs';
-import { mergeMap, take } from 'rxjs/operators';
+import { mergeMap, take, map } from 'rxjs/operators';
 import { FriendService } from './friend.service';
 import { MatchChatService } from './match-chat.service';
 
@@ -212,8 +212,8 @@ export class GameService {
     }
 
     this.observing = true;
-
-    this.http.post<SuccessResponseBody>(`${GameService.BASE_URL}/${matchId}/observers`, {}, this.createHttpOptions())
+    console.log('startObserving');
+    this.http.post<SuccessResponseBody>(`${GameService.BASE_URL}/matches/${matchId}/observers`, {}, this.createHttpOptions())
       .subscribe(
         response => {
           this.router.navigate(['/game']);
@@ -235,7 +235,7 @@ export class GameService {
       return;
     }
 
-    this.http.delete<SuccessResponseBody>(`${GameService.BASE_URL}/${this.matchId}/observers`, this.createHttpOptions())
+    this.http.delete<SuccessResponseBody>(`${GameService.BASE_URL}/matches/${this.matchId}/observers`, this.createHttpOptions())
     .subscribe(
       response => {
         this.matchId = null;
@@ -257,14 +257,18 @@ export class GameService {
 
 
   getMatchIdFromUsername(username: string): Observable<string> {
-    return this.http.get<GetMatchesResponseBody>(GameService.BASE_URL, this.createHttpOptions({
+    return this.http.get<GetMatchesResponseBody>(`${GameService.BASE_URL}/matches`, this.createHttpOptions({
       live: 'true',
-      username: username,
+      username: username, 
     }))
     .pipe(
-      mergeMap(response => from(response.matches)),
+      map(response => {
+        console.log('Response ' + JSON.stringify(response,null,2));
+        return response.matches[0]._id;
+      })
+     /* mergeMap(response => from(response.matches)),
       mergeMap(match => match._id),
-      take(1)
+      take(1)*/
     );
   }
 

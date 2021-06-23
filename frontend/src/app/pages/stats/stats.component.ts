@@ -5,6 +5,7 @@ import { AuthService } from 'src/app/auth/services/auth.service';
 import { ClientPlayer, Player, PlayerType } from 'src/app/models/player.model';
 import { Stats } from 'src/app/models/stats.model';
 import { FriendService } from 'src/app/services/friend.service';
+import { GameService } from 'src/app/services/game.service';
 import { PlayerService } from 'src/app/services/player.service';
 
 
@@ -85,6 +86,7 @@ export class StatsComponent implements OnInit {
     private authService: AuthService,
     private location: Location,
     public router: Router,
+    public gameService: GameService,
   ) { }
 
   ngOnInit(): void {
@@ -188,6 +190,14 @@ export class StatsComponent implements OnInit {
    deleteFriend(): void{
     this.friendService.deleteFriend(this.player.username);
     this.dynamicFlags.areUserPlayerFriends=false;
+  }
+
+  observe(): void{
+    this.gameService.getMatchIdFromUsername(this.player.username)
+        .subscribe( matchId => {
+          console.log('MatchId ' + matchId);
+          this.gameService.startObservingMatch(matchId)
+        });
   }
 
 

@@ -142,9 +142,9 @@ export class FriendService {
   }
 
   /**
-   * Checks if a friend request 
-   * @param username 
-   * @returns 
+   * Checks if a friend request
+   * @param username
+   * @returns
    */
   hasSentFriendRequest(username: string): boolean{
     return !!this.friendRequests.find( friendRequest => friendRequest.from===this.auth.getUsername() && friendRequest.to===username);
@@ -157,30 +157,30 @@ export class FriendService {
   hasFriendAsync(username: string): Observable<boolean>{
     return this.http.get<GetFriendsResponseBody>(`${FriendService.BASE_URL}/friends`, this.createHttpOptions())
       .pipe(
-        map(response =>  !!response.friends.find(friend => friend===username))       
-      );      
+        map(response =>  !!response.friends.find(friend => friend===username))
+      );
   }
 
   /**
-   * Checks if a friend request 
-   * @param username 
-   * @returns 
+   * Checks if a friend request
+   * @param username
+   * @returns
    */
    hasSentFriendRequestAsync(username: string): Observable<boolean>{
     return this.http.get<GetFriendRequestsResponseBody>(`${FriendService.BASE_URL}/friend_requests`, this.createHttpOptions())
     .pipe(
-      map(response => !!response.friendRequests.find( request => request.from===this.auth.getUsername() && request.to===username))        
+      map(response => !!response.friendRequests.find( request => request.from===this.auth.getUsername() && request.to===username))
     );
   }
 
   hasReceivedFriendRequestAsync(username: string): Observable<boolean>{
     return this.http.get<GetFriendRequestsResponseBody>(`${FriendService.BASE_URL}/friend_requests`, this.createHttpOptions())
     .pipe(
-      map(response => !!response.friendRequests.find( request => request.from===username && request.to===this.auth.getUsername()))        
+      map(response => !!response.friendRequests.find( request => request.from===username && request.to===this.auth.getUsername()))
     );
   }
 
-  
+
   /*getPlayerFriendInfo(username: string): Observable<FriendInfo>{
     return this.http.get<GetPlayerResponseBody>(`${FriendService.BASE_URL}/players/${username}`, this.createHttpOptions())
       .pipe( map( getPlayerResponseBody => {
@@ -200,8 +200,8 @@ export class FriendService {
 
   /**
    * Returns an observable that generates friend-related updates abouts the given username
-   * @param username 
-   * @returns 
+   * @param username
+   * @returns
    */
   listenForFriendUpdates(username: string): Observable<string> | undefined{
     /*if(this.isListening){
@@ -237,8 +237,8 @@ export class FriendService {
   }
 
   /**
-   * Delets the friend with the specified username, if any 
-   * @param username 
+   * Delets the friend with the specified username, if any
+   * @param username
    */
   deleteFriend(friendUsername: string): void{
     console.info('Deleting the friend ' + friendUsername);
@@ -272,7 +272,11 @@ export class FriendService {
       this.createHttpOptions()
     )
     .subscribe(
-      response => console.info('Friend request sent correctly'),
+      response => {
+        console.info('Friend request sent correctly')
+        this.friendRequests = [];
+        this.populateFriendRequestList();
+      },
       error => console.error('An error occurred while sending the friend request')
     );
   }
@@ -296,7 +300,11 @@ export class FriendService {
       { ...this.createHttpOptions(), body: body }
     )
     .subscribe(
-      response => console.info('Friend request cancelled correctly'),
+      response => {
+        console.info('Friend request cancelled correctly')
+        this.friendRequests = [];
+        this.populateFriendRequestList();
+      },
       error => console.error('An error occurred while cancelling the friend request')
     );
   }
@@ -504,6 +512,11 @@ export class FriendService {
       console.info(`New friend request received from: ${fromUsername}`);
 
       // Re-populate the friend request list (by requesting it to the server)
+      this.friendRequests = [];
+      this.populateFriendRequestList();
+    });
+
+    this.socket.on('cancelFriendRequest', (username) => {
       this.friendRequests = [];
       this.populateFriendRequestList();
     });

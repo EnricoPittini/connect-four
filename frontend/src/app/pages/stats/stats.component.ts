@@ -78,6 +78,8 @@ export class StatsComponent implements OnInit {
    */
   isUserModerator: boolean = false;
 
+  refreshInterval: number = 30000;
+
 
   constructor(
     private activatedRoute: ActivatedRoute,
@@ -106,14 +108,18 @@ export class StatsComponent implements OnInit {
         this.dynamicFlags.hasPlayerSentFriendRequestToUser = this.friendService.hasReceivedFriendRequest(playerUsername);*/
         this.isUserModerator = this.authService.getPlayerType()===PlayerType.MODERATOR;
 
-        this.getPlayerFriendData(playerUsername);
+        /*this.getPlayerFriendData(playerUsername);
 
         // Gets the player general data and stats
         this.getPlayer(playerUsername);
-        this.getPlayerStats(playerUsername);
+        this.getPlayerStats(playerUsername);*/
+
+        this.refresh(playerUsername);
 
         // Start listening for friend-related updates
         this.listenForFriendUpdates(playerUsername);
+
+        setInterval( () => this.refresh(this.player.username), this.refreshInterval);
       }
     );
   }
@@ -206,6 +212,11 @@ export class StatsComponent implements OnInit {
         });
   }
 
+  private refresh(playerUsername: string): void{
+    this.getPlayerFriendData(playerUsername);
+    this.getPlayer(playerUsername);
+    this.getPlayerStats(playerUsername);
+  }
 
   private getPlayerFriendData(playerUsername: string): void{
     this.friendService.hasFriendAsync(playerUsername).subscribe( flag => this.dynamicFlags.areUserPlayerFriends=flag);
@@ -225,34 +236,48 @@ export class StatsComponent implements OnInit {
       observable.subscribe( eventString => {
         console.log('StatsComponent socketIO event ' + eventString)
         switch(eventString){
-          case 'newFriend': this.dynamicFlags.areUserPlayerFriends=true;
-                            this.dynamicFlags.hasPlayerSentFriendRequestToUser=false;
-                            this.dynamicFlags.hasUserSentFriendRequestToPlayer=false;
-                            console.log('StatsComponent newFriend');
-                            break;
-          case 'lostFriend': this.dynamicFlags.areUserPlayerFriends=false;
-                             this.dynamicFlags.hasPlayerSentFriendRequestToUser=false;
-                             this.dynamicFlags.hasUserSentFriendRequestToPlayer=false;
-                             console.log('StatsComponent lostFriend');
-                             break;
-          case 'newFriendRequest': this.dynamicFlags.hasPlayerSentFriendRequestToUser=true;
-                                   console.log('StatsComponent newFriendRequest');
-                                   break;
-          case 'cancelFriendRequest': this.dynamicFlags.hasPlayerSentFriendRequestToUser=false;
-                                      this.dynamicFlags.hasUserSentFriendRequestToPlayer=false;
-                                      console.log('StatsComponent cancelFriendRequest');
-                                      break;
-          case 'friendOnline': this.player.online=true;
-                               console.log('StatsComponent friendOnline');
-                               break;
-          case 'friendOffline': this.player.online=false;
-                               console.log('StatsComponent friendOffline');
-                               break;
-                            
+          case 'newFriend':
+            this.dynamicFlags.areUserPlayerFriends=true;
+            this.dynamicFlags.hasPlayerSentFriendRequestToUser=false;
+            this.dynamicFlags.hasUserSentFriendRequestToPlayer=false;
+            console.log('StatsComponent newFriend');
+            break;
+          case 'lostFriend':
+            this.dynamicFlags.areUserPlayerFriends=false;
+            this.dynamicFlags.hasPlayerSentFriendRequestToUser=false;
+            this.dynamicFlags.hasUserSentFriendRequestToPlayer=false;
+            console.log('StatsComponent lostFriend');
+            break;
+          case 'newFriendRequest':
+            this.dynamicFlags.hasPlayerSentFriendRequestToUser=true;
+            console.log('StatsComponent newFriendRequest');
+            break;
+          case 'cancelFriendRequest':
+            this.dynamicFlags.hasPlayerSentFriendRequestToUser=false;
+            this.dynamicFlags.hasUserSentFriendRequestToPlayer=false;
+            console.log('StatsComponent cancelFriendRequest');
+            break;
+          case 'friendOnline': 
+            this.player.online=true;
+            console.log('StatsComponent friendOnline');
+            break;
+          case 'friendOffline':
+            this.player.online=false;
+            this.player.ingame=false;
+            console.log('StatsComponent friendOffline');
+            break;
+           case 'friendIngame': 
+            this.player.ingame=true;
+            console.log('StatsComponent friendIngame');
+            break;
+          case 'friendOffgame':
+            this.player.ingame=false;
+            console.log('StatsComponent friendOffgame');
+            break;                            
         }
-        console.log('areUserPlayerFriends ' + this.dynamicFlags.areUserPlayerFriends);
+        /*console.log('areUserPlayerFriends ' + this.dynamicFlags.areUserPlayerFriends);
         console.log('hasUserSentFriendRequestToPlayer ' + this.dynamicFlags.hasUserSentFriendRequestToPlayer);
-        console.log('hasPlayerSentFriendRequestToUser ' + this.dynamicFlags.hasPlayerSentFriendRequestToUser);
+        console.log('hasPlayerSentFriendRequestToUser ' + this.dynamicFlags.hasPlayerSentFriendRequestToUser);*/
       });
     }
   }

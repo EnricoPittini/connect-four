@@ -262,7 +262,18 @@ export class FriendService {
           observer.next('friendOffline');
         }
       });
-      // TODO aggiungere friendIngame e friendOutgame
+      this.socket.on('friendIngame', otherUsername =>{
+        console.log('Observable friendIngame');
+        if(otherUsername===username){
+          observer.next('friendIngame');
+        }
+      });
+      this.socket.on('friendOffgame', otherUsername =>{
+        console.log('Observable friendOffgame');
+        if(otherUsername===username){
+          observer.next('friendOffgame');
+        }
+      });
     });
   }
 
@@ -418,6 +429,33 @@ export class FriendService {
           friendInfo.ingame = false;
           friendInfo.matchRequestSent = false;
           friendInfo.matchRequestReceived = false;
+        }
+      }
+    });
+
+    // friendIngame: a friend entered a match
+    this.socket.on('friendIngame', (friendUsername) => {
+      console.info(`Friend in game: ${friendUsername}`);
+
+      // Set the friend as in game
+      for (let friendInfo of this.friends) {
+        if (friendInfo.username === friendUsername) {
+          friendInfo.ingame = true;
+          // When a player goes in game, also the following fields are affected.
+          friendInfo.matchRequestSent = false;
+          friendInfo.matchRequestReceived = false;
+        }
+      }
+    });
+
+    // friendOutgame: a friend exited a match
+    this.socket.on('friendOffgame', (friendUsername) => {
+      console.info(`Friend out of game: ${friendUsername}`);
+
+      for (let friendInfo of this.friends) {
+        if (friendInfo.username === friendUsername) {
+          // Set friend as out of game
+          friendInfo.ingame = false;
         }
       }
     });

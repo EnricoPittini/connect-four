@@ -34,6 +34,16 @@ export default interface ServerEvents {
   'friendOnline': (username: string) => void;
 
   /**
+   * The Server notifies the Client sockets that one of his friend is now in gamee
+   */
+   'friendIngame': (username: string) => void;
+
+   /**
+    * The Server notifies the Client sockets that one of his friend is now off game
+    */
+    'friendOffgame': (username: string) => void;
+
+  /**
    * The Server notifies the Client sockets about a new friend request
    */
   'newFriendRequest': (username: string) => void;

@@ -180,23 +180,6 @@ export class FriendService {
     );
   }
 
-  
-  /*getPlayerFriendInfo(username: string): Observable<FriendInfo>{
-    return this.http.get<GetPlayerResponseBody>(`${FriendService.BASE_URL}/players/${username}`, this.createHttpOptions())
-      .pipe( map( getPlayerResponseBody => {
-        // Create the FriendInfo object and push it into the `friends` field.
-        const friendInfo: FriendInfo = {
-          username: getPlayerResponseBody.player.username,
-          online: getPlayerResponseBody.player.online,
-          ingame: getPlayerResponseBody.player.ingame,
-          // TODO matchRequestSent e matchRequestReceived andrebbero ricavate da un endpoint (non ancora esistente)
-          matchRequestSent: false,
-          matchRequestReceived: false,
-        };
-        return friendInfo;
-      })
-      )
-  }*/
 
   /**
    * Returns an observable that generates friend-related updates abouts the given username
@@ -233,6 +216,19 @@ export class FriendService {
           observer.next('cancelFriendRequest');
         }
       });
+      this.socket.on('friendOnline', otherUsername =>{
+        console.log('Observable friendOnline');
+        if(otherUsername===username){
+          observer.next('friendOnline');
+        }
+      });
+      this.socket.on('friendOffline', otherUsername =>{
+        console.log('Observable friendOffline');
+        if(otherUsername===username){
+          observer.next('friendOffline');
+        }
+      });
+      // TODO aggiungere friendIngame e friendOutgame
     });
   }
 

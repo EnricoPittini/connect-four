@@ -226,6 +226,13 @@ export class StatsComponent implements OnInit {
                                       this.dynamicFlags.hasUserSentFriendRequestToPlayer=false;
                                       console.log('StatsComponent cancelFriendRequest');
                                       break;
+          case 'friendOnline': this.player.online=true;
+                               console.log('StatsComponent friendOnline');
+                               break;
+          case 'friendOffline': this.player.online=false;
+                               console.log('StatsComponent friendOffline');
+                               break;
+                            
         }
         console.log('areUserPlayerFriends ' + this.dynamicFlags.areUserPlayerFriends);
         console.log('hasUserSentFriendRequestToPlayer ' + this.dynamicFlags.hasUserSentFriendRequestToPlayer);

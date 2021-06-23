@@ -41,7 +41,6 @@ export class LiveMatchesComponent implements OnInit {
                                 player2: match.player2,
                                 matchId: match._id,
           }));
-          console.log('Global matches ' + this.globalLiveMatches);
         });
 
     // Refresh periodically the live matches list    
@@ -71,7 +70,6 @@ export class LiveMatchesComponent implements OnInit {
   observeMatch(match: LiveMatchInfo): void{
     this.gameService.getMatchIdFromUsername(match.player1)
         .subscribe( matchId => {
-          console.log('MatchId ' + matchId);
           this.gameService.startObservingMatch(matchId)
         });
   }

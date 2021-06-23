@@ -34,7 +34,6 @@ export class SearchPlayerComponent implements OnInit {
     // TODO meglio impostare skip e limit
     this.playerService.getPlayers(partial_username,0,10).subscribe( players => {
       this.playersUsernames=players;
-      console.log(players);
     });
   }
 

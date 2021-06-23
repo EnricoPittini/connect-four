@@ -83,8 +83,6 @@ export class StatsComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    console.log('Entering StatsComponent');
-
     // Username of the player
     this.activatedRoute.paramMap.subscribe(
       params => {
@@ -203,7 +201,6 @@ export class StatsComponent implements OnInit {
   observe(): void{
     this.gameService.getMatchIdFromUsername(this.player.username)
         .subscribe( matchId => {
-          console.log('MatchId ' + matchId);
           this.gameService.startObservingMatch(matchId)
         });
   }
@@ -241,7 +238,6 @@ export class StatsComponent implements OnInit {
     const observable = this.friendService.listenForFriendUpdates(playerUsername);
     if(observable){
       observable.subscribe( eventString => {
-        console.log('StatsComponent socketIO event ' + eventString)
         switch(eventString){
           case 'newFriend':
             this.dynamicFlags.areUserPlayerFriends=true;
@@ -292,7 +288,6 @@ export class StatsComponent implements OnInit {
    private getPlayer(playerUsername: string): void{
     this.playerService.getPlayer(playerUsername).subscribe( player => {
       this.player=player
-      //console.log(player);
     });
   }
 

@@ -450,7 +450,6 @@ router.post('/:match_id/observers', auth, ensureNotFirstAccessModerator, (req, r
     // Check if the Client is alredy an observer of another match
     const playerSockets = transientDataHandler.getPlayerSockets(req.user!.username);
     for(let playerSocket of playerSockets){ // At least one of the Client sockets is in alredy an abserver
-      console.log('Client rooms ' + JSON.stringify(playerSocket.rooms));
       if(playerSocket.rooms.size>1){
         console.warn('A client asked to be an observer while he is alredy an observer, match_id: ' + req.params.match_id);
         const errorBody: ErrorResponseBody = { error: true, statusCode: 400, errorMessage: 'You are alredy an observer of another match' };

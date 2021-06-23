@@ -8,7 +8,6 @@ import { NewMatchParams, MatchDocument } from './models/Match';
  * Function that arranges the random match requests till now made
  */
 export async function arrangeRandomMatchRequests(){
-  console.info('Arranging the random match requests');
 
   try{
     const transientDataHandler = TransientDataHandler.getInstance();

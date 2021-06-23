@@ -167,7 +167,6 @@ export class FriendService {
    * @returns 
    */
   hasFriend(username: string): boolean{
-    console.log('Friend list '+this.friends);
     return !!this.friends.find( friend => friend.username===username);
   }
 
@@ -244,49 +243,41 @@ export class FriendService {
     this.isListening = true;
     return new Observable<string>( (observer) => {
       this.socket.on('newFriend', otherUsername => {
-        console.log('Observable newFriend');
         if(otherUsername===username){
           observer.next('newFriend');
         }
       });
       this.socket.on('lostFriend', otherUsername => {
-        console.log('Observable lostFriend');
         if(otherUsername===username){
           observer.next('lostFriend');
         }
       });
       this.socket.on('newFriendRequest', otherUsername => {
-        console.log('Observable newFriendRequest');
         if(otherUsername===username){
           observer.next('newFriendRequest');
         }
       });
       this.socket.on('cancelFriendRequest', otherUsername => {
-        console.log('Observable cancelFriendRequest');
         if(otherUsername===username){
           observer.next('cancelFriendRequest');
         }
       });
       this.socket.on('friendOnline', otherUsername =>{
-        console.log('Observable friendOnline');
         if(otherUsername===username){
           observer.next('friendOnline');
         }
       });
       this.socket.on('friendOffline', otherUsername =>{
-        console.log('Observable friendOffline');
         if(otherUsername===username){
           observer.next('friendOffline');
         }
       });
       this.socket.on('friendIngame', otherUsername =>{
-        console.log('Observable friendIngame');
         if(otherUsername===username){
           observer.next('friendIngame');
         }
       });
       this.socket.on('friendOffgame', otherUsername =>{
-        console.log('Observable friendOffgame');
         if(otherUsername===username){
           observer.next('friendOffgame');
         }

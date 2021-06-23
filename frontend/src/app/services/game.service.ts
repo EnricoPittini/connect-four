@@ -147,7 +147,6 @@ export class GameService {
         response => {
           console.info('Match updated succesfully'),
           this.match = response.match;
-          console.log(this.match);
           // ! Trick to update friend list
           if (this.isGameEnded()) {
             this.friendService.populateFriendList();

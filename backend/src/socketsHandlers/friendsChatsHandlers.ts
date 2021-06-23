@@ -11,12 +11,12 @@ import { NewChatParams } from '../models/Chat';
 
 
 /**
- * Registers to the specified Client socket the handlers about the friends chats managment. (e.g. the chats between 
+ * Registers to the specified Client socket the handlers about the friends chats managment. (e.g. the chats between
  * two players: private chats).
- * 
- * IMPORTANT: These chats can be also between two players that aren't friend, if at least one of the player is a moderator 
- * @param io 
- * @param socket 
+ *
+ * IMPORTANT: These chats can be also between two players that aren't friend, if at least one of the player is a moderator
+ * @param io
+ * @param socket
  */
 export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<ClientEvents, ServerEvents>) {
 
@@ -41,7 +41,7 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
       if (!toPlayerDocument) {
         throw new Error('A player sent a message to an inalid player; fromUsername: ' + fromUsername + ' ,toUsername: ' + toUsername);
       }
-      return player.getModel().findOne({ username: fromUsername }, { friends: 1 });
+      return player.getModel().findOne({ username: fromUsername });
     })
     // Search the "from player"
     .then(fromPlayerDocument => {
@@ -68,7 +68,7 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
       };
       return chat.getModel().findOne(filter);
     })
-    .then( chatDocument => {      
+    .then( chatDocument => {
       if(!chatDocument){
         // The chat between the players doesn't exist : I have to create a new one
         const data : NewChatParams = {
@@ -110,6 +110,6 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
     .catch(err =>{
       console.warn("An error occoured: " + err);
       return;
-    });  
+    });
   });
 }

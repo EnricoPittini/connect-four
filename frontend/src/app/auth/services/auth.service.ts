@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable, of, throwError } from 'rxjs';
+import { BehaviorSubject, Observable, of, ReplaySubject, Subject, throwError } from 'rxjs';
 import { catchError, map, mapTo, retry, tap } from 'rxjs/operators';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 
@@ -13,6 +13,7 @@ import getSocket from 'src/app/utils/initialize-socket-io';
 import { ErrorResponseBody, LoginResponseBody, RegistrationResponseBody } from 'src/app/models/httpTypes/responses.model';
 import { PlayerType } from 'src/app/models/player.model';
 import { StandardPlayerRegistrationRequestBody } from 'src/app/models/httpTypes/requests.model';
+import { Router } from '@angular/router';
 
 
 // TODO va bene definita qui internamente ?
@@ -56,6 +57,8 @@ export class AuthService {
    */
   private token: string | null;
 
+  authEvents: ReplaySubject<boolean> = new ReplaySubject<boolean>();
+
 
   /**
    * Constructs the AuthService service.
@@ -63,7 +66,8 @@ export class AuthService {
    * @param http - The HttpClient
    */
   constructor(
-    private http: HttpClient
+    private http: HttpClient,
+    private router: Router
   ) {
     console.info('Auth service instantiated');
 
@@ -119,6 +123,10 @@ export class AuthService {
     sessionStorage.removeItem(AuthService.JWT_TOKEN_STORAGE_KEY);
     // Notify the backend that the user is offline
     this.notifyOffline();
+    this.router.navigate(['/login']);
+
+
+    this.authEvents.next(false);
   }
 
   /**
@@ -185,7 +193,7 @@ export class AuthService {
 
   /**
    * Gets the user player type
-   * 
+   *
    * @returns The player type of the authenticated user. It the user
    *          it's not authenticated, an error is raised
    */
@@ -241,6 +249,7 @@ export class AuthService {
     }
     // Notify the backend that the user is online
     this.notifyOnline();
+    this.listenForProfileDeletion();
   }
 
   /**
@@ -252,6 +261,8 @@ export class AuthService {
       return;
     }
     this.socket.emit('online', this.token);
+
+    this.authEvents.next(true);
   }
 
   /**
@@ -291,6 +302,16 @@ export class AuthService {
         }
       }
     }
+  }
+
+  private listenForProfileDeletion(): void {
+    console.log('listenForProfileDeletion');
+
+    this.socket.once('profileDeleted', () => {
+      console.log('profileDeleted');
+
+      this.logout();
+    });
   }
 
 }

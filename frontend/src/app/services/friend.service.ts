@@ -93,6 +93,28 @@ export class FriendService {
   ) {
     console.info('Friend service instantiated');
 
+    // // Connect to the server
+    this.socket = getSocket();
+
+    // // Friend list management
+    this.friends = [];
+    // this.populateFriendList();
+    // this.listenForFriendListUpdate();
+
+    // // Friend request management
+    this.friendRequests = [];
+    // this.populateFriendRequestList();
+    // this.listenForFriendRequestListUpdate();
+
+    this.auth.authEvents.subscribe(
+      newState => {
+        console.log('new state', newState)
+        newState ? this.start() : this.stop()
+      }
+    )
+  }
+
+  start(): void {
     // Connect to the server
     this.socket = getSocket();
 
@@ -105,6 +127,18 @@ export class FriendService {
     this.friendRequests = [];
     this.populateFriendRequestList();
     this.listenForFriendRequestListUpdate();
+  }
+
+  stop(): void {
+    this.socket.off('friendOnline')
+    this.socket.off('friendOffline')
+    this.socket.off('friendMatchRequest')
+    this.socket.off('deleteFriendMatchRequest')
+    this.socket.off('newFriend')
+    this.socket.off('lostFriend')
+
+    this.socket.off('newFriendRequest')
+    this.socket.off('cancelFriendRequest')
   }
 
   hasFriend(username: string): boolean{

@@ -5,7 +5,7 @@
 
   <!-- Username -->
   <div class="username-container">
-    {{ getFriendUsername() }}
+    <a [routerLink]="['/player/'+ getFriendUsername()]">{{ getFriendUsername() }}</a>
   </div>
 
   <!-- Button -->

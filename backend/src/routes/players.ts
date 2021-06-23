@@ -287,7 +287,7 @@ router.get(`/:username`, auth, (req, res, next) => {
       type: document.type,
       online: transientDataHandler.isOnline(req.params.username),
       ingame: transientDataHandler.isInGame(req.params.username),
-    }; 
+    };
     const body: GetPlayerResponseBody = { error: false, statusCode: 200, player: player };
     return res.status(200).json(body);
   })

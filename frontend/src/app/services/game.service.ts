@@ -264,7 +264,7 @@ export class GameService {
   getMatchIdFromUsername(username: string): Observable<string> {
     return this.http.get<GetMatchesResponseBody>(`${GameService.BASE_URL}/matches`, this.createHttpOptions({
       live: 'true',
-      username: username, 
+      username: username,
     }))
     .pipe(
       map(response => response.matches[0]._id)
@@ -280,7 +280,7 @@ export class GameService {
 
 
   // TODO spostare in altro service?
-  
+
   getMatches(live: boolean = true, username: string | null = null, skip: number | null = null,
              limit: number | null = null)
             : Observable<GetMatchesResponseBody['matches']> {
@@ -298,7 +298,7 @@ export class GameService {
       params.limit = limit;
     }
     return this.http.get<GetMatchesResponseBody>(`${GameService.BASE_URL}/matches`, this.createHttpOptions(params))
-      .pipe( 
+      .pipe(
         map(getMatchesResponseBody => getMatchesResponseBody.matches)
       );
   }

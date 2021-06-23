@@ -9,8 +9,9 @@
   <!-- Nav bar -->
   <app-nav></app-nav>
 
+  <h1>Create new moderator</h1>
 
-  <div style="display: flex; justify-content: center; align-items: center; flex-direction: column; height: 90vh;">
+  <div style="display: flex; flex-direction: column; height: 90vh;">
 
       <!-- Error message card -->
       <div *ngIf="errorMessage" class="alert alert-danger">
@@ -31,7 +32,7 @@
           <input id="password" type="password" formControlName="password" required>
         </div>
 
-        <button style="margin: 10px; width: 100%;" type="submit" [disabled]="newModeratorForm.invalid">Create</button>
+        <button style="margin: 10px;" type="submit" [disabled]="newModeratorForm.invalid">Create</button>
 
       </form>
 

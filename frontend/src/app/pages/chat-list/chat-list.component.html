@@ -14,13 +14,19 @@
     <h1>Chats</h1>
 
     <!-- Chat list -->
-    <div *ngFor="let chat of getChats()" >
-      <app-chat-card
-        [chat]="chat"
-        (chatOpened)="openChat($event)"
-      >
-      </app-chat-card>
+    <div *ngIf="getChats().length>0; else emptyList">
+      <div *ngFor="let chat of getChats()" >
+        <app-chat-card
+          [chat]="chat"
+          (chatOpened)="openChat($event)"
+        >
+        </app-chat-card>
+      </div>
     </div>
+
+    <ng-template #emptyList>
+      <div style="padding-top: 20px; color: gray;"><h3>No chats</h3></div>
+    </ng-template>
 
   </main>
 

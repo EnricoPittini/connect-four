@@ -15,8 +15,9 @@
     </div>
 
     <!-- Time container -->
-    <div style="border-color: gray; border-style: solid; border-width: 2px; padding: 50px;"
+    <div style="border-color: gray; border-style: solid; border-width: 2px; padding: 50px; text-align: center;"
     >
+      <p>Turn</p>
       {{ getTurnUsername() }}
     </div>
 
@@ -24,6 +25,7 @@
     <div
     class="name-rectangle"
     [ngClass]="{'red': !isLeftPlayerRed(), 'yellow': isLeftPlayerRed()}"
+    style="text-align: center;"
     >
       {{ isUserAMatchPlayer() ? getOtherUsername() : gameService.getPlayer2Username() }}
     </div>

@@ -131,7 +131,7 @@ export class StatsComponent implements OnInit {
    * @returns The player type, in a pretty format
    */
   getPrettyPlayerType(): string{
-    return this.player.type.toString().replace(/_/g, " ");
+    return this.player.type.toString().replace(/_/g, " ").toLowerCase();
   }
 
   getPrettyRating(): number | undefined{

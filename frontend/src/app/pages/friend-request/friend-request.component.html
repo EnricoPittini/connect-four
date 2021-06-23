@@ -7,10 +7,13 @@
   <!-- Nav bar -->
   <app-nav></app-nav>
 
+  <h1>Friend requests</h1>
+
   <!-- Friend requets container -->
-  <div>
+  <div *ngIf="getReceivedFriendRequests().length>0; else emptyList">
     <!-- Friend request list -->
-    <div *ngFor="let friendRequest of getReceivedFriendRequests()">
+    <div *ngFor="let friendRequest of getReceivedFriendRequests()"
+          style="border:1px solid black;">
       <!-- Friend request -->
       <app-friend-request-card
         [friendRequest]="friendRequest"
@@ -19,5 +22,9 @@
       </app-friend-request-card>
     </div>
   </div>
+
+  <ng-template #emptyList>
+    <div style="padding-top: 20px; color: gray;"><h3>No friend requests</h3></div>
+  </ng-template>
 
 </div>

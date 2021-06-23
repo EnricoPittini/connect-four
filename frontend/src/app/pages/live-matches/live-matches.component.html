@@ -18,20 +18,26 @@
 
     <h1>Best global live matches</h1>
 
-    <div>
-      <h3>Filter live matches for player username</h3>
+    <div style="padding-top: 20px;">
+      <p>Filter live matches for player username</p>
       <input #search type="text" placeholder="Username"/>
       <input type="submit" (click)="searchLiveMatchesByUsername(search.value)" value="Search"/>
     </div>
 
     <br/>
 
-    <div *ngFor="let liveMatch of globalLiveMatches" style="border:1px solid black;">
-      <!-- TODO eventualmente creare un component a parte (MatchCard) -->
-      <p style="color:red">{{ liveMatch.player1 }}</p> vs <p style="color:yellow">{{ liveMatch.player2 }}</p>
+    <div *ngIf="globalLiveMatches.length>0; else emptyList" style="padding-top: 20px;">
+      <div *ngFor="let liveMatch of globalLiveMatches"
+            style="border:1px solid black;">
+        <div style="color:red">{{ liveMatch.player1 }}</div> vs <div style="color:rgb(255, 217, 0)">{{ liveMatch.player2 }}</div>
 
-      <button (click)="observeMatch(liveMatch)">Observe</button>
+        <button (click)="observeMatch(liveMatch)">Observe</button>
+      </div>
     </div>
+
+    <ng-template #emptyList>
+      <div style="padding-top: 20px; color: gray;"><h3>No live matches</h3></div>
+    </ng-template>
 
   </main>
 

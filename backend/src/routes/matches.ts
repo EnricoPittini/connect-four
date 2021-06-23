@@ -279,7 +279,7 @@ router.post(`/:match_id`, auth, ensureNotFirstAccessModerator, async (req, res, 
       for (let friendUsername of player1Document.friends) {
         const friendSockets = transientDataHandler.getPlayerSockets(friendUsername);
         for (let friendSocket of friendSockets) {
-          friendSocket.emit('friendIngame', matchDocument.player1);
+          friendSocket.emit('friendOffgame', matchDocument.player1);
           /*friendSocket.emit('deleteFriendMatchRequest', { // TODO serve?
             sender: player2,
             receiver: friendUsername,
@@ -295,7 +295,7 @@ router.post(`/:match_id`, auth, ensureNotFirstAccessModerator, async (req, res, 
       for (let friendUsername of player2Document.friends) {
         const friendSockets = transientDataHandler.getPlayerSockets(friendUsername);
         for (let friendSocket of friendSockets) {
-          friendSocket.emit('friendIngame', matchDocument.player2);
+          friendSocket.emit('friendOffgame', matchDocument.player2);
           /*friendSocket.emit('deleteFriendMatchRequest', { // TODO serve?
             sender: player2,
             receiver: friendUsername,
@@ -399,7 +399,7 @@ router.put(`/:match_id`, auth, ensureNotFirstAccessModerator, async (req, res, n
     for (let friendUsername of player1Document.friends) {
       const friendSockets = transientDataHandler.getPlayerSockets(friendUsername);
       for (let friendSocket of friendSockets) {
-        friendSocket.emit('friendIngame', matchDocument.player1);
+        friendSocket.emit('friendOffgame', matchDocument.player1);
         /*friendSocket.emit('deleteFriendMatchRequest', { // TODO serve?
           sender: player2,
           receiver: friendUsername,
@@ -415,7 +415,7 @@ router.put(`/:match_id`, auth, ensureNotFirstAccessModerator, async (req, res, n
     for (let friendUsername of player2Document.friends) {
       const friendSockets = transientDataHandler.getPlayerSockets(friendUsername);
       for (let friendSocket of friendSockets) {
-        friendSocket.emit('friendIngame', matchDocument.player2);
+        friendSocket.emit('friendOffgame', matchDocument.player2);
         /*friendSocket.emit('deleteFriendMatchRequest', { // TODO serve?
           sender: player2,
           receiver: friendUsername,

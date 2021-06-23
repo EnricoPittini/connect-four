@@ -23,6 +23,8 @@ import {
 } from '../httpTypes/responses';
 import { TransientDataHandler } from '../TransientDataHandler';
 
+import {ensureNotFirstAccessModerator} from "../middlewares/ensureNotFirstAccessModerator";
+
 // Handler of the non-persistent data
 const transientDataHandler = TransientDataHandler.getInstance();
 
@@ -35,7 +37,7 @@ export default router;
  * Returns all the matches (both terminated and in progress)
  */
 //?live=<live>&username=<username>&skip=<skip>&limit=<limit>
-router.get(`/`, auth, async (req, res, next) => {
+router.get(`/`, auth,  ensureNotFirstAccessModerator, async (req, res, next) => {
 
   // Check the consistency of the query section
   if ((req.query.skip && typeof (req.query.skip) !== 'string') || (req.query.limit && typeof (req.query.limit) !== 'string')
@@ -163,7 +165,7 @@ router.get(`/`, auth, async (req, res, next) => {
 /**
  * Returns all the informations about a specific match
  */
-router.get(`/:match_id`, auth, (req, res, next) => {
+router.get(`/:match_id`, auth, ensureNotFirstAccessModerator, (req, res, next) => {
 
   const matchId = new mongoose.Types.ObjectId(req.params.match_id);
 
@@ -192,7 +194,7 @@ router.get(`/:match_id`, auth, (req, res, next) => {
 /**
  * The Client asks to add a move in the specified match
  */
-router.post(`/:match_id`, auth, async (req, res, next) => {
+router.post(`/:match_id`, auth, ensureNotFirstAccessModerator, async (req, res, next) => {
 
   // socketIO instance
   const io = getSocketIO();
@@ -289,7 +291,7 @@ router.post(`/:match_id`, auth, async (req, res, next) => {
 /**
  * The Client asks to end prematurely the specified match
  */
-router.put(`/:match_id`, auth, async (req, res, next) => {
+router.put(`/:match_id`, auth, ensureNotFirstAccessModerator, async (req, res, next) => {
 
   // socketIO instance
   const io = getSocketIO();
@@ -376,7 +378,7 @@ router.put(`/:match_id`, auth, async (req, res, next) => {
 /**
  * The Client asks to become an observer of the specified game
  */
-router.post('/:match_id/observers', auth, (req, res, next) =>{
+router.post('/:match_id/observers', auth, ensureNotFirstAccessModerator, (req, res, next) =>{
 
   const matchId = new mongoose.Types.ObjectId(req.params.match_id);
 
@@ -432,7 +434,7 @@ router.post('/:match_id/observers', auth, (req, res, next) =>{
 /**
  * The Client asks to not be anymore an observer of a match
  */
-router.delete('/:match_id/observers', auth, (req, res, next) =>{
+router.delete('/:match_id/observers', auth, ensureNotFirstAccessModerator, (req, res, next) =>{
 
   const matchId = new mongoose.Types.ObjectId(req.params.match_id);
 

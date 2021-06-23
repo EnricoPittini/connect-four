@@ -21,6 +21,8 @@ import {
   NotifyAvailabilityFriendRequestResponseBody,
 } from '../httpTypes/responses';
 
+import {ensureNotFirstAccessModerator} from "../middlewares/ensureNotFirstAccessModerator";
+
 const router = express.Router();
 export default router;
 
@@ -31,7 +33,7 @@ const transientDataHandler = TransientDataHandler.getInstance();
 /**
  * Returns all the friend requests of the Client
  */
-router.get(`/`, auth, (req, res, next) => {
+router.get(`/`, auth, ensureNotFirstAccessModerator, (req, res, next) => {
   const filter = {
     $or: [
       { from: req.user?.username },
@@ -57,7 +59,7 @@ router.get(`/`, auth, (req, res, next) => {
  * 
  * That player is specified in the HTTP request body. 
  */
-router.post(`/`, auth, async (req, res, next) => {
+router.post(`/`, auth, ensureNotFirstAccessModerator, async (req, res, next) => {
   try {
     // Check if the body is correct
     if (!isNotifyAvailabilityFriendRequestRequestBody(req.body)) {
@@ -190,7 +192,7 @@ router.post(`/`, auth, async (req, res, next) => {
  * 
  * That player is specified in the HTTP request body.
  */
-router.delete(`/`, auth, async (req, res, next) => {
+router.delete(`/`, auth, ensureNotFirstAccessModerator, async (req, res, next) => {
   try {
     // Check if the body is correct
     if (!isNotifyUnavailabilityFriendRequestRequestBody(req.body)) {

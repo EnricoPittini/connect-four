@@ -9,6 +9,8 @@ import { PlayerType } from '../models/Player';
 import chat = require('../models/Chat');
 import { NewChatParams } from '../models/Chat';
 
+import { ensureNotFirstAccessModerator } from './ensureNotFirstAccessModerator';
+
 
 /**
  * Registers to the specified Client socket the handlers about the friends chats managment. (e.g. the chats between
@@ -48,7 +50,7 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
       if (!fromPlayerDocument) {
         throw new Error('An invalid player sent a message, username: ' + fromUsername);
       }
-
+      ensureNotFirstAccessModerator(fromPlayerDocument);
       const fromPlayerType = fromPlayerDocument.type;
 
       // Check if the "from player" can send a message to the "to player"

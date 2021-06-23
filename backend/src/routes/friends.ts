@@ -21,12 +21,14 @@ export default router;
 // Handler of the non-persistent data
 const transientDataHandler = TransientDataHandler.getInstance();
 
+import {ensureNotFirstAccessModerator} from "../middlewares/ensureNotFirstAccessModerator";
+
 
 /**
  * Returns all the friends of the Client
  */
 //?skip=<skip>&limit=<limit>
-router.get(`/`, auth, (req, res, next) => {
+router.get(`/`, auth, ensureNotFirstAccessModerator, (req, res, next) => {
 
   // Parse skip and limit
   if ((req.query.skip && typeof (req.query.skip) !== 'string') || (req.query.limit && typeof (req.query.limit) !== 'string')) {
@@ -61,7 +63,7 @@ router.get(`/`, auth, (req, res, next) => {
 /**
  * The Client asks to delete a friend of him, with the specified username
  */
-router.delete(`/:username`, auth, (req, res, next) => {
+router.delete(`/:username`, auth, ensureNotFirstAccessModerator, (req, res, next) => {
 
   // Username of the Client
   const myUsername = req.user!.username;

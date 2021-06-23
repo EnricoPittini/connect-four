@@ -14,7 +14,6 @@ export interface Stats {
   secondsPlayed: number,
   moveCount: number,
   player: string,
-  // TODO campo matches che è la lista di id di partite che sono state già analizzate in queste statistiche
 }
 
 /**
@@ -69,7 +68,6 @@ const statsSchema = new mongoose.Schema<StatsDocument, StatsModel>({
  * @returns 
  */
 statsSchema.methods.refresh = function (match: MatchDocument): Promise<void> {
-  // TODO controllare che la partita non sia già stata analizzata
 
   if (match.status === MatchStatus.IN_PROGRESS) {
     return Promise.reject('The match is not terminated yet');

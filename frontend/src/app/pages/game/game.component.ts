@@ -46,7 +46,6 @@ export class GameComponent implements OnInit {
   }
 
   getBoard(): Match['board'] {
-    // TODO molto probabilmente la board arriva rovesciata
     return this.gameService.match?.board
            || Array(GameComponent.ROWS).fill(Array(GameComponent.COLS).fill(WhichPlayer.EMPTY));
   }

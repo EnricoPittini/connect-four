@@ -22,7 +22,6 @@ export class MatchChatComponent implements OnInit {
     // if (this.matchId) {
     //   console.log('initiating')
 
-    //   // TODO va bene ???
     //   // this.matchChatService.stop();
     //   this.matchChatService.initiate(this.matchId);
     // }

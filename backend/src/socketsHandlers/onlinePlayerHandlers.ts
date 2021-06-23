@@ -148,7 +148,7 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
 
         // Notify all the observers of the match
         const roomName = 'observersRoom:' + matchDocument._id.toString();
-        io.to(roomName).emit('match', matchDocument._id.toString()); // TODO : cosa succede se la room non esiste? (Non dovrebbe fare nulla)
+        io.to(roomName).emit('match', matchDocument._id.toString()); 
 
         // All the observers of the match have to leave the match room
         const observersSocketsId = io.sockets.adapter.rooms.get(roomName);

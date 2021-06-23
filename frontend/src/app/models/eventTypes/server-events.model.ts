@@ -71,13 +71,11 @@ export default interface ServerEvents {
   /**
    * The Server notifies the Clients (both sender and receiver) sockets about a friend match request deletion (both canceled and rejected)
    */
-  // TODO il tipo si può isolare, con nome SocketNotificationBetweenClients
   'deleteFriendMatchRequest': (message : {sender:string, receiver:string}) => void;
 
   /**
    * The Server notifies the Clients (both sender and receiver) sockets about a new friend match request
    */
-  // TODO il tipo si può isolare, con nome SocketNotificationBetweenClients
   'friendMatchRequest': (message : {sender:string, receiver:string})=> void;
 
   /**

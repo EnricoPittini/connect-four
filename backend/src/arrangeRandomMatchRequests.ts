@@ -66,10 +66,6 @@ export async function arrangeRandomMatchRequests(){
         const friendSockets = transientDataHandler.getPlayerSockets(friendUsername);
         for (let friendSocket of friendSockets) {
           friendSocket.emit('friendIngame', player1);
-          /*friendSocket.emit('deleteFriendMatchRequest', { // TODO serve?
-            sender: player1,
-            receiver: friendUsername,
-          });*/
         }
       }
 
@@ -82,10 +78,6 @@ export async function arrangeRandomMatchRequests(){
         const friendSockets = transientDataHandler.getPlayerSockets(friendUsername);
         for (let friendSocket of friendSockets) {
           friendSocket.emit('friendIngame', player2);
-          /*friendSocket.emit('deleteFriendMatchRequest', { // TODO serve?
-            sender: player2,
-            receiver: friendUsername,
-          });*/
         }
       }    
     }

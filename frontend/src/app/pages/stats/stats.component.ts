@@ -43,10 +43,8 @@ export class StatsComponent implements OnInit {
   isUser: boolean = false;
 
   /**
-   * Wrapps several flags that have to be changed dynamically.
-   * This object is used in order to detect the changes dynamically
-   *
-   * TODO provare a togliere
+   * Wrapps several flags that change dynamically..
+   * This object is used in order to help angular to detect the template changes dynamically
    */
   dynamicFlags: {
     areUserPlayerFriends: boolean,

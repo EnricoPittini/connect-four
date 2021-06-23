@@ -135,10 +135,6 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
         const friendSockets = transientDataHandler.getPlayerSockets(friendUsername);
         for (let friendSocket of friendSockets) {
           friendSocket.emit('friendIngame', fromUsername);
-          /*friendSocket.emit('deleteFriendMatchRequest', { // TODO serve?
-            sender: player1,
-            receiver: friendUsername,
-          });*/
         }
       }
 
@@ -151,10 +147,6 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
         const friendSockets = transientDataHandler.getPlayerSockets(friendUsername);
         for (let friendSocket of friendSockets) {
           friendSocket.emit('friendIngame', toUsername);
-          /*friendSocket.emit('deleteFriendMatchRequest', { // TODO serve?
-            sender: player2,
-            receiver: friendUsername,
-          });*/
         }
       }
 

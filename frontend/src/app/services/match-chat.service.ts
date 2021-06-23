@@ -22,12 +22,11 @@ import {
 } from '../models/httpTypes/responses.model';
 import { Match } from '../models/match.model';
 
-// TODO mettere queste interfacce in models?
+
 /**
  * Represents the match messages as seen by the Client (e.g. as seen by the user)
  */
 export interface ClientMatchMessage {
-  // TODO aggiungere flag sended ?
   from: string,
   text: string,
   datetime: Date,
@@ -165,7 +164,6 @@ export class MatchChatService {
     console.log("stopping !!!!!!!")
     this.matchId = null;
     this.messages = [];
-    // TODO stop the socket listening?
     this.socket.off('matchChat');
   }
 }

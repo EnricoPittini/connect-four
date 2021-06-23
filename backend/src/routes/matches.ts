@@ -33,7 +33,6 @@ const router = express.Router();
 export default router;
 
 
-// TODO eventualmente restituire solo lista id di matches e non tutti i dati
 /**
  * Returns all the matches (both terminated and in progress)
  */
@@ -280,10 +279,6 @@ router.post(`/:match_id`, auth, ensureNotFirstAccessModerator, async (req, res, 
         const friendSockets = transientDataHandler.getPlayerSockets(friendUsername);
         for (let friendSocket of friendSockets) {
           friendSocket.emit('friendOffgame', matchDocument.player1);
-          /*friendSocket.emit('deleteFriendMatchRequest', { // TODO serve?
-            sender: player2,
-            receiver: friendUsername,
-          });*/
         }
       }
 
@@ -296,10 +291,6 @@ router.post(`/:match_id`, auth, ensureNotFirstAccessModerator, async (req, res, 
         const friendSockets = transientDataHandler.getPlayerSockets(friendUsername);
         for (let friendSocket of friendSockets) {
           friendSocket.emit('friendOffgame', matchDocument.player2);
-          /*friendSocket.emit('deleteFriendMatchRequest', { // TODO serve?
-            sender: player2,
-            receiver: friendUsername,
-          });*/
         }
       }
     }
@@ -400,10 +391,6 @@ router.put(`/:match_id`, auth, ensureNotFirstAccessModerator, async (req, res, n
       const friendSockets = transientDataHandler.getPlayerSockets(friendUsername);
       for (let friendSocket of friendSockets) {
         friendSocket.emit('friendOffgame', matchDocument.player1);
-        /*friendSocket.emit('deleteFriendMatchRequest', { // TODO serve?
-          sender: player2,
-          receiver: friendUsername,
-        });*/
       }
     }
 
@@ -416,10 +403,6 @@ router.put(`/:match_id`, auth, ensureNotFirstAccessModerator, async (req, res, n
       const friendSockets = transientDataHandler.getPlayerSockets(friendUsername);
       for (let friendSocket of friendSockets) {
         friendSocket.emit('friendOffgame', matchDocument.player2);
-        /*friendSocket.emit('deleteFriendMatchRequest', { // TODO serve?
-          sender: player2,
-          receiver: friendUsername,
-        });*/
       }
     }
 

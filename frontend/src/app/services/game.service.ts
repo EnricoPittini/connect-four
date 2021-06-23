@@ -74,7 +74,6 @@ export class GameService {
     // Connect to the server
     this.socket = getSocket();
 
-    // TODO chiedere a backend se sono in game
     this.matchId = null;
     this.match = null;
     this.initializeMatch();
@@ -98,8 +97,6 @@ export class GameService {
     if (column < 0 || column >= this.match.board[0].length) {
       return;
     }
-
-    // TODO valutare se fare anche il controllo sul turno
 
     const body: AddMoveRequestBody = {
       column: column,
@@ -175,8 +172,6 @@ export class GameService {
 
   private initializeMatch(): void {
     // this.playerService.getPlayer(this.auth.getUsername())
-    // TODO come inizializzo i campi match e matchId ???
-    // TODO forse per semplicità aspetto il primo evento 'match'
   }
 
   private listenForMatchUpdate(): void {
@@ -203,13 +198,6 @@ export class GameService {
     });
   }
 
-  // TODO come gestire invece gli osservatori ???
-
-
-  ///////////////////////////////////////////////
-  // TODO capire se funziona
-
-  // TODO eventualmente impedire agli osservatori di inviare mosse
 
   startObservingMatch(matchId: string): void {
     if (this.isObserving()) {
@@ -275,11 +263,6 @@ export class GameService {
   }
 
 
-
-  // TODO forse metodo exitMatch / resetMatch per togliere matchId / match
-
-
-  // TODO spostare in altro service?
 
   getMatches(live: boolean = true, username: string | null = null, skip: number | null = null,
              limit: number | null = null)

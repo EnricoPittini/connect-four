@@ -74,6 +74,3 @@ router.get(`/:username`, auth, ensureNotFirstAccessModerator, (req, res, next) =
     return next(errorBody);
   });
 });
-
-
-// TODO valutare POST /:username

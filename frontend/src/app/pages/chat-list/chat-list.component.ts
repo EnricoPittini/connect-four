@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { ClientChat, FriendChatService } from 'src/app/services/friend-chat.service';
 
-// TODO da capire se va bene e forse metterla in un file a parte
+
 interface ChatInfo {
   player: string,
   hasNewMessages: boolean,

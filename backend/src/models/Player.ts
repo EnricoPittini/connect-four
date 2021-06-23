@@ -68,7 +68,6 @@ export interface PlayerDocument extends Player, mongoose.Document {
   validatePassword: (pwd: string) => boolean,
   confirmModerator: (name: string, surname: string, avatar: string, pwd: string) => void,
 
-  // TODO valutare utilizzo eccezioni
   addFriend: (friendUsername: string) => boolean,
   removeFriend: (friendUsername: string) => boolean,
   hasFriend: (friendUsername: string) => boolean,

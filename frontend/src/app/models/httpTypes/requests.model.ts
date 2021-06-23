@@ -98,6 +98,6 @@ export interface AddMoveRequestBody extends RequestBody {
 export function isAddMoveRequestBody(arg: any): arg is AddMoveRequestBody {
   return arg
     && arg.column !== undefined
-    && typeof (arg.column) === 'number'; // TODO verificare se è numero o stringa
+    && typeof (arg.column) === 'number'; 
 }
 

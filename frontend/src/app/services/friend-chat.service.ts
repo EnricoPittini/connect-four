@@ -21,7 +21,7 @@ import {
   GetChatResponseBody,
 } from '../models/httpTypes/responses.model';
 
-// TODO mettere queste interfacce in models?
+
 /**
  * Represents the messages as seen by the Client (e.g. as seen by the user)
  */
@@ -86,7 +86,6 @@ export class FriendChatService {
   /**
    * The username of the other player of the current chat (if any)
    */
-  // TODO se si deciderà di mettere evento eliminazione chat, fare aggiornamento di questo campo
   currentChatOtherPlayerUsername: string | null = null;
 
   /**
@@ -151,7 +150,6 @@ export class FriendChatService {
     }
     const clientChat : ClientChat = {
       otherPlayerUsername: otherPlayerUsername,
-      // TODO remove
       messages: [],
       newMessages: false,
     };

@@ -53,7 +53,7 @@ const matchSchema = new mongoose.Schema<MatchDocument, MatchModel>({
   },
   datetimeEnd: {
     type: mongoose.SchemaTypes.Date,
-    required: false, // TODO bisogna mettere a false essendo che può essere null?
+    required: false, 
   },
   board: {
     type: [[mongoose.SchemaTypes.String]],
@@ -79,7 +79,6 @@ const matchSchema = new mongoose.Schema<MatchDocument, MatchModel>({
  * @param playerUsername
  * @returns
  */
-// TODO eventualmente trasformarla in metodo o esportarla
 function getPlayerRole(match: Match, playerUsername: string): WhichPlayer {
   if (playerUsername === match.player1) {
     return WhichPlayer.PLAYER_1;
@@ -350,7 +349,7 @@ matchSchema.methods.countMoves = function (playerUsername: string): number {
   const role = getPlayerRole(this, playerUsername);
 
   if (role === WhichPlayer.EMPTY) {   // The player username is not one of the match players
-    return -1;        // TODO valutare se si può fare di meglio
+    return -1;        
   }
 
   let count = 0;

@@ -156,8 +156,20 @@ app.get(`/v${version}`, (_, res) => {
     statusCode: 200,
     apiVersion: version,
     endpoints: [
-      // TODO
       '/login',
+      '/players',
+      /*'/players/:username',
+      '/players/:username/match_request',
+      '/players/:username/stats',
+      '/players/:username/avatar',*/
+      '/friends',
+      //'/friends/:username',
+      '/friend_requests',
+      '/chats',
+     // '/chats/:username',
+      '/matches',
+     /* '/matches/:match_id',
+      '/matches/:match_id/observers',*/
     ]
   };
   res.status(200).json(body);

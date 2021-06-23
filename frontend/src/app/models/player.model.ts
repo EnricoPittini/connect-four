@@ -19,7 +19,6 @@ export interface Player extends ClientPlayer {
   stats: string,
 }
 
-// TODO capire se servono
 export interface NewStandardPlayerParams extends Pick<Player, 'username' | 'name' | 'surname' | 'avatar'> {
   password: string,
 }

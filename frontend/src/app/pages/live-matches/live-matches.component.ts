@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { GameService } from 'src/app/services/game.service';
 
 
-// TODO da capire se va bene e forse metterla in un file a parte
 interface LiveMatchInfo {
   player1: string,
   player2: string,

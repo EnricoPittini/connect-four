@@ -77,7 +77,7 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
           playerA : fromUsername, // Convenction : playerA is the one that started the chat
           playerB : toUsername
         }
-        return chat.newChat(data); // TODO : salvare qua il documento o no?
+        return chat.newChat(data); 
       }
       return chatDocument;
     })

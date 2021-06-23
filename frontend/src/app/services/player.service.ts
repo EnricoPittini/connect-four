@@ -72,9 +72,6 @@ export class PlayerService {
     console.info('Friend service instantiated');
   }
 
-  // TODO forse altri metodi
-  // TODO parametri potrebbero non essere giusti o mancanti
-
   /**
    * Returns the general informations about the specified player (e.g. non stats data)
    * @param username

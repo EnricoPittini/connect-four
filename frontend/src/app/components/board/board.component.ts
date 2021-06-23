@@ -25,7 +25,6 @@ export class BoardComponent implements OnInit {
     // Make sure that `value` has been provided
     this.assertInputsProvided();
 
-    // TODO in alternativa posso settare qui la board ad una board vuota
     // this.boardMatrix = Array(6).fill(Array(7).fill(this.EMPTY));
   }
 

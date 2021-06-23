@@ -17,7 +17,6 @@ export interface Message {
 /**
  * Represents the messages documents (e.g. the messages stored in the database)
  */
-// TODO ricontrollare tipi per sub documents
 const messageSchema = new mongoose.Schema({
   sender: {
     type: mongoose.SchemaTypes.String,
@@ -110,7 +109,6 @@ chatSchema.methods.addMessage = function (senderUsername: string, text: string):
 
   this.messages.push(message);
 
-  // TODO attenzione al fatto che ogni volta che è aggiunto un messaggio è messo che il destinatario ha nuovi messaggi
   if (sender === SenderPlayer.PLAYER_A) {
     this.playerBHasNewMessages = true;
   }

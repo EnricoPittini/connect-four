@@ -17,9 +17,6 @@ import { FriendAction, FriendActionType } from '../friend-card/friend-card.compo
 })
 export class FriendsSideBarComponent implements OnInit {
 
-
-
-  // TODO probabile FriendService
   constructor(
     private router: Router,
     public friendService: FriendService,

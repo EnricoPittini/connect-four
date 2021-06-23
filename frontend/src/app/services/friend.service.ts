@@ -20,16 +20,13 @@ import {
 } from '../models/httpTypes/responses.model';
 
 
-// TODO da capire se va bene e forse metterla in un file a parte
 export interface FriendInfo {
   username: string,
   online: boolean,
   ingame: boolean,
   matchRequestSent: boolean,
   matchRequestReceived: boolean,
-  // TODO forse unreadMessages: boolean,    // non serve in sidebar, ma in chat
 }
-// TODO da capire se fare gestione errori
 
 
 /**
@@ -145,7 +142,6 @@ export class FriendService {
     return !!this.friends.find( friend => friend.username===username);
   }
 
-  // TODO questi 2 metodi potrebbero essere spostati insieme alle richieste match random (forse)
   /**
    * Notifies the availability of the authenticated user to play a match with
    * the user with the given username.
@@ -386,13 +382,11 @@ export class FriendService {
    * @param friendUsername - The username of the friend player
    * @returns An Observable that yields the information about the given friend.
    */
-  // private getFriendInfo(friendUsername: string): Observable<GetPlayerResponseBody> {
-  //   // TODO posso usare getPlayer di PlayerService
+  // private getFriendInfo(friendUsername: string): Observable<GetPlayerResponseBody> 
   //   return this.http.get<GetPlayerResponseBody>(`${FriendService.BASE_URL}/players/${friendUsername}`, this.createHttpOptions());
   // }
 
   private getFriendInfo = (friendUsername: string): Observable<GetPlayerResponseBody> => {
-    // TODO posso usare getPlayer di PlayerService
     return this.http.get<GetPlayerResponseBody>(`${FriendService.BASE_URL}/players/${friendUsername}`, this.createHttpOptions());
   }
 

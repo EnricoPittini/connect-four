@@ -16,7 +16,6 @@ import { StandardPlayerRegistrationRequestBody } from 'src/app/models/httpTypes/
 import { Router } from '@angular/router';
 
 
-// TODO va bene definita qui internamente ?
 interface TokenData {
   username: string,
   name: string,
@@ -298,7 +297,7 @@ export class AuthService {
         }
         else {
           // `result` was not passed, so return an Observable that yields the HTTP response body
-          return of(error.error);   // TODO verificare che sia realmente il response body
+          return of(error.error);   
         }
       }
     }

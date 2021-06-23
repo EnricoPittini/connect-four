@@ -21,20 +21,21 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
   const transientDataHandler = TransientDataHandler.getInstance();
 
   // Handler of the friendMatchRequest event
-  socket.on('friendMatchRequest', (toUsername) => {
+  socket.on('friendMatchRequest', async (toUsername) => {
     console.info('Socket event: "friendMatchRequest"');
 
-    // Player that sent the request
-    const fromUsername = transientDataHandler.getSocketPlayer(socket);
-    if(!fromUsername){
-      console.warn('An invalid player sent a message');
-      return;
-    }
+    try{
+      // Player that sent the request
+      const fromUsername = transientDataHandler.getSocketPlayer(socket);
+      if(!fromUsername){
+        console.warn('An invalid player sent a message');
+        return;
+      }
 
-    // Search the "from player"
-    player.getModel().findOne({ username: fromUsername }).then(fromPlayerDocument => {
+      // Search the "from player"
+      const fromPlayerDocument = await player.getModel().findOne({ username: fromUsername }).exec();
       if (!fromPlayerDocument) {
-        throw new Error('An invalid player sent a message, username: ' + fromUsername);
+        throw new Error('An invalid player sent a friend match request, username: ' + fromUsername);
       }
 
       ensureNotFirstAccessModerator(fromPlayerDocument);
@@ -42,13 +43,13 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
       // With this condition we check not only that the "to player" is a friend of "from player", but also that "to player" is a 
       // valid player 
       if(!fromPlayerDocument.hasFriend(toUsername)){
-        throw new Error('A player sent a match request to another player that isn\'t his friend; fromUsername: ' 
-                         + fromUsername + ' ,toUsername: ' + toUsername);
+        throw new Error('A player sent a friend match request to another player that isn\'t his friend; fromUsername: ' 
+                          + fromUsername + ' ,toUsername: ' + toUsername);
       }
 
       if(transientDataHandler.hasFriendMatchRequest(fromUsername, toUsername)){        
         throw new Error('A match request sent from this "from player" to this "to player" alredy exists; fromUsername: '
-                         + fromUsername + ' ,toUsername: ' + toUsername);
+                          + fromUsername + ' ,toUsername: ' + toUsername);
       }
 
       if(!transientDataHandler.isOnline(fromUsername) || !transientDataHandler.isOnline(toUsername)){
@@ -101,38 +102,68 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
         player1: player1,
         player2: player2
       };
-      return match.newMatch( data ).save();
-    })
-    .then( matchDocument => {      
-      if(matchDocument){ // The new match is created 
-
-        // Mark in game both the players
-        transientDataHandler.markInGame(fromUsername);
-        transientDataHandler.markInGame(toUsername);
-
-        // Notify the "from player"
-        const fromPlayerSockets = transientDataHandler.getPlayerSockets(fromUsername);
-        for (let fromPlayerSocket of fromPlayerSockets) {
-          fromPlayerSocket.emit('newMatch', matchDocument._id.toString());
-        }
-
-        // Notify the "to player"
-        const toPlayerSockets = transientDataHandler.getPlayerSockets(toUsername);
-        for (let toPlayerSocket of toPlayerSockets) {
-          toPlayerSocket.emit('newMatch', matchDocument._id.toString());
-        }
-
-        // Deleting all the match requests for both player
-        transientDataHandler.deletePlayerFriendMatchRequests(fromUsername);
-        transientDataHandler.deletePlayerFriendMatchRequests(toUsername);
-
-        return;
+      const matchDocument = await match.newMatch( data ).save();
+      
+      if(!matchDocument){
+        throw new Error('Something wrong happened during the new match creation');
       }
-    })
-    .catch(err =>{
+        
+      // The new match is created 
+
+      // Mark in game both the players
+      transientDataHandler.markInGame(fromUsername);
+      transientDataHandler.markInGame(toUsername);
+
+      // Notify the "from player"
+      const fromPlayerSockets = transientDataHandler.getPlayerSockets(fromUsername);
+      for (let fromPlayerSocket of fromPlayerSockets) {
+        fromPlayerSocket.emit('newMatch', matchDocument._id.toString());
+      }
+
+      // Notify the "to player"
+      const toPlayerSockets = transientDataHandler.getPlayerSockets(toUsername);
+      for (let toPlayerSocket of toPlayerSockets) {
+        toPlayerSocket.emit('newMatch', matchDocument._id.toString());
+      }
+
+      // Deleting all the (potential) match requests for both player
+      transientDataHandler.deletePlayerFriendMatchRequests(fromUsername);
+      transientDataHandler.deletePlayerFriendMatchRequests(toUsername);
+        
+      // Notify "from player" friends (all the sockets) that his friend is now in game 
+      for (let friendUsername of fromPlayerDocument.friends) {
+        const friendSockets = transientDataHandler.getPlayerSockets(friendUsername);
+        for (let friendSocket of friendSockets) {
+          friendSocket.emit('friendIngame', fromUsername);
+          /*friendSocket.emit('deleteFriendMatchRequest', { // TODO serve?
+            sender: player1,
+            receiver: friendUsername,
+          });*/
+        }
+      }
+
+      // Notify "to player" friends (all the sockets) that his friend is now in game
+      const toPlayerDocument = await player.getModel().findOne({ username: toUsername }, { friends: 1 }).exec();
+      if (!toPlayerDocument) {
+        throw new Error('A player sent a friend match request to an invalid player, other player username: ' + toUsername);
+      } 
+      for (let friendUsername of toPlayerDocument.friends) {
+        const friendSockets = transientDataHandler.getPlayerSockets(friendUsername);
+        for (let friendSocket of friendSockets) {
+          friendSocket.emit('friendIngame', toUsername);
+          /*friendSocket.emit('deleteFriendMatchRequest', { // TODO serve?
+            sender: player2,
+            receiver: friendUsername,
+          });*/
+        }
+      }
+
+      return;
+    }
+    catch(err){
       console.warn("An error occoured: " + err);
       return;
-    });  
+    }
   });
 
   // Handler of the deleteFriendMatchRequest event

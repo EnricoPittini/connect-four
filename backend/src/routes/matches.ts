@@ -8,6 +8,7 @@ import match = require('../models/Match');
 import { MatchStatus } from '../models/Match';
 import stats = require('../models/Stats');
 import { StatsDocument } from '../models/Stats';
+import player = require('../models/Player');
 
 import { getSocketIO } from '../initializeSocketIO';
 
@@ -269,6 +270,38 @@ router.post(`/:match_id`, auth, ensureNotFirstAccessModerator, async (req, res, 
       await statsDocumentPlayer2.refresh(matchDocument);
       await statsDocumentPlayer1.save();
       await statsDocumentPlayer2.save();
+
+      // Notify player1 friends (all the sockets) that his friend is now in game
+      const player1Document = await player.getModel().findOne({ username: matchDocument.player1 }, { friends: 1 }).exec();
+      if (!player1Document) {
+        throw new Error('The player1 of the match is not a valid player, username: ' + matchDocument.player1);
+      } 
+      for (let friendUsername of player1Document.friends) {
+        const friendSockets = transientDataHandler.getPlayerSockets(friendUsername);
+        for (let friendSocket of friendSockets) {
+          friendSocket.emit('friendIngame', matchDocument.player1);
+          /*friendSocket.emit('deleteFriendMatchRequest', { // TODO serve?
+            sender: player2,
+            receiver: friendUsername,
+          });*/
+        }
+      }
+
+      // Notify player2 friends (all the sockets) that his friend is now in game
+      const player2Document = await player.getModel().findOne({ username: matchDocument.player2 }, { friends: 1 }).exec();
+      if (!player2Document) {
+        throw new Error('The player1 of the match is not a valid player, username: ' + matchDocument.player2);
+      } 
+      for (let friendUsername of player2Document.friends) {
+        const friendSockets = transientDataHandler.getPlayerSockets(friendUsername);
+        for (let friendSocket of friendSockets) {
+          friendSocket.emit('friendIngame', matchDocument.player2);
+          /*friendSocket.emit('deleteFriendMatchRequest', { // TODO serve?
+            sender: player2,
+            receiver: friendUsername,
+          });*/
+        }
+      }
     }
 
     const body: SuccessResponseBody = { error: false, statusCode: 200 };
@@ -357,6 +390,38 @@ router.put(`/:match_id`, auth, ensureNotFirstAccessModerator, async (req, res, n
     await statsDocumentPlayer2.refresh(matchDocument);
     await statsDocumentPlayer1.save();
     await statsDocumentPlayer2.save();
+
+    // Notify player1 friends (all the sockets) that his friend is now in game
+    const player1Document = await player.getModel().findOne({ username: matchDocument.player1 }, { friends: 1 }).exec();
+    if (!player1Document) {
+      throw new Error('The player1 of the match is not a valid player, username: ' + matchDocument.player1);
+    } 
+    for (let friendUsername of player1Document.friends) {
+      const friendSockets = transientDataHandler.getPlayerSockets(friendUsername);
+      for (let friendSocket of friendSockets) {
+        friendSocket.emit('friendIngame', matchDocument.player1);
+        /*friendSocket.emit('deleteFriendMatchRequest', { // TODO serve?
+          sender: player2,
+          receiver: friendUsername,
+        });*/
+      }
+    }
+
+    // Notify player2 friends (all the sockets) that his friend is now in game
+    const player2Document = await player.getModel().findOne({ username: matchDocument.player2 }, { friends: 1 }).exec();
+    if (!player2Document) {
+      throw new Error('The player1 of the match is not a valid player, username: ' + matchDocument.player2);
+    } 
+    for (let friendUsername of player2Document.friends) {
+      const friendSockets = transientDataHandler.getPlayerSockets(friendUsername);
+      for (let friendSocket of friendSockets) {
+        friendSocket.emit('friendIngame', matchDocument.player2);
+        /*friendSocket.emit('deleteFriendMatchRequest', { // TODO serve?
+          sender: player2,
+          receiver: friendUsername,
+        });*/
+      }
+    }
 
     const body: SuccessResponseBody = { error: false, statusCode: 200 };
     return res.status(200).json(body);

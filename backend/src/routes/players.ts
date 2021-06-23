@@ -52,20 +52,6 @@ export default router;
 const transientDataHandler = TransientDataHandler.getInstance();
 
 
-// TODO sportare in cartella middlewares
-/*function ensureNotFirstAccessModerator1(user: Express.User | undefined, next: express.NextFunction) {
-  if (user!.type === PlayerType.MODERATOR_FIRST_ACCESS) {
-    console.warn('A first access moderator tried to perform an unauthorized operation, user: ' + JSON.stringify(user, null, 2));
-    const errorBody: ErrorResponseBody = {
-      error: true,
-      statusCode: 403,
-      errorMessage: 'You must confirm your moderator profile first'
-    };
-    next(errorBody);
-  }
-}*/
-
-
 /**
  * Creates a new player (either standard or moderator), given the data in the body of the HTTP request.
  * In addition, returns the JWT token of the new player.

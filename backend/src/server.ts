@@ -24,6 +24,8 @@ if (!process.env.npm_package_version) {
 }
 
 import http = require('http');                    // HTTP module
+import fs = require('fs');
+import path = require("path");
 import mongoose = require('mongoose');
 import express = require('express');
 import passport = require('passport');            // authentication middleware for Express
@@ -42,6 +44,7 @@ import matchesRouter from './routes/matches';
 
 import player = require('./models/Player');
 import { PlayerType } from './models/Player';
+import avatar = require('./models/Avatar');
 
 import { TransientDataHandler } from "./TransientDataHandler";
 
@@ -184,7 +187,6 @@ app.get(`/v${version}/login`, passport.authenticate('basic', { session: false })
     name: req.user.name,
     surname: req.user.surname,
     type: req.user.type,
-    // TODO avatar?
   };
 
   console.info('Login granted. Generating token');
@@ -252,6 +254,19 @@ mongoose.connect(`mongodb://${DB_HOST}:${DB_PORT}/${DB_NAME}`, {
 .then(() => {
   console.info('Connected to MongoDB');
 
+  return avatar.getModel().countDocuments();
+})
+.then(avatarDocumentCounts => {
+  if (avatarDocumentCounts === 0) {
+    console.info('Creating default avatar');
+    const file = fs.readFileSync(path.resolve(__dirname, '../assets/blank-avatar.png'));
+    return avatar.newAvatar({ image: file }).save();
+  }
+  else {
+    console.info('Default avatar already exists');
+  }
+})
+.then(() => {
   // Search the main moderator
   return player.getModel().findOne({ username: MAIN_MODERATOR_USERNAME });
 })
@@ -270,7 +285,7 @@ mongoose.connect(`mongodb://${DB_HOST}:${DB_PORT}/${DB_NAME}`, {
 })
 .then((moderatorDocument) => {
   if (moderatorDocument) { // Confirm the main moderator profile just created
-    moderatorDocument.confirmModerator('John', 'Smith', 'TODO', MAIN_MODERATOR_PASSWORD);
+    moderatorDocument.confirmModerator('John', 'Smith', MAIN_MODERATOR_PASSWORD);
     return moderatorDocument.save();
   }
 })

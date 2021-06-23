@@ -3,9 +3,9 @@
 import express from 'express';
 import jsonwebtoken = require('jsonwebtoken');    // JWT generation
 
-const multer = require("multer");
-const path = require("path");
-const fs = require("fs");
+import multer = require('multer');
+// const path = require("path");
+// const fs = require("fs");
 
 import auth from '../middlewares/auth'
 import player = require('../models/Player');
@@ -16,6 +16,8 @@ import friendRequest = require('../models/FriendRequest');
 import match = require('../models/Match');
 import { MatchStatus , MatchDocument } from '../models/Match';
 import { FriendMatchRequest } from '../models/FriendMatchRequest';
+import avatar = require('../models/Avatar');
+import { NewAvatarParams } from '../models/Avatar';
 
 import { TransientDataHandler } from "../TransientDataHandler";
 
@@ -87,7 +89,6 @@ router.post(`/`, (req, res, next) => {
         name: newPlayer.name,
         surname: newPlayer.surname,
         type: newPlayer.type,
-        // TODO avatar?
       };
       console.info('New standard player correctly created, with username: ' + newPlayer.username);
       const tokenSigned = jsonwebtoken.sign(tokenData, process.env.JWT_SECRET as string);
@@ -235,7 +236,7 @@ router.put(`/:username`, auth, (req, res, next) => {
     }
 
     // Confirm the first access moderator profile
-    moderator.confirmModerator(req.body.name, req.body.surname, req.body.avatar, req.body.password);
+    moderator.confirmModerator(req.body.name, req.body.surname, req.body.password);
     return moderator.save();
   })
   .then(moderator => {
@@ -245,7 +246,6 @@ router.put(`/:username`, auth, (req, res, next) => {
       name: moderator!.name,
       surname: moderator!.surname,
       type: moderator!.type,
-      // TODO avatar?
     };
 
     // Create the JWT.
@@ -273,7 +273,6 @@ router.get(`/:username`, auth, ensureNotFirstAccessModerator, (req, res, next) =
     username: 1,
     name: 1,
     surname: 1,
-    avatar: 1, // TODO Se è URL
     type: 1,
   };
 
@@ -285,11 +284,10 @@ router.get(`/:username`, auth, ensureNotFirstAccessModerator, (req, res, next) =
     }
 
     // Add the information about online and ingame
-    const player: ClientPlayer & {online: boolean, ingame: boolean} = {
+    const player: ClientPlayer & { online: boolean, ingame: boolean } = {
       username: document.username,
       name: document.name,
       surname: document.surname,
-      avatar: document.avatar,
       type: document.type,
       online: transientDataHandler.isOnline(req.params.username),
       ingame: transientDataHandler.isInGame(req.params.username),
@@ -586,29 +584,97 @@ router.get(`/:username/stats`, auth, ensureNotFirstAccessModerator, (req, res, n
 });
 
 
+var storage = multer.memoryStorage()
+var upload = multer({ storage: storage })
 
-const upload = multer({
-  dest: "/temp"
-  // you might also want to set some limits: https://github.com/expressjs/multer#limits
+
+router.post(`/:username/avatar`, auth, ensureNotFirstAccessModerator, upload.single("file"), async (req, res, next) => {
+  if (req.user?.username !== req.params.username) {
+    console.warn('A player is requesting to upload the avatar of another player');
+    const errorBody: ErrorResponseBody = {
+      error: true,
+      errorMessage: 'You cannot change the avatar of another player',
+      statusCode: 403,
+    };
+    return next(errorBody);
+  }
+
+  if(!req.file){
+    console.warn('File missing');
+    const errorBody: ErrorResponseBody = {
+      error: true,
+      errorMessage: 'Missing file',
+      statusCode: 400,
+    };
+    return next(errorBody);
+  }
+
+  try {
+    // Create the avater document
+    const newAvatar: NewAvatarParams = {
+      image: req.file.buffer,
+    }
+    const avatarDocument = avatar.newAvatar(newAvatar);
+    await avatarDocument.save();
+
+    // Add the avatar to the Player
+    const playerDocument = await player.getModel().findOne({ username: req.user?.username }).exec();
+    if (!playerDocument) {
+      console.warn('An invalid player uploaded his avatar');
+      const errorBody: ErrorResponseBody = {
+        error: true,
+        errorMessage: 'Invalid player',
+        statusCode: 404,
+      };
+      return next(errorBody);
+    }
+    playerDocument.avatar = avatarDocument._id.toString();
+    await playerDocument.save();
+
+    // Send the success response
+    const body: SuccessResponseBody = {
+      error: false,
+      statusCode: 200,
+    };
+    return res.status(200).json(body);
+  }
+  catch (err) {
+    console.warn('File too large');
+    const errorBody: ErrorResponseBody = {
+      error: true,
+      errorMessage: 'File too large',
+      statusCode: 400,
+    };
+    return next(errorBody);
+  }
 });
 
-
-router.post(`/:username/avatar`, upload.single("file" /* name attribute of <file> element in your form */),
-  (req, res, next) => {
-    console.log('Uploag file');
-    console.log(JSON.stringify(req.file));
-    if(!req.file){
-      // TODO errore
-      return next({});
-    }
-
-    const tempPath = req.file.path;
-    const targetPath = path.join(__dirname, "./uploads/image.png");
-
-    if(req.headers['content-type']!=="image/jpg"){
-      // ERRORE
-    }
-
-    
+router.get(`/:username/avatar`, async (req, res, next) => {
+  const playerDocument = await player.getModel().findOne({ username: req.params.username }).exec();
+  if (!playerDocument) {
+    // TODO capire se crea problemi restituire un errore in questa particolare route
+    console.warn('A client asked the avatar of a non existing player');
+    const errorBody: ErrorResponseBody = {
+      error: true,
+      errorMessage: 'The player does not exist',
+      statusCode: 404,
+    };
+    return next(errorBody);
   }
-);
+
+  console.log(playerDocument.avatar);
+
+  const avatarDocument = await avatar.getModel().findOne({ _id: playerDocument.avatar });
+  if (!avatarDocument) {
+    // TODO capire se crea problemi restituire un errore in questa particolare route
+    console.error('The avatar of the player was not found');
+    const errorBody: ErrorResponseBody = {
+      error: true,
+      errorMessage: 'Internal Server error',
+      statusCode: 500,
+    };
+    return next(errorBody);
+  }
+
+  return res.status(200).send(avatarDocument.image);
+});

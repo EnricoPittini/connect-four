@@ -14,7 +14,9 @@
   <!-- Link to live matches page -->
   <a [routerLink]="['/matches']">Live matches</a> |
   <!-- Link to search player page -->
-  <a [routerLink]="['/searchPlayer']">Search player</a>
+  <a [routerLink]="['/searchPlayer']">Search player</a> |
+  <!-- Link to upload avatar page -->
+  <a [routerLink]="['/upload_avatar']">Upload avatar</a>
 
   <!-- Link to search player page -->
   <div *ngIf="auth.getPlayerType() === 'MODERATOR'">

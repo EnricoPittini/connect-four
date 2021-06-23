@@ -1,0 +1,17 @@
+
+<!-- Side bar -->
+<app-friends-side-bar></app-friends-side-bar>
+
+<!-- Page content -->
+<div class="main">
+  <!-- Nav bar -->
+  <app-nav></app-nav>
+
+  <h1>Upload avatar</h1>
+
+  <form method="post" enctype="multipart/form-data" [action]="'/v0.0.1/players/'+auth.getUsername()+'/avatar'">
+    <input type="file" name="file">
+    <input type="submit" value="Submit">
+  </form>
+
+</div>

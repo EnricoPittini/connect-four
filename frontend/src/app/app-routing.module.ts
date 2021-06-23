@@ -15,6 +15,7 @@ import { LoginComponent } from './pages/login/login.component';
 import { SearchPlayerComponent } from './pages/search-player/search-player.component';
 import { SignUpComponent } from './pages/sign-up/sign-up.component';
 import { StatsComponent } from './pages/stats/stats.component';
+import { UploadAvatarComponent } from './pages/upload-avatar/upload-avatar.component';
 
 
 const routes: Routes = [
@@ -105,6 +106,14 @@ const routes: Routes = [
     canActivate: [AuthGuard, RoleGuard],
     data: {
       expectedRoles: [PlayerType.MODERATOR_FIRST_ACCESS],
+    },
+  },
+  {
+    path: 'upload_avatar',
+    component: UploadAvatarComponent,
+    canActivate: [AuthGuard, RoleGuard],
+    data: {
+      expectedRoles: [PlayerType.STANDARD_PLAYER, PlayerType.MODERATOR],
     },
   },
 

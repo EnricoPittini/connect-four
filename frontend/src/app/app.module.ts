@@ -28,6 +28,7 @@ import { FriendRequestComponent } from './pages/friend-request/friend-request.co
 import { FriendRequestCardComponent } from './components/friend-request-card/friend-request-card.component';
 import { CreateModeratorComponent } from './pages/create-moderator/create-moderator.component';
 import { ConfirmModeratorComponent } from './pages/confirm-moderator/confirm-moderator.component';
+import { UploadAvatarComponent } from './pages/upload-avatar/upload-avatar.component';
 
 @NgModule({
   declarations: [
@@ -54,6 +55,7 @@ import { ConfirmModeratorComponent } from './pages/confirm-moderator/confirm-mod
     FriendRequestCardComponent,
     CreateModeratorComponent,
     ConfirmModeratorComponent,
+    UploadAvatarComponent,
   ],
   imports: [
     BrowserModule,

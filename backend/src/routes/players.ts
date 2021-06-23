@@ -3,6 +3,10 @@
 import express from 'express';
 import jsonwebtoken = require('jsonwebtoken');    // JWT generation
 
+const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
+
 import auth from '../middlewares/auth'
 import player = require('../models/Player');
 import { PlayerType,ClientPlayer } from '../models/Player';
@@ -580,3 +584,31 @@ router.get(`/:username/stats`, auth, ensureNotFirstAccessModerator, (req, res, n
     return next(errorBody);
   });
 });
+
+
+
+const upload = multer({
+  dest: "/temp"
+  // you might also want to set some limits: https://github.com/expressjs/multer#limits
+});
+
+
+router.post(`/:username/avatar`, upload.single("file" /* name attribute of <file> element in your form */),
+  (req, res, next) => {
+    console.log('Uploag file');
+    console.log(JSON.stringify(req.file));
+    if(!req.file){
+      // TODO errore
+      return next({});
+    }
+
+    const tempPath = req.file.path;
+    const targetPath = path.join(__dirname, "./uploads/image.png");
+
+    if(req.headers['content-type']!=="image/jpg"){
+      // ERRORE
+    }
+
+    
+  }
+);

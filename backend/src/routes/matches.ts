@@ -140,14 +140,12 @@ router.get(`/`, auth,  ensureNotFirstAccessModerator, async (req, res, next) => 
       // Array that contains, for each match, the associated rating.
       const matchRatings: number[] = matchPlayersRatings.map(matchRatings => (matchRatings[0] + matchRatings[1]) / 2);
 
-      console.log('matchDocuments ' + matchDocuments);
       // Matches sorted by rating
       const sortedMatchDocuments = matchDocuments
         .map((matchDocument, index) => ({ rating: matchRatings[index], document: matchDocument }))
         .sort((a, b) => b.rating - a.rating)
         .map(matchObject => matchObject.document);
 
-      console.log('sortedMatchDocuments : ' + sortedMatchDocuments);
       const filteredMatchDocuments = sortedMatchDocuments.slice(skip, skip+limit);
       const body: GetMatchesResponseBody = { error: false, statusCode: 200, matches: filteredMatchDocuments as any };
       return res.status(200).json(body);

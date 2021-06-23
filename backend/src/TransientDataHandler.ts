@@ -427,5 +427,8 @@ const MAX_WAITING_MILLISECONDS = 1500;
     }
   }
 
+  /*console.log('randomMatchRequests : ' + JSON.stringify(randomMatchRequests,null,2));
+  console.log('randomMatchesArrangements : ' + JSON.stringify(randomMatchesArrangements,null,2));*/
+
   return randomMatchesArrangements;
 }

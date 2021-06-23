@@ -26,6 +26,7 @@ import { MatchChatComponent } from './components/match-chat/match-chat.component
 import { MatchChatMessageComponent } from './components/match-chat-message/match-chat-message.component';
 import { FriendRequestComponent } from './pages/friend-request/friend-request.component';
 import { FriendRequestCardComponent } from './components/friend-request-card/friend-request-card.component';
+import { CreateModeratorComponent } from './pages/create-moderator/create-moderator.component';
 
 @NgModule({
   declarations: [
@@ -50,6 +51,7 @@ import { FriendRequestCardComponent } from './components/friend-request-card/fri
     MatchChatMessageComponent,
     FriendRequestComponent,
     FriendRequestCardComponent,
+    CreateModeratorComponent,
   ],
   imports: [
     BrowserModule,

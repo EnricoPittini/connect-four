@@ -1,0 +1,41 @@
+
+
+<!-- Side bar -->
+<app-friends-side-bar></app-friends-side-bar>
+
+
+<!-- Page content -->
+<div class="main">
+  <!-- Nav bar -->
+  <app-nav></app-nav>
+
+
+  <div style="display: flex; justify-content: center; align-items: center; flex-direction: column; height: 90vh;">
+
+      <!-- Error message card -->
+      <div *ngIf="errorMessage" class="alert alert-danger">
+        <div>{{ errorMessage }}</div>
+      </div>
+
+
+      <!-- Login form -->
+      <form [formGroup]="newModeratorForm" (ngSubmit)="onSubmit()">
+
+        <div style="margin: 10px;">
+          <label for="username">Username</label>
+          <input id="username" type="text" formControlName="username" required>
+        </div>
+
+        <div style="padding: 10px; padding-bottom: 5px;">
+          <label for="password">Password</label>
+          <input id="password" type="password" formControlName="password" required>
+        </div>
+
+        <button style="margin: 10px; width: 100%;" type="submit" [disabled]="newModeratorForm.invalid">Create</button>
+
+      </form>
+
+  </div>
+
+
+</div>

@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { AuthGuard } from './auth/guards/auth.guard';
 import { ChatListComponent } from './pages/chat-list/chat-list.component';
+import { CreateModeratorComponent } from './pages/create-moderator/create-moderator.component';
 import { FriendChatComponent } from './pages/friend-chat/friend-chat.component';
 import { FriendRequestComponent } from './pages/friend-request/friend-request.component';
 import { GameComponent } from './pages/game/game.component';
@@ -25,6 +26,7 @@ const routes: Routes = [
   { path: 'game', component: GameComponent, canActivate: [AuthGuard] },
   { path: 'searchPlayer', component: SearchPlayerComponent, canActivate: [AuthGuard]},
   { path: 'friend_requests', component: FriendRequestComponent, canActivate: [AuthGuard]},
+  { path: 'create_moderator', component: CreateModeratorComponent, canActivate: [AuthGuard]},
 
   // TODO eventualmente gestire path errati con 404 not found
   // {path: '404', component: NotFoundComponent},

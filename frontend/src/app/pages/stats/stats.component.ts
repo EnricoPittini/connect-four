@@ -5,6 +5,7 @@ import { AuthService } from 'src/app/auth/services/auth.service';
 import { ClientPlayer, Player, PlayerType } from 'src/app/models/player.model';
 import { Stats } from 'src/app/models/stats.model';
 import { FriendService } from 'src/app/services/friend.service';
+import { GameService } from 'src/app/services/game.service';
 import { PlayerService } from 'src/app/services/player.service';
 
 
@@ -85,6 +86,7 @@ export class StatsComponent implements OnInit {
     private authService: AuthService,
     private location: Location,
     public router: Router,
+    public gameService: GameService,
   ) { }
 
   ngOnInit(): void {
@@ -196,6 +198,14 @@ export class StatsComponent implements OnInit {
     this.dynamicFlags.areUserPlayerFriends=false;
   }
 
+  observe(): void{
+    this.gameService.getMatchIdFromUsername(this.player.username)
+        .subscribe( matchId => {
+          console.log('MatchId ' + matchId);
+          this.gameService.startObservingMatch(matchId)
+        });
+  }
+
 
   private getPlayerFriendData(playerUsername: string): void{
     this.friendService.hasFriendAsync(playerUsername).subscribe( flag => this.dynamicFlags.areUserPlayerFriends=flag);
@@ -232,6 +242,13 @@ export class StatsComponent implements OnInit {
                                       this.dynamicFlags.hasUserSentFriendRequestToPlayer=false;
                                       console.log('StatsComponent cancelFriendRequest');
                                       break;
+          case 'friendOnline': this.player.online=true;
+                               console.log('StatsComponent friendOnline');
+                               break;
+          case 'friendOffline': this.player.online=false;
+                               console.log('StatsComponent friendOffline');
+                               break;
+                            
         }
         console.log('areUserPlayerFriends ' + this.dynamicFlags.areUserPlayerFriends);
         console.log('hasUserSentFriendRequestToPlayer ' + this.dynamicFlags.hasUserSentFriendRequestToPlayer);

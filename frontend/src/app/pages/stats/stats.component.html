@@ -67,7 +67,10 @@
               (click)="deletePlayer()">
         Delete player
       </button>
-      <button *ngIf="player.ingame">Watch</button>
+      <button *ngIf="player.ingame"
+              (click)="observe()">
+        Watch
+      </button>
     </div>
 
     <!-- 1v1 stats -->

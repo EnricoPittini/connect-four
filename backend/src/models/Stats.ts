@@ -124,7 +124,7 @@ statsSchema.methods.refresh = function (match: MatchDocument): Promise<void> {
       this.forfaitLossCount += (match.status === MatchStatus.FORFAIT) ? 1 : 0;
     }
 
-    this.secondsPlayed = Math.floor(
+    this.secondsPlayed += Math.floor(
       ((match.datetimeEnd || new Date()).valueOf() - match.datetimeBegin.valueOf()) / 1000
     );
 

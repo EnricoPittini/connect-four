@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { AuthService } from 'src/app/auth/services/auth.service';
 import { Match, MatchStatus, WhichPlayer } from 'src/app/models/match.model';
 import { GameService } from 'src/app/services/game.service';
@@ -16,10 +17,19 @@ export class GameComponent implements OnInit {
 
   constructor(
     public auth: AuthService,
-    public gameService: GameService
+    public gameService: GameService,
+    private router: Router,
   ) { }
 
   ngOnInit(): void {
+  }
+
+  /**
+   *
+   * @returns true if the player on the left side is red, false if it is yellow
+   */
+  isLeftPlayerRed(): boolean{
+    return (!this.isUserAMatchPlayer() ||  this.getMyUsername()===this.gameService.getPlayer1Username());
   }
 
   getMyUsername(): string {
@@ -83,4 +93,15 @@ export class GameComponent implements OnInit {
     return this.gameService.whichPlayer() === turn ? this.getMyUsername() : this.getOtherUsername();
   }
 
+  isUserAMatchPlayer(): boolean{
+    return this.auth.getUsername()===this.gameService.getPlayer1Username()
+           || this.auth.getUsername()===this.gameService.getPlayer2Username();
+  }
+
+  exitGame(): void{
+    if(!this.isUserAMatchPlayer()){
+      this.gameService.stopObservingMatch();
+    }
+    this.router.navigate(['']);
+  }
 }

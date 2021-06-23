@@ -11,19 +11,26 @@
   <!-- The main content of the page -->
   <main>
 
-    <h1>Live matches</h1>
+    <!-- <h1>Live matches</h1>
 
-    <h2>Friends live matches</h2>
+    <h2>Friends live matches</h2> -->
     <!-- TODO simile a sotto -->
 
-    <h2>Best global live matches</h2>
+    <h1>Best global live matches</h1>
 
-    <div *ngFor="let liveMatch of globalLiveMatches" >
+    <div>
+      <h3>Filter live matches for player username</h3>
+      <input #search type="text" placeholder="Username"/>
+      <input type="submit" (click)="searchLiveMatchesByUsername(search.value)" value="Search"/>
+    </div>
+
+    <br/>
+
+    <div *ngFor="let liveMatch of globalLiveMatches" style="border:1px solid black;">
       <!-- TODO eventualmente creare un component a parte (MatchCard) -->
-      {{ liveMatch.playerA }} vs {{ liveMatch.playerB }}
+      <p style="color:red">{{ liveMatch.player1 }}</p> vs <p style="color:yellow">{{ liveMatch.player2 }}</p>
 
-      <!-- TODO forse meglio un button -->
-      <a [routerLink]="['/game/' + liveMatch.matchId + '/observe']">Observe</a>
+      <button (click)="observeMatch(liveMatch)">Observe</button>
     </div>
 
   </main>

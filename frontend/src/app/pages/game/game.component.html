@@ -9,9 +9,9 @@
     <!-- My name container -->
     <div
       class="name-rectangle"
-      [ngClass]="{'red': gameService.whichPlayer() === 'PLAYER_1', 'yellow': gameService.whichPlayer() === 'PLAYER_2'}"
+      [ngClass]="{'red': isLeftPlayerRed(), 'yellow': !isLeftPlayerRed() }"
     >
-      {{ getMyUsername() }}
+      {{ isUserAMatchPlayer() ? getMyUsername() : gameService.getPlayer1Username() }}
     </div>
 
     <!-- Time container -->
@@ -23,9 +23,9 @@
     <!-- Other player name container -->
     <div
     class="name-rectangle"
-    [ngClass]="{'red': gameService.whichPlayerOpponent() === 'PLAYER_1', 'yellow': gameService.whichPlayerOpponent() === 'PLAYER_2'}"
+    [ngClass]="{'red': !isLeftPlayerRed(), 'yellow': isLeftPlayerRed()}"
     >
-      {{ getOtherUsername() }}
+      {{ isUserAMatchPlayer() ? getOtherUsername() : gameService.getPlayer2Username() }}
     </div>
   </div>
 
@@ -51,7 +51,7 @@
   <!-- Bottom container -->
   <div class="bottom-row">
     <!-- Forfait button -->
-    <div *ngIf="!isGameEnded()">
+    <div *ngIf="!isGameEnded() && isUserAMatchPlayer()">
       <button
         style="padding-inline: 100px; padding-block: 20px; background-color: red;"
         (click)="forfait()"

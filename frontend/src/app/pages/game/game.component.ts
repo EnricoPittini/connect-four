@@ -24,6 +24,14 @@ export class GameComponent implements OnInit {
   ngOnInit(): void {
   }
 
+  /**
+   * 
+   * @returns true if the player on the left side is red, false if it is yellow
+   */
+  isLeftPlayerRed(): boolean{
+    return (!this.isUserAMatchPlayer() ||  this.getMyUsername()===this.gameService.getPlayer1Username());
+  }
+
   getMyUsername(): string {
     return this.auth.getUsername();
   }

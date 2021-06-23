@@ -106,8 +106,28 @@ export class FriendChatService {
 
     // Friend chats managment
     this.chats = [];
+    // this.populateChats();
+    // this.listenForChatsUpdate();
+
+    this.auth.authEvents.subscribe(
+      authenticated => {
+        authenticated ? this.start() : this.stop();
+      }
+    );
+  }
+
+  start(): void {
+    // Connect to the server
+    this.socket = getSocket();
+
+    // Friend chats managment
+    this.chats = [];
     this.populateChats();
     this.listenForChatsUpdate();
+  }
+
+  stop(): void {
+    this.socket.off('chat');
   }
 
   /**

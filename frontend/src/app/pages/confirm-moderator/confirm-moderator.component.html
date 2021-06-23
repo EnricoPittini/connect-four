@@ -1,0 +1,42 @@
+
+<h3>Confirm moderator</h3>
+
+
+<!-- Error message card -->
+<div *ngIf="errorMessage" class="alert alert-danger">
+  <div>{{ errorMessage }}</div>
+</div>
+
+
+<!-- Sign Up form -->
+<form [formGroup]="confirmModeratorForm" (ngSubmit)="onSubmit()">
+
+  <div>
+    <label for="password">Password</label>
+    <input id="password" type="password" formControlName="password" required>
+  </div>
+
+  <!-- TODO bug: segna verde anche se password è diversa -->
+  <div>
+    <label for="confirmPassword">Confirm password</label>
+    <input id="confirmPassword" type="password" formControlName="confirmPassword" required>
+  </div>
+
+  <div>
+    <label for="name">Name</label>
+    <input id="name" type="text" formControlName="name" required>
+  </div>
+
+  <div>
+    <label for="surname">Surname</label>
+    <input id="surname" type="text" formControlName="surname" required>
+  </div>
+
+  <div>
+    <label for="avatar">Avatar</label>
+    <input id="avatar" type="text" formControlName="avatar" required>
+  </div>
+
+  <button type="submit" [disabled]="confirmModeratorForm.invalid">Confirm</button>
+
+</form>

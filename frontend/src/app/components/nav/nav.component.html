@@ -16,4 +16,9 @@
   <!-- Link to search player page -->
   <a [routerLink]="['/searchPlayer']">Search player</a>
 
+  <!-- Link to search player page -->
+  <div *ngIf="auth.getPlayerType() === 'MODERATOR'">
+    | <a [routerLink]="['/create_moderator']">Create moderator</a>
+  </div>
+
 </nav>

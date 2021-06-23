@@ -6,6 +6,7 @@
 - Aggiungere evento socketIO 'friendIngame' che notifica i Client di un loro amico in game
 - cambiare nomi dei metodi della friend service (da sendFriendREquest a NotifyAvailability. E lo stesso per deleteFriendRequest)
 
+- Logout button
 
 ## AuthService
 - Add `isAutheticated` method

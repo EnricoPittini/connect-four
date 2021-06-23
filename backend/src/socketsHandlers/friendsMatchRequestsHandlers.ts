@@ -8,6 +8,8 @@ import player = require('../models/Player');
 import match = require('../models/Match');
 import { NewMatchParams } from '../models/Match';
 
+import { ensureNotFirstAccessModerator } from './ensureNotFirstAccessModerator';
+
 
 /**
  * Registers to the specified Client socket the handlers about the friends match requests managment 
@@ -34,6 +36,8 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
       if (!fromPlayerDocument) {
         throw new Error('An invalid player sent a message, username: ' + fromUsername);
       }
+
+      ensureNotFirstAccessModerator(fromPlayerDocument);
 
       // With this condition we check not only that the "to player" is a friend of "from player", but also that "to player" is a 
       // valid player 

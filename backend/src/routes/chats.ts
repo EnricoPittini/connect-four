@@ -17,6 +17,8 @@ import {
   GetChatResponseBody,
 } from '../httpTypes/responses';
 
+import {ensureNotFirstAccessModerator} from "../middlewares/ensureNotFirstAccessModerator";
+
 const router = express.Router();
 export default router;
 
@@ -24,7 +26,7 @@ export default router;
 /**
  * Returns the list of chats of the Client
  */
-router.get(`/`, auth, (req, res, next) => {
+router.get(`/`, auth, ensureNotFirstAccessModerator, (req, res, next) => {
 
   const filter = { $or: [{ playerA: req.user?.username }, { playerB: req.user?.username }] };
   chat.getModel().find(filter, { _id: 0, __v: 0, messages: 0 }).then((chatDocuments) => {
@@ -41,7 +43,7 @@ router.get(`/`, auth, (req, res, next) => {
 /**
  * Returns the chat between the Client and the specified player
  */
-router.get(`/:username`, auth, (req, res, next) => {
+router.get(`/:username`, auth, ensureNotFirstAccessModerator, (req, res, next) => {
 
   // Username of the Client
   const myUsername = req.user?.username;

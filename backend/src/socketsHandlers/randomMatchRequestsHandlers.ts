@@ -8,6 +8,7 @@ import player = require('../models/Player');
 import match = require('../models/Match');
 import { NewMatchParams } from '../models/Match';
 
+import { ensureNotFirstAccessModerator } from './ensureNotFirstAccessModerator';
 
 /**
  * Registers to the specified Client socket the handlers about the random match requests managment
@@ -34,6 +35,8 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
       if (!playerDocument) {
         throw new Error('An invalid player sent a random match request, username: ' + username);
       }
+
+      ensureNotFirstAccessModerator(playerDocument);
 
       // The several checks are made by transientDataHandler
       return transientDataHandler.addRandomMatchRequest(username);

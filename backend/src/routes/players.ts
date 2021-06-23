@@ -39,6 +39,8 @@ import {
   GetMatchRequestInformationResponseBody,
 } from '../httpTypes/responses';
 
+import {ensureNotFirstAccessModerator} from "../middlewares/ensureNotFirstAccessModerator";
+
 const router = express.Router();
 export default router;
 
@@ -47,7 +49,7 @@ const transientDataHandler = TransientDataHandler.getInstance();
 
 
 // TODO sportare in cartella middlewares
-function ensureNotFirstAccessModerator(user: Express.User | undefined, next: express.NextFunction) {
+/*function ensureNotFirstAccessModerator1(user: Express.User | undefined, next: express.NextFunction) {
   if (user!.type === PlayerType.MODERATOR_FIRST_ACCESS) {
     console.warn('A first access moderator tried to perform an unauthorized operation, user: ' + JSON.stringify(user, null, 2));
     const errorBody: ErrorResponseBody = {
@@ -57,7 +59,7 @@ function ensureNotFirstAccessModerator(user: Express.User | undefined, next: exp
     };
     next(errorBody);
   }
-}
+}*/
 
 
 /**
@@ -114,7 +116,7 @@ router.post(`/`, (req, res, next) => {
   }
 
   // Next middleware functions (only if the body contains the moderator registration data)
-}, auth, (req, res, next) => {
+}, auth, ensureNotFirstAccessModerator, (req, res, next) => {
   //Cheks if the Client is a moderator
   if (req.user?.type !== PlayerType.MODERATOR) {
     console.warn('A non Moderator player asked to create a new Moderator, the player is ' + JSON.stringify(req.user, null, 2));
@@ -148,7 +150,7 @@ router.post(`/`, (req, res, next) => {
  * Returns all the players registered in the system
  */
 //?username_filter=<partial_username>&skip=<skip>&limit=<limit>
-router.get(`/`, auth, (req, res, next) => {
+router.get(`/`, auth, ensureNotFirstAccessModerator, (req, res, next) => {
 
   // Object used to filter the database query
   const filter: any = {};
@@ -259,7 +261,7 @@ router.put(`/:username`, auth, (req, res, next) => {
 /**
  * Returns the data of the player with the specified username
  */
-router.get(`/:username`, auth, (req, res, next) => {
+router.get(`/:username`, auth, ensureNotFirstAccessModerator, (req, res, next) => {
 
   // Fields to select
   const fields = {
@@ -306,7 +308,7 @@ router.get(`/:username`, auth, (req, res, next) => {
  * Used by a Client to get match request informations with respect to the specified player.
  * The client must be a friend of the specified player. (It' a friend match request)
  */
-router.get(`/:username/match_request`, auth, (req, res, next) => {
+router.get(`/:username/match_request`, auth, ensureNotFirstAccessModerator, (req, res, next) => {
 
   // Search the document of the specified player
   player.getModel().findOne({ username: req.params.username }).then((playerDocument) => {
@@ -360,7 +362,7 @@ router.get(`/:username/match_request`, auth, (req, res, next) => {
 /**
  * Deletes the specified player.
  */
-router.delete(`/:username`, auth, async (req, res, next) => {
+router.delete(`/:username`, auth, ensureNotFirstAccessModerator, async (req, res, next) => {
 
   // The socketIO instance
   const io = getSocketIO();
@@ -530,8 +532,8 @@ router.delete(`/:username`, auth, async (req, res, next) => {
 /**
  * Return the stats information about the specified player
  */
-router.get(`/:username/stats`, auth, (req, res, next) => {
-  ensureNotFirstAccessModerator(req.user, next);
+router.get(`/:username/stats`, auth, ensureNotFirstAccessModerator, (req, res, next) => {
+  //ensureNotFirstAccessModerator(req.user, next);
 
   // Search the specified player document
   player.getModel().findOne({ username: req.params.username }).then(document => {

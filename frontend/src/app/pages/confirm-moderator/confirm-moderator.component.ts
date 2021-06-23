@@ -19,7 +19,6 @@ export class ConfirmModeratorComponent implements OnInit {
     confirmPassword: ['', Validators.required],
     name: ['', Validators.required],
     surname: ['', Validators.required],
-    avatar: ['', Validators.required],   // TODO capire come fare
   }, { validators: ConfirmModeratorComponent.passwordConfirming });
 
   /**
@@ -51,9 +50,9 @@ export class ConfirmModeratorComponent implements OnInit {
   public onSubmit(): void {
     console.info('Your information has been submitted', this.confirmModeratorForm.value);
 
-    const { password, name, surname, avatar } = this.confirmModeratorForm.value;
+    const { password, name, surname } = this.confirmModeratorForm.value;
 
-    this.playerService.confirmModerator(password, name, surname, avatar).subscribe(
+    this.playerService.confirmModerator(password, name, surname).subscribe(
       success => {
         // The backend server was contacted successfully
 

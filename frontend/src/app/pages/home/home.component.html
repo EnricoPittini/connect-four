@@ -15,7 +15,7 @@
     <div *ngIf="!waitingMatch()" class="content">
 
       <div class="top-row">
-        <img src="" alt="Avatar">
+        <img [src]="avatarLink()" alt="Avatar">
         <h1>{{ getUsername() }}</h1>
       </div>
 

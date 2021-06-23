@@ -150,12 +150,11 @@ export class PlayerService {
       );
   }
 
-  confirmModerator(password: string, name: string, surname: string, avatar: string): Observable<boolean> {
+  confirmModerator(password: string, name: string, surname: string): Observable<boolean> {
     const body: ConfirmModeratorRequestBody = {
       password: password,
       name: name,
       surname: surname,
-      avatar: avatar,
     };
     return this.http.put<ConfirmModeratorResponseBody>(`${PlayerService.BASE_URL}/players/${this.auth.getUsername()}`, body, this.createHttpOptions())
       .pipe(

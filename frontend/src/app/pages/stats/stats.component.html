@@ -13,7 +13,7 @@
 
     <!-- Player personal data -->
     <div>
-      <img src="" alt="Avatar">
+      <img [src]="avatarLink(player.username)" alt="Avatar">
       <h1>{{player.username}}</h1>
       <p>{{getPrettyPlayerType()}}</p>
       <div *ngIf="player.online">
@@ -30,40 +30,40 @@
       </div>
     </div>
 
-    <!-- Various buttons  --> 
+    <!-- Various buttons  -->
     <div>
        <!-- TODO provare a eliminare -->
       {{dynamicFlags.areUserPlayerFriends ? "" : ""}}
       {{dynamicFlags.hasUserSentFriendRequestToPlayer ? "" : ""}}
       {{dynamicFlags.hasPlayerSentFriendRequestToUser ? "" : ""}}
-      <button *ngIf="!(dynamicFlags.areUserPlayerFriends) && !isUser"    
-              [disabled]="dynamicFlags.hasUserSentFriendRequestToPlayer || dynamicFlags.hasPlayerSentFriendRequestToUser"         
+      <button *ngIf="!(dynamicFlags.areUserPlayerFriends) && !isUser"
+              [disabled]="dynamicFlags.hasUserSentFriendRequestToPlayer || dynamicFlags.hasPlayerSentFriendRequestToUser"
               (click)="sendFriendRequest()">
-        Send friend request 
+        Send friend request
       </button>
-      <button *ngIf="dynamicFlags.hasUserSentFriendRequestToPlayer" 
+      <button *ngIf="dynamicFlags.hasUserSentFriendRequestToPlayer"
             (click)="cancelFriendRequest()">
-        Cancel friend request 
+        Cancel friend request
       </button>
-      <button *ngIf="dynamicFlags.hasPlayerSentFriendRequestToUser"             
+      <button *ngIf="dynamicFlags.hasPlayerSentFriendRequestToUser"
               (click)="sendFriendRequest()">
-        Accept friend request 
+        Accept friend request
       </button>
-      <button *ngIf="dynamicFlags.hasPlayerSentFriendRequestToUser"             
+      <button *ngIf="dynamicFlags.hasPlayerSentFriendRequestToUser"
               (click)="cancelFriendRequest()">
         Reject friend request
       </button>
-      <button *ngIf="dynamicFlags.areUserPlayerFriends" 
+      <button *ngIf="dynamicFlags.areUserPlayerFriends"
             (click)="deleteFriend()">
         Delete friend
-      </button>  
-      <br/>
-      <button *ngIf="!isUser && (isUserModerator || dynamicFlags.areUserPlayerFriends)"
-              (click)="router.navigate(['/chat/'+player.username])"> 
-              Chat        
       </button>
       <br/>
-      <button *ngIf="isUser || isUserModerator" 
+      <button *ngIf="!isUser && (isUserModerator || dynamicFlags.areUserPlayerFriends)"
+              (click)="router.navigate(['/chat/'+player.username])">
+              Chat
+      </button>
+      <br/>
+      <button *ngIf="isUser || isUserModerator"
               (click)="deletePlayer()">
         Delete player
       </button>

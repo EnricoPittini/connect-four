@@ -1,9 +1,11 @@
 import { Location } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
+import { SafeUrl } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from 'src/app/auth/services/auth.service';
 import { ClientPlayer, Player, PlayerType } from 'src/app/models/player.model';
 import { Stats } from 'src/app/models/stats.model';
+import { AvatarLinkGeneratorService } from 'src/app/services/avatar-link-generator.service';
 import { FriendService } from 'src/app/services/friend.service';
 import { GameService } from 'src/app/services/game.service';
 import { PlayerService } from 'src/app/services/player.service';
@@ -32,7 +34,6 @@ export class StatsComponent implements OnInit {
     name: "",
     surname: "",
     type: PlayerType.STANDARD_PLAYER,
-    avatar: "",
     online: false,
     ingame: false,
   };
@@ -87,6 +88,7 @@ export class StatsComponent implements OnInit {
     private location: Location,
     public router: Router,
     public gameService: GameService,
+    private avatarLinkGenerator: AvatarLinkGeneratorService
   ) { }
 
   ngOnInit(): void {
@@ -206,6 +208,9 @@ export class StatsComponent implements OnInit {
         });
   }
 
+  avatarLink(username: string): SafeUrl {
+    return this.avatarLinkGenerator.avatarLink(username);
+  }
 
   private getPlayerFriendData(playerUsername: string): void{
     this.friendService.hasFriendAsync(playerUsername).subscribe( flag => this.dynamicFlags.areUserPlayerFriends=flag);
@@ -248,7 +253,7 @@ export class StatsComponent implements OnInit {
           case 'friendOffline': this.player.online=false;
                                console.log('StatsComponent friendOffline');
                                break;
-                            
+
         }
         console.log('areUserPlayerFriends ' + this.dynamicFlags.areUserPlayerFriends);
         console.log('hasUserSentFriendRequestToPlayer ' + this.dynamicFlags.hasUserSentFriendRequestToPlayer);

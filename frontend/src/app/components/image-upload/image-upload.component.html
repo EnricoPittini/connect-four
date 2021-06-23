@@ -1,0 +1,26 @@
+<div class="image-upload-container btn btn-bwm">
+
+  <input
+    #imageInput
+    type="file"
+    accept="image/*"
+    (change)="processFile(imageInput)"
+  >
+
+</div>
+
+
+<div *ngIf="selectedFile">
+
+  <div [ngStyle]="{'background-image': 'url('+ selectedFile.src + ')'}"></div>
+
+  <div *ngIf="selectedFile.pending" class="img-loading-overlay">
+    <div class="img-spinning-circle"></div>
+  </div>
+
+  <img *ngIf="!selectedFile.pending" [src]="selectedFile.src" style="max-width: 500px; max-height: 500px; object-fit: cover;" alt="">
+
+  <div *ngIf="selectedFile.status === 'ok'">Image Uploaded Succesfuly!</div>
+  <div *ngIf="selectedFile.status === 'fail'">Image Upload Failed!</div>
+
+</div>

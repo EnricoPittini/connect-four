@@ -231,7 +231,7 @@ export class FriendChatService {
   // private getChat(chatInfo: ChatInfo): Observable<GetChatResponseBody> {
   private getChat = (chatInfo: ChatInfo): Observable<GetChatResponseBody> => {
     const otherPlayerUsername = chatInfo.playerA===this.auth.getUsername() ?  chatInfo.playerB : chatInfo.playerA;
-    return this.http.get<GetChatResponseBody>(`${FriendChatService.BASE_URL}/chats/${otherPlayerUsername}`);
+    return this.http.get<GetChatResponseBody>(`${FriendChatService.BASE_URL}/chats/${otherPlayerUsername}`, this.createHttpOptions());
   }
 
   /**

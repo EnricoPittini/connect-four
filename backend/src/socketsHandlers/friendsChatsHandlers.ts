@@ -64,8 +64,8 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
       // I find the chat between the two players
       const filter = {
         $or: [
-          { from: fromUsername, to: toUsername },
-          { from: toUsername, to: fromUsername },
+          { playerA: fromUsername, playerB: toUsername },
+          { playerA: toUsername, playerB: fromUsername },
         ],
       };
       return chat.getModel().findOne(filter);

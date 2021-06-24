@@ -30,7 +30,7 @@ export class MatchChatService {
   /**
    * Base REST api server url.
    */
-   private static readonly BASE_URL = 'http://localhost:8080/v0.0.1';
+   private static readonly BASE_URL = 'http://localhost:8080/v1.0.0';
 
    /**
     * Base WebSocket server url.

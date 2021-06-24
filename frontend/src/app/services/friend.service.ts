@@ -40,7 +40,7 @@ export class FriendService {
   /**
    * Base REST api server url.
    */
-  private static readonly BASE_URL = 'http://localhost:8080/v0.0.1';
+  private static readonly BASE_URL = 'http://localhost:8080/v1.0.0';
 
   /**
    * Base WebSocket server url.
@@ -162,8 +162,8 @@ export class FriendService {
 
   /**
    * Checks if the user and the specified player are friends
-   * @param username 
-   * @returns 
+   * @param username
+   * @returns
    */
   hasFriend(username: string): boolean{
     return !!this.friends.find( friend => friend.username===username);
@@ -198,8 +198,8 @@ export class FriendService {
 
   /**
    * Checks, in an async way, if the user and the specified player are friends
-   * @param username 
-   * @returns 
+   * @param username
+   * @returns
    */
   hasFriendAsync(username: string): Observable<boolean>{
     return this.http.get<GetFriendsResponseBody>(`${FriendService.BASE_URL}/friends`, this.createHttpOptions())
@@ -222,8 +222,8 @@ export class FriendService {
 
   /**
    * Checks, in an async way, if the specified player and the user are friends
-   * @param username 
-   * @returns 
+   * @param username
+   * @returns
    */
   hasReceivedFriendRequestAsync(username: string): Observable<boolean>{
     return this.http.get<GetFriendRequestsResponseBody>(`${FriendService.BASE_URL}/friend_requests`, this.createHttpOptions())
@@ -393,7 +393,7 @@ export class FriendService {
    * @param friendUsername - The username of the friend player
    * @returns An Observable that yields the information about the given friend.
    */
-  // private getFriendInfo(friendUsername: string): Observable<GetPlayerResponseBody> 
+  // private getFriendInfo(friendUsername: string): Observable<GetPlayerResponseBody>
   //   return this.http.get<GetPlayerResponseBody>(`${FriendService.BASE_URL}/players/${friendUsername}`, this.createHttpOptions());
   // }
 

@@ -10,7 +10,7 @@ import { SuccessResponseBody } from '../models/httpTypes/responses.model';
 })
 export class ImageService {
 
-  private static readonly BASE_URL = 'http://localhost:8080/v0.0.1';
+  private static readonly BASE_URL = 'http://localhost:8080/v1.0.0';
 
   /**
    * Http headers.

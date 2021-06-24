@@ -1,6 +1,6 @@
 {
   "name": "connect-four-backend",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Connect Four game",
   "main": "server.js",
   "scripts": {

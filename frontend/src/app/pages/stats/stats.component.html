@@ -12,8 +12,8 @@
   <main *ngIf="player.username; else notValidPlayer">
 
     <!-- Player personal data -->
-    <div>
-      <img [src]="avatarLink(player.username)" alt="Avatar">
+    <div style="margin-top: 20px;">
+      <img [src]="avatarLink(player.username)" alt="Avatar" style="max-width: 200px; max-height: 200px; object-fit: cover;">
       <h1>{{player.username}}
          <button *ngIf="isUser || isUserModerator"
                  (click)="deletePlayer()">

@@ -208,6 +208,10 @@ export class StatsComponent implements OnInit {
         });
   }
 
+  avatarLink(username: string): SafeUrl {
+    return this.avatarLinkGenerator.avatarLink(username);
+  }
+
   /**
    * Refresh the player's data
    */
@@ -215,10 +219,6 @@ export class StatsComponent implements OnInit {
     this.getPlayerFriendData(playerUsername);
     this.getPlayer(playerUsername);
     this.getPlayerStats(playerUsername);
-  }
-
-  avatarLink(username: string): SafeUrl {
-    return this.avatarLinkGenerator.avatarLink(username);
   }
 
   /**

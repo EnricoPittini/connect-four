@@ -1,6 +1,6 @@
 // CHATS ENDPOINTS
 
-// These are the Endpoints of the chats between two players (e.g. private chats).
+// These are the Endpoints of the chats between two players (i.e. private chats).
 // There aren't the endpoints for the match chats
 
 import express from 'express';

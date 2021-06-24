@@ -71,7 +71,7 @@ export default function (io: Server<ClientEvents, ServerEvents>, socket: Socket<
     // Remove the disconnected socket
     transientDataHandler.removePlayerSocket(socket);
 
-    if (transientDataHandler.isOnline(username)) { // The player is stil online (e.g. he has other sockets connected)
+    if (transientDataHandler.isOnline(username)) { // The player is stil online (i.e. he has other sockets connected)
       return;
     }
 

@@ -64,7 +64,7 @@ export interface Player extends ClientPlayer {
 }
 
 /**
- * Represents a player document (e.g. a player memorized in the database)
+ * Represents a player document (i.e. a player memorized in the database)
  */
 export interface PlayerDocument extends Player, mongoose.Document {
   validatePassword: (pwd: string) => boolean,

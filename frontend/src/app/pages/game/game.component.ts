@@ -124,7 +124,7 @@ export class GameComponent implements OnInit {
   }
 
   /**
-   * Checks if the user is one of the two players of the match (e.g. is not an observer of the match)
+   * Checks if the user is one of the two players of the match (i.e. is not an observer of the match)
    * @returns 
    */
   isUserAMatchPlayer(): boolean{

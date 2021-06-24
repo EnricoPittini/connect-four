@@ -3,7 +3,7 @@ import mongoose = require('mongoose');
 import { MatchDocument, WhichPlayer, MatchStatus } from './Match';
 
 /**
- * Represents a stats (e.g. a statistics object)
+ * Represents a stats (i.e. a statistics object)
  */
 export interface Stats {
   rating: number,
@@ -17,7 +17,7 @@ export interface Stats {
 }
 
 /**
- * Represents a stats document(e.g. a stats memorized in the database)
+ * Represents a stats document(i.e. a stats memorized in the database)
  */
 export interface StatsDocument extends Stats, mongoose.Document {
   refresh: (match: MatchDocument) => Promise<void>,

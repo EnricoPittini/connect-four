@@ -34,7 +34,7 @@ type SocketIdPlayerMap = {
 
 
 /**
- * Handle the non-persistent data of the application (e.g. players online, players in game, friend match
+ * Handle the non-persistent data of the application (i.e. players online, players in game, friend match
  * requests and random match requests)
  */
 export class TransientDataHandler {
@@ -178,7 +178,7 @@ export class TransientDataHandler {
   }
 
   /**
-   * Adds a frind match request (e.g. a match request between teo friends)
+   * Adds a frind match request (i.e. a match request between teo friends)
    * @param fromUsername
    * @param toUsername
    */
@@ -350,7 +350,7 @@ const MAX_WAITING_MILLISECONDS = 1500;
  * The logic of the arrangment alghoritm is the following.
  * The random match requests are iterated, sorted by datetime (from the oldest to the latest).
  * For each match request is computed the waiting time.
- * In addition, for each match request is found the nearest match request, according to the player rating(e.g. is found the match
+ * In addition, for each match request is found the nearest match request, according to the player rating(i.e. is found the match
  * request that has the player with nearest rating).
  * So, for each match request is computed the rating difference with the nearest rating.
  * Now, the match request is arranged to the nearest match request if and only if:
@@ -362,7 +362,7 @@ const MAX_WAITING_MILLISECONDS = 1500;
  * Given a match request of the list, to found the nearest match request (according to the rating) it's not necessary to search also
  * the previous requests of the list, but it's sufficient to iterate only through the next requests of the list.
  * This is because if the previous match requests haven't been arranged with any other request, I'm sure that the next requests won't
- * be arranged with that previous requests. (e.g. These previous requests dcan't be arranged)
+ * be arranged with that previous requests. (i.e. These previous requests dcan't be arranged)
  *
  * @param randomMatchRequests
  */

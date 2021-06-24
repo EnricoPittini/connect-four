@@ -61,7 +61,7 @@ export class PlayerService {
   }
 
   /**
-   * Returns the general informations about the specified player (e.g. non stats data)
+   * Returns the general informations about the specified player (i.e. non stats data)
    * @param username
    * @returns
    */

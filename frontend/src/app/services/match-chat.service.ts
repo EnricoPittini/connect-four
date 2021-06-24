@@ -11,7 +11,7 @@ import { AuthService } from '../auth/services/auth.service';
 
 
 /**
- * Represents the match messages as seen by the Client (e.g. as seen by the user)
+ * Represents the match messages as seen by the Client (i.e. as seen by the user)
  */
 export interface ClientMatchMessage {
   from: string,
@@ -87,7 +87,7 @@ export class MatchChatService {
   /**
    * Initiate the match chat to the specified match
    * @param matchId
-   * @returns true if the match chat is correctly initiated, false otherwise (e.g. the last match chat wasn't stopped )
+   * @returns true if the match chat is correctly initiated, false otherwise (i.e. the last match chat wasn't stopped )
    */
   initiate(matchId: string): boolean{
     console.log(`initiate:${matchId}` )
@@ -105,7 +105,7 @@ export class MatchChatService {
    /**
     * Sends a message to the match
     * @param text
-    * @returns true if the message is correctly sent, false otherwise (e.g. the match it's not initiated yet)
+    * @returns true if the message is correctly sent, false otherwise (i.e. the match it's not initiated yet)
     */
    sendMessage(text: string): boolean{
     console.info(`Sending a message to the match ${this.matchId}  with text: ${text}`);

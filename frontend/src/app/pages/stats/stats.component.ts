@@ -170,7 +170,7 @@ export class StatsComponent implements OnInit {
   /**
    * Sends a friend request from the user to the player.
    * If alredy exists a friend request from the player to the user, that request is accepted
-   * (e.g. the players become friends)
+   * (i.e. the players become friends)
    */
   sendFriendRequest(): void{
     this.friendService.sendFriendRequest(this.player.username);

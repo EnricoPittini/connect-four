@@ -15,7 +15,7 @@ export interface Message {
 }
 
 /**
- * Represents the messages documents (e.g. the messages stored in the database)
+ * Represents the messages documents (i.e. the messages stored in the database)
  */
 const messageSchema = new mongoose.Schema({
   sender: {
@@ -33,7 +33,7 @@ const messageSchema = new mongoose.Schema({
 });
 
 /**
- * Represents the chats (e.g. the list of messages between two players)
+ * Represents the chats (i.e. the list of messages between two players)
  *
  * IMPORTANT : these chats are only the chats between two players (a private chat). They don't include the
  * chats of the matches.
@@ -49,7 +49,7 @@ export interface Chat {
 }
 
 /**
- * Represents the chats documents (e.g. the chats stored in the database)
+ * Represents the chats documents (i.e. the chats stored in the database)
  */
 export interface ChatDocument extends Chat, mongoose.Document {
   addMessage: (senderUsername: string, text: string) => void,

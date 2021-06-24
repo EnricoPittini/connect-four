@@ -10,7 +10,7 @@ export interface FriendRequest {
 }
 
 /**
- * Represents the friend requests documents (e.g. the friend requests stored in the database)
+ * Represents the friend requests documents (i.e. the friend requests stored in the database)
  */
 export interface FriendRequestDocument extends FriendRequest, mongoose.Document {
 }

@@ -114,14 +114,14 @@ router.get(`/`, auth,  ensureNotFirstAccessModerator, async (req, res, next) => 
 
   else {
     // The Client asked only for the in progress matches
-    // In this case the matches are sorted by match rating (e.g. the mean of the ratings of the two players)
+    // In this case the matches are sorted by match rating (i.e. the mean of the ratings of the two players)
 
     try {
       // Search the matches
       const matchDocuments = await match.getModel().find(filter, { __v: 0 });
 
       // Array of promise, where there is a promise for each match
-      // Each promise is a promise of 2 numbers (e.g. array of numbers). These two numbers are the two ratings of the
+      // Each promise is a promise of 2 numbers (i.e. array of numbers). These two numbers are the two ratings of the
       // players a match.
       const matchPlayersRatingsPromises: Promise<number[]>[] = [];
       for (let matchDocument of matchDocuments) {

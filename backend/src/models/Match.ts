@@ -27,7 +27,7 @@ export interface Match {
 }
 
 /**
- * Represents the matches documents (e.g. the matches stored in the database)
+ * Represents the matches documents (i.e. the matches stored in the database)
  */
 export interface MatchDocument extends Match, mongoose.Document {
   addMove: (playerUsername: string, column: number) => void,

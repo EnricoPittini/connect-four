@@ -18,7 +18,7 @@ import {
 
 
 /**
- * Represents the messages as seen by the Client (e.g. as seen by the user)
+ * Represents the messages as seen by the Client (i.e. as seen by the user)
  */
 export interface ClientMessage{
   sended: boolean,
@@ -27,7 +27,7 @@ export interface ClientMessage{
 }
 
 /**
- * Represents the chats as seen by the Client (e.g. as seen by the user)
+ * Represents the chats as seen by the Client (i.e. as seen by the user)
  */
 export interface ClientChat{
   otherPlayerUsername: string,
@@ -154,7 +154,7 @@ export class FriendChatService {
 
   /**
    *  Enters in the chat relate to the specified username.
-   *  Returns true if a chat with that player exists, false otherwise (e.g. it does not exist the specified chat)
+   *  Returns true if a chat with that player exists, false otherwise (i.e. it does not exist the specified chat)
    */
   enterChat(selectedChatOtherPlayerUsername: string): boolean{
     console.info('Entering the chat relate to the username: ' + selectedChatOtherPlayerUsername);
@@ -178,7 +178,7 @@ export class FriendChatService {
 
   /**
    * Sends a message to the current chat.
-   * Returns true if there is a current chat, false otherwise (e.g. the message isn't correctly sent)
+   * Returns true if there is a current chat, false otherwise (i.e. the message isn't correctly sent)
    */
   sendMessage(text: string): boolean{
     console.info(`Sending a message to: ${this.currentChatOtherPlayerUsername} with text: ${text}`);
@@ -216,11 +216,11 @@ export class FriendChatService {
    * about each of the chats of the authenticated user.
    */
   private populateChats(): void {
-    // Get the chats info (e.g. the chats without the messages) of the player
+    // Get the chats info (i.e. the chats without the messages) of the player
     this.http.get<GetChatsResponseBody>(`${FriendChatService.BASE_URL}/chats`, this.createHttpOptions())
       .pipe(
         mergeMap(response => from(response.chats)),       // flatten the object into an array of chats info
-        mergeMap(this.getChat)  // For each chat info, retreive the fully chat entity (e.g. with the messages)
+        mergeMap(this.getChat)  // For each chat info, retreive the fully chat entity (i.e. with the messages)
       )
       .subscribe(
         chatResponseBody => {

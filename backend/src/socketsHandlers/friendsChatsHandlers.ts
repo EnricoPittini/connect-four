@@ -13,7 +13,7 @@ import { ensureNotFirstAccessModerator } from './ensureNotFirstAccessModerator';
 
 
 /**
- * Registers to the specified Client socket the handlers about the friends chats managment. (e.g. the chats between
+ * Registers to the specified Client socket the handlers about the friends chats managment. (i.e. the chats between
  * two players: private chats).
  *
  * IMPORTANT: These chats can be also between two players that aren't friend, if at least one of the player is a moderator

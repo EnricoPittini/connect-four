@@ -38,7 +38,6 @@ export class AuthService {
   /**
    * Base REST api server url.
    */
-  // TODO .env per host, porta e versione ?
   private static readonly BASE_URL = 'http://localhost:8080/v0.0.1';
 
   /**

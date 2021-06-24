@@ -638,7 +638,6 @@ router.post(`/:username/avatar`, auth, ensureNotFirstAccessModerator, upload.sin
 router.get(`/:username/avatar`, async (req, res, next) => {
   const playerDocument = await player.getModel().findOne({ username: req.params.username }).exec();
   if (!playerDocument) {
-    // TODO capire se crea problemi restituire un errore in questa particolare route
     console.warn('A client asked the avatar of a non existing player');
     const errorBody: ErrorResponseBody = {
       error: true,
@@ -652,7 +651,6 @@ router.get(`/:username/avatar`, async (req, res, next) => {
 
   const avatarDocument = await avatar.getModel().findOne({ _id: playerDocument.avatar });
   if (!avatarDocument) {
-    // TODO capire se crea problemi restituire un errore in questa particolare route
     console.error('The avatar of the player was not found');
     const errorBody: ErrorResponseBody = {
       error: true,

@@ -37,7 +37,6 @@ export interface FriendInfo {
 })
 export class FriendService {
 
-  // TODO .env per host, porta e versione ?
   /**
    * Base REST api server url.
    */
@@ -377,7 +376,6 @@ export class FriendService {
             username: friendInfoResponseBody.player.username,
             online: friendInfoResponseBody.player.online,
             ingame: friendInfoResponseBody.player.ingame,
-            // TODO matchRequestSent e matchRequestReceived andrebbero ricavate da un endpoint (non ancora esistente)
             matchRequestSent: false,
             matchRequestReceived: false,
           };
@@ -543,7 +541,6 @@ export class FriendService {
           username: friendInfoResponseBody.player.username,
           online: friendInfoResponseBody.player.online,
           ingame: friendInfoResponseBody.player.ingame,
-          // TODO matchRequestSent e matchRequestReceived andrebbero ricavate da un endpoint (non ancora esistente)
           matchRequestSent: false,
           matchRequestReceived: false,
         };

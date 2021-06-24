@@ -23,7 +23,6 @@ import {
 })
 export class PlayerService {
 
-  // TODO .env per host, porta e versione ?
   /**
    * Base REST api server url.
    */

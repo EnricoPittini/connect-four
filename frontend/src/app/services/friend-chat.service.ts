@@ -44,7 +44,6 @@ export interface ClientChat{
 })
 export class FriendChatService {
 
-  // TODO .env per host, porta e versione ?
   /**
    * Base REST api server url.
    */

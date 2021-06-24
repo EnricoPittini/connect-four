@@ -10,7 +10,6 @@ let io : Server<ClientEvents, ServerEvents>;
  * Initialize the socketIO instance
  * @param server 
  */
-// TODO .env
 export function initializeSocketIO(server: http.Server){
   if(!io){
     io = new Server<ClientEvents, ServerEvents>(server, {

@@ -26,7 +26,6 @@ import { MatchChatService } from './match-chat.service';
 })
 export class GameService {
 
-  // TODO .env per host, porta e versione ?
   /**
    * Base REST api server url.
    */

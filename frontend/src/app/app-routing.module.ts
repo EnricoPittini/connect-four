@@ -116,9 +116,7 @@ const routes: Routes = [
     },
   },
 
-  // TODO eventualmente gestire path errati con 404 not found
-  // {path: '404', component: NotFoundComponent},
-  // {path: '**', redirectTo: '/404'}
+  {path: '**', redirectTo: '/'}
 ];
 
 @NgModule({

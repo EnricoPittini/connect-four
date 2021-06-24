@@ -49,7 +49,6 @@ export interface ConfirmModeratorRequestBody extends RequestBody {
   password: string,
   name: string,
   surname: string,
-  avatar: string, // TODO capire come gestire
 }
 
 // Type guard function

@@ -30,14 +30,10 @@ export class ImageService {
     private auth: AuthService
   ) { }
 
-  // TODO response type va bene ???
   public uploadImage(image: File): Observable<SuccessResponseBody> {
     const formData = new FormData();
 
     formData.append('file', image);
-
-    // TODO remove log
-    console.log(formData);
 
     return this.http.post<SuccessResponseBody>(
       `${ImageService.BASE_URL}/players/${this.auth.getUsername()}/avatar`,

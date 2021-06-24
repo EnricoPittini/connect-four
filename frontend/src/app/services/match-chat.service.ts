@@ -27,7 +27,6 @@ export interface ClientMatchMessage {
 })
 export class MatchChatService {
 
-  // TODO .env per host, porta e versione ?
   /**
    * Base REST api server url.
    */

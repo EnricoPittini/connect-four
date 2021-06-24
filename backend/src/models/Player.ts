@@ -94,7 +94,7 @@ const playerSchema = new mongoose.Schema<PlayerDocument, PlayerModel>({
     type: mongoose.SchemaTypes.String,
     required: true,
   },
-  avatar: {     // TODO da capire come gestire
+  avatar: {     
     type: mongoose.SchemaTypes.String,
     required: true,
   },

@@ -1,5 +1,5 @@
 # Connect Four
-Full stack implementation of the Connect Four Game.
+MEAN Full stack implementation of the Connect Four Game.
 
 
 ## Run
